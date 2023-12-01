@@ -1,0 +1,17 @@
+{
+    "watch": [
+        "src/**/*.ts",
+        "tsconfig.json",
+        "nodemon.json"
+    ],
+    "events": {
+        "start": "clear"
+    },
+    "ignore": [
+        "src/**/*.spec.ts",
+        "src/prisma/*"
+    ],
+    "inspect": "0.0.0.0",
+    "ext": "ts,json,env",
+    "exec": "tsc && tsc-alias && npm run start:dev"
+}

@@ -1,0 +1,320 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
+}
+
+// Some conventions:
+// - `name` is a "display name" which user sees
+// - `realId` is unique identifier of format `lower-case-kebab-case` for user-friendly search
+
+model App {
+    id Int @id @default(autoincrement())
+
+    uri String @unique @db.VarChar(255)
+
+    config Json @default("{}")
+
+    userApps UserApps[]
+
+    @@map("apps")
+}
+
+model UserApps {
+    id Int @id @default(autoincrement())
+
+    user   User   @relation(fields: [userId], references: [id])
+    userId BigInt
+
+    app   App @relation(fields: [appId], references: [id])
+    appId Int
+
+    config Json @default("{}")
+
+    @@map("user_apps")
+}
+
+model User {
+    id BigInt @id @default(autoincrement())
+
+    email    String @unique @db.VarChar(320)
+    nickname String @unique @db.VarChar(255)
+    password String @db.VarChar(255)
+
+    createdAt DateTime @default(now())
+
+    operations  UserOperations[]
+    apps        UserApps[]
+    inventories Inventory[]
+    AmountUnit  AmountUnit[]
+    Item        Item[]
+
+    @@map("users")
+}
+
+model UserOperations {
+    id BigInt @id @default(autoincrement())
+
+    userId BigInt
+    user   User   @relation(fields: [userId], references: [id])
+
+    operation String
+
+    createdAt DateTime @default(now())
+
+    @@map("user_operations")
+}
+
+// Inventory //
+model Inventory {
+    id Int @id @default(autoincrement())
+    // realId String @unique
+
+    uri  String @db.VarChar(255)
+    user User   @relation(fields: [userId], references: [id])
+
+    name        String  @db.VarChar(255)
+    description String? @db.VarChar(1023)
+
+    userId  BigInt
+    items   Item[]
+    folders Folder[]
+
+    @@unique([userId, uri])
+    @@map("inventories")
+}
+
+model Image {
+    id  BigInt @id @default(autoincrement())
+    src String
+
+    items        ItemImage[]
+    itemVariants ItemVariantImage[]
+    folders      FolderImages[]
+
+    @@map("images")
+}
+
+model Tag {
+    id          BigInt   @id @default(autoincrement())
+    // realId      String   @unique
+    name        String   @db.VarChar(255)
+    description String?  @db.VarChar(1023)
+    forms       String[] @unique @default([])
+
+    @@map("tags")
+}
+
+model Item {
+    id BigInt @id @default(autoincrement())
+    // realId String @unique @db.VarChar(255)
+
+    uri String @db.VarChar(255)
+
+    name        String  @db.VarChar(255)
+    description String? @db.VarChar(1023)
+
+    inventory   Inventory @relation(fields: [inventoryId], references: [id])
+    inventoryId Int
+
+    folder   Folder @relation(fields: [folderId], references: [id])
+    folderId BigInt
+
+    itemLocationId    Int?
+    itemLocation      ItemLocation? @relation(fields: [itemLocationId], references: [id])
+    itemLocationNotes String?       @db.VarChar(1023)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    buyLink         String? @db.VarChar(255)
+    reasonablePrice Float?  @db.Real
+
+    amountUnitId   Int
+    amountUnit     AmountUnit @relation(fields: [amountUnitId], references: [id])
+    rawAmountValue BigInt     @default(0)
+
+    user User @relation(fields: [userId], references: [id])
+
+    variants ItemVariant[]
+    usages   ItemUsage[]
+    returns  ItemReturn[]
+    arrivals ArrivalItems[]
+    images   ItemImage[]
+    userId   BigInt
+
+    @@unique([folderId, uri])
+    @@map("items")
+}
+
+model ItemImage {
+    item   Item   @relation(fields: [itemId], references: [id])
+    itemId BigInt
+
+    image   Image  @relation(fields: [imageId], references: [id])
+    imageId BigInt
+
+    @@id([itemId, imageId])
+    @@map("item_images")
+}
+
+model ItemVariant {
+    id BigInt @id @default(autoincrement())
+
+    uri String @db.VarChar(255)
+
+    name        String  @db.VarChar(255)
+    description String? @db.VarChar(1023)
+
+    itemId BigInt
+    item   Item   @relation(fields: [itemId], references: [id])
+
+    reasonablePrice Float? @db.Real
+
+    images ItemVariantImage[]
+
+    @@unique([itemId, uri])
+    @@map("item_variants")
+}
+
+model ItemVariantImage {
+    itemVariant   ItemVariant @relation(fields: [itemVariantId], references: [id])
+    itemVariantId BigInt
+
+    image   Image  @relation(fields: [imageId], references: [id])
+    imageId BigInt
+
+    @@id([itemVariantId, imageId])
+    @@map("item_variant_images")
+}
+
+model ItemLocation {
+    id          Int     @id @default(autoincrement())
+    name        String  @db.VarChar(255)
+    description String? @db.VarChar(1023)
+
+    items Item[]
+
+    @@map("item_locations")
+}
+
+model AmountUnit {
+    id     Int    @id @default(autoincrement())
+    name   String @db.VarChar(255)
+    symbol String @unique @db.VarChar(10)
+
+    user User? @relation(fields: [userId], references: [id])
+
+    items         Item[]
+    userId        BigInt?
+    powerPrefixes AmountUnitPowerPrefix[]
+
+    @@map("amount_units")
+}
+
+model AmountUnitPowerPrefix {
+    amountUnit AmountUnit @relation(fields: [amountUnitId], references: [id])
+    power      Int
+    prefix     String
+    name       String?
+
+    amountUnitId Int
+
+    @@id([amountUnitId, power])
+    @@map("amount_unit_power_prefixes")
+}
+
+model ItemUsage {
+    id BigInt @id @default(autoincrement())
+
+    itemId BigInt
+    item   Item   @relation(fields: [itemId], references: [id])
+
+    notes  String @db.VarChar(1023)
+    amount BigInt
+
+    @@map("item_usages")
+}
+
+model ItemReturn {
+    id BigInt @id @default(autoincrement())
+
+    itemId BigInt
+    item   Item   @relation(fields: [itemId], references: [id])
+
+    notes  String @db.VarChar(1023)
+    amount BigInt
+
+    @@map("item_returns")
+}
+
+// @map not working, idk why
+enum FolderKind {
+    Root
+    Trash
+}
+
+model Folder {
+    id BigInt @id @default(autoincrement())
+
+    uri String @db.VarChar(255)
+
+    inventory Inventory @relation(fields: [inventoryId], references: [id])
+
+    name        String  @db.VarChar(255)
+    description String? @db.VarChar(1023)
+
+    kind     FolderKind?
+    parent   Folder?     @relation("Parent", fields: [parentId], references: [id])
+    parentId BigInt?
+
+    children    Folder[]       @relation("Parent")
+    items       Item[]
+    inventoryId Int
+    images      FolderImages[]
+
+    @@unique([parentId, uri])
+    @@unique([inventoryId, kind])
+    @@map("folders")
+}
+
+model FolderImages {
+    folder   Folder @relation(fields: [folderId], references: [id])
+    image    Image  @relation(fields: [imageId], references: [id])
+    folderId BigInt
+    imageId  BigInt
+
+    @@id([folderId, imageId])
+}
+
+model Arrival {
+    id BigInt @id @default(autoincrement())
+
+    name String @db.VarChar(255)
+
+    createdAt DateTime @default(now())
+
+    items ArrivalItems[]
+
+    @@map("arrivals")
+}
+
+model ArrivalItems {
+    arrival Arrival @relation(fields: [arrivalId], references: [id])
+    item    Item    @relation(fields: [itemId], references: [id])
+
+    arrivalId BigInt
+    itemId    BigInt
+    value     Int
+
+    // Better use BigInt and currency minor units, e.g. for cryptocurrencies
+    priceUsd Float? @db.Real
+    price    Float? @db.Real
+
+    @@id([arrivalId, itemId])
+    @@map("arrival_items")
+}

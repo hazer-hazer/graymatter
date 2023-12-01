@@ -1,0 +1,179 @@
+{
+    "ItemCreate": {
+        "body": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "variants": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "reasonablePrice": {
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "description",
+                            "reasonablePrice"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "inventoryId": {
+                    "type": "number"
+                },
+                "folderId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "amountUnitId": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "amountUnitId",
+                "folderId",
+                "inventoryId",
+                "name"
+            ]
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "item": {
+                        "$ref": "refSchema#/definitions/Item"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "UBigInt": {},
+    "Item": {},
+    "Inventory": {},
+    "InventoryStats": {},
+    "TreePath": {},
+    "TreePathSegment": {},
+    "Folder": {},
+    "Image": {},
+    "AmountUnit": {},
+    "AmountUnitPowerPrefix": {},
+    "ItemVariant": {},
+    "FolderTree": {},
+    "Tree": {},
+    "TreeNodeKind": {},
+    "ItemUpdate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "uri": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "item"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "item": {
+                        "$ref": "refSchema#/definitions/Item"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemSearch": {
+        "params": {
+            "type": "null"
+        }
+    },
+    "ItemGetById": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "item": {
+                        "$ref": "refSchema#/definitions/Item"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

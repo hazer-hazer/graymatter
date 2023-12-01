@@ -1,0 +1,179 @@
+{
+    "TreeGetBaseParams": {},
+    "UriPath": {},
+    "TreeFolderGet": {
+        "params": {
+            "$ref": "refSchema#/definitions/TreeGetBaseParams"
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "inventory": {
+                        "$ref": "refSchema#/definitions/Inventory"
+                    },
+                    "targetFolderId": {
+                        "$ref": "refSchema#/definitions/UBigInt"
+                    },
+                    "targetFolderPath": {
+                        "$ref": "refSchema#/definitions/TreePath"
+                    },
+                    "folders": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Folder"
+                        }
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "inventory": {
+                                    "type": "object",
+                                    "properties": {
+                                        "uri": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "uri"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                "id": {
+                                    "$ref": "refSchema#/definitions/UBigInt"
+                                },
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "inventoryId": {
+                                    "type": "number"
+                                },
+                                "folder": {
+                                    "$ref": "refSchema#/definitions/Folder"
+                                },
+                                "folderId": {
+                                    "$ref": "refSchema#/definitions/UBigInt"
+                                },
+                                "rawAmountValue": {
+                                    "$ref": "refSchema#/definitions/UBigInt"
+                                },
+                                "itemLocationId": {
+                                    "type": [
+                                        "number",
+                                        "null"
+                                    ]
+                                },
+                                "itemLocationNotes": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "buyLink": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "reasonablePrice": {
+                                    "type": [
+                                        "number",
+                                        "null"
+                                    ]
+                                },
+                                "createdAt": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                },
+                                "updatedAt": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                },
+                                "amountUnitId": {
+                                    "type": "number"
+                                },
+                                "amountUnit": {
+                                    "$ref": "refSchema#/definitions/AmountUnit"
+                                },
+                                "images": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "image": {
+                                                "$ref": "refSchema#/definitions/Image"
+                                            }
+                                        },
+                                        "required": [
+                                            "image"
+                                        ],
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "variants": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "refSchema#/definitions/ItemVariant"
+                                    }
+                                },
+                                "path": {
+                                    "$ref": "refSchema#/definitions/TreePath"
+                                }
+                            },
+                            "required": [
+                                "amountUnitId",
+                                "createdAt",
+                                "folderId",
+                                "id",
+                                "inventory",
+                                "inventoryId",
+                                "name",
+                                "rawAmountValue",
+                                "updatedAt",
+                                "uri"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "inventory",
+                    "targetFolderId",
+                    "targetFolderPath",
+                    "folders",
+                    "items"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "Inventory": {},
+    "UBigInt": {},
+    "InventoryStats": {},
+    "TreePath": {},
+    "TreePathSegment": {},
+    "FolderTree": {},
+    "Tree": {},
+    "TreeNodeKind": {},
+    "Folder": {},
+    "Image": {},
+    "AmountUnit": {},
+    "AmountUnitPowerPrefix": {},
+    "ItemVariant": {},
+    "TreeItemGet": {
+        "params": {
+            "$ref": "refSchema#/definitions/TreeGetBaseParams"
+        }
+    }
+}

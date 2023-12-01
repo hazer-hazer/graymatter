@@ -1,0 +1,18 @@
+FROM node:21
+
+RUN mkdir -p /usr/src/web
+WORKDIR /usr/src/web
+
+COPY package*.json .
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 8080
+
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=8080
+
+CMD [ "npm", "run", "dev" ]

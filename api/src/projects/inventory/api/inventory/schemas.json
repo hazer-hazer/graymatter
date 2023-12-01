@@ -1,0 +1,97 @@
+{
+    "InventoryGetByUri": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "inventoryUri": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "inventoryUri"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "inventory": {
+                        "$ref": "refSchema#/definitions/Inventory"
+                    }
+                },
+                "required": [
+                    "inventory"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "Inventory": {},
+    "UBigInt": {},
+    "InventoryStats": {},
+    "TreePath": {},
+    "TreePathSegment": {},
+    "FolderTree": {},
+    "Tree": {},
+    "TreeNodeKind": {},
+    "SearchResult": {},
+    "Item": {},
+    "Folder": {},
+    "Image": {},
+    "AmountUnit": {},
+    "AmountUnitPowerPrefix": {},
+    "ItemVariant": {},
+    "InventorySearch": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "inventoryUri": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "inventoryUri"
+            ],
+            "additionalProperties": false
+        },
+        "querystring": {
+            "type": "object",
+            "properties": {
+                "q": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "number",
+                    "default": 10
+                }
+            },
+            "required": [
+                "q",
+                "limit"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "inventory": {
+                        "$ref": "refSchema#/definitions/Inventory"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/SearchResult"
+                        }
+                    }
+                },
+                "required": [
+                    "inventory",
+                    "results"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

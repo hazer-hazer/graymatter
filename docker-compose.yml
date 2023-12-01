@@ -1,0 +1,66 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: graymatter
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # I use prisma-studio for now
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "${PGADMIN_PORT:-5050}:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
+  #   restart: unless-stopped
+
+  # api:
+  #   build:
+  #     context: ./api
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./api:/usr/src/api
+  #   container_name: graymatter-api
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "3000:3000"
+  #     - "9229:9229"
+  #   restart: always
+  #   networks:
+  #     - graymatter-network
+
+  # web:
+  #   build:
+  #     context: ./web
+  #     dockerfile: Dockerfile.dev
+  #   container_name: graymatter-web
+  #   ports:
+  #     - "8080:8080"
+  #     # - "24678:24678"
+  #   restart: always
+  #   networks:
+  #     - graymatter-network
+
+networks:
+  graymatter-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  pgadmin-data:

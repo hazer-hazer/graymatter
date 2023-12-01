@@ -1,0 +1,18 @@
+{
+    "http": {
+        "port": 5000
+    },
+    "cookie": {
+        "secret": "superKEK"
+    },
+    "auth": {
+        "secret": "superKEK"
+    },
+    "img": {
+        "uploadcare": {
+            "baseUrl": "https://upload.uploadcare.com",
+            "secretKey": "",
+            "publicKey": "c6170948024ddc1d3a62"
+        }
+    }
+}

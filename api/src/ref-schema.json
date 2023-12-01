@@ -1,0 +1,1514 @@
+{
+    "$id": "refSchema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ImageUpload": {
+            "type": "object",
+            "properties": {
+                "consumes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "const": "multipart/form-data"
+                    },
+                    "minItems": 1,
+                    "maxItems": 1
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "images": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Image"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "images"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "consumes",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "Image": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "src": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "src"
+            ],
+            "additionalProperties": false
+        },
+        "AmountUnitCreate": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "symbol": {
+                            "type": "string"
+                        },
+                        "userId": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "powerPrefixes": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/AmountUnitPowerPrefix"
+                            }
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "symbol",
+                        "userId",
+                        "powerPrefixes"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "unit": {
+                                    "$ref": "#/definitions/AmountUnit"
+                                }
+                            },
+                            "required": [
+                                "unit"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "AmountUnitPowerPrefix": {
+            "type": "object",
+            "properties": {
+                "power": {
+                    "type": "number"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "amountUnitId": {
+                    "type": "number"
+                },
+                "amountUnit": {
+                    "$ref": "#/definitions/AmountUnit"
+                }
+            },
+            "required": [
+                "power",
+                "prefix",
+                "name",
+                "amountUnitId"
+            ],
+            "additionalProperties": false
+        },
+        "AmountUnit": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "powerPrefixes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AmountUnitPowerPrefix"
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "symbol",
+                "userId",
+                "powerPrefixes"
+            ],
+            "additionalProperties": false
+        },
+        "AmountUnitSearch": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "amountUnits": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/AmountUnit"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "amountUnits"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "AmountUnitGetById": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "amountId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "amountId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "unit": {
+                                    "$ref": "#/definitions/AmountUnit"
+                                }
+                            },
+                            "required": [
+                                "unit"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemAmountGet": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "itemId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "amount": {
+                                    "type": "object",
+                                    "properties": {
+                                        "unit": {
+                                            "$ref": "#/definitions/AmountUnit"
+                                        },
+                                        "value": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "unit",
+                                        "value"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "amount"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "InventoryGetByUri": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "inventoryUri": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "inventoryUri"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "inventory": {
+                                    "$ref": "#/definitions/Inventory"
+                                }
+                            },
+                            "required": [
+                                "inventory"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "Inventory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "userId": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "stats": {
+                    "$ref": "#/definitions/InventoryStats"
+                },
+                "path": {
+                    "$ref": "#/definitions/TreePath"
+                },
+                "tree": {
+                    "$ref": "#/definitions/FolderTree"
+                },
+                "rootFolderId": {
+                    "$ref": "#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "id",
+                "uri",
+                "userId",
+                "name",
+                "description"
+            ],
+            "additionalProperties": false
+        },
+        "UBigInt": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^\\d+$"
+        },
+        "InventoryStats": {
+            "type": "object",
+            "properties": {
+                "itemsCount": {
+                    "type": "number"
+                },
+                "variantsCount": {
+                    "type": "number"
+                },
+                "foldersCount": {
+                    "type": "number"
+                },
+                "priceValue": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "itemsCount",
+                "variantsCount",
+                "foldersCount",
+                "priceValue"
+            ],
+            "additionalProperties": false
+        },
+        "TreePath": {
+            "type": "object",
+            "properties": {
+                "segments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TreePathSegment"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "segments"
+            ],
+            "additionalProperties": false
+        },
+        "TreePathSegment": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "type": "string",
+                            "const": "inventory"
+                        },
+                        "id": {
+                            "$ref": "#/definitions/Inventory"
+                        },
+                        "uri": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "rootFolderId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "kind",
+                        "id",
+                        "uri",
+                        "name",
+                        "rootFolderId"
+                    ],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "type": "string",
+                            "const": "folder"
+                        },
+                        "id": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "uri": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "kind",
+                        "id",
+                        "uri",
+                        "name"
+                    ],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "type": "string",
+                            "const": "item"
+                        },
+                        "id": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "uri": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "kind",
+                        "id",
+                        "uri",
+                        "name"
+                    ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "FolderTree": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "inventory",
+                        "folder"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "$ref": "#/definitions/TreePath"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Tree"
+                    }
+                }
+            },
+            "required": [
+                "children",
+                "id",
+                "kind",
+                "name",
+                "path",
+                "uri"
+            ],
+            "additionalProperties": false
+        },
+        "Tree": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "kind": {
+                    "$ref": "#/definitions/TreeNodeKind"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "$ref": "#/definitions/TreePath"
+                }
+            },
+            "required": [
+                "id",
+                "uri",
+                "kind",
+                "name",
+                "path"
+            ],
+            "additionalProperties": false
+        },
+        "TreeNodeKind": {
+            "type": "string",
+            "enum": [
+                "inventory",
+                "item",
+                "folder"
+            ]
+        },
+        "SearchResult": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "type": "string",
+                            "const": "item"
+                        },
+                        "item": {
+                            "$ref": "#/definitions/Item"
+                        }
+                    },
+                    "required": [
+                        "kind",
+                        "item"
+                    ],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "kind": {
+                            "type": "string",
+                            "const": "folder"
+                        },
+                        "folder": {
+                            "$ref": "#/definitions/Folder"
+                        }
+                    },
+                    "required": [
+                        "kind",
+                        "folder"
+                    ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "Item": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "inventoryId": {
+                    "type": "number"
+                },
+                "inventory": {
+                    "$ref": "#/definitions/Inventory"
+                },
+                "folder": {
+                    "$ref": "#/definitions/Folder"
+                },
+                "folderId": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "rawAmountValue": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "itemLocationId": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "itemLocationNotes": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "buyLink": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "reasonablePrice": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "amountUnitId": {
+                    "type": "number"
+                },
+                "amountUnit": {
+                    "$ref": "#/definitions/AmountUnit"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "image": {
+                                "$ref": "#/definitions/Image"
+                            }
+                        },
+                        "required": [
+                            "image"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "variants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ItemVariant"
+                    }
+                },
+                "path": {
+                    "$ref": "#/definitions/TreePath"
+                }
+            },
+            "required": [
+                "id",
+                "uri",
+                "name",
+                "inventoryId",
+                "folderId",
+                "rawAmountValue",
+                "createdAt",
+                "updatedAt",
+                "amountUnitId"
+            ],
+            "additionalProperties": false
+        },
+        "Folder": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "inventoryId": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "parentId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "image": {
+                                "$ref": "#/definitions/Image"
+                            }
+                        },
+                        "required": [
+                            "image"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "uri",
+                "inventoryId",
+                "name",
+                "description",
+                "parentId"
+            ],
+            "additionalProperties": false
+        },
+        "ItemVariant": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "itemId": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "reasonablePrice": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "uri",
+                "name",
+                "description",
+                "itemId",
+                "reasonablePrice"
+            ],
+            "additionalProperties": false
+        },
+        "InventorySearch": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "inventoryUri": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "inventoryUri"
+                    ],
+                    "additionalProperties": false
+                },
+                "Querystring": {
+                    "type": "object",
+                    "properties": {
+                        "q": {
+                            "type": "string"
+                        },
+                        "limit": {
+                            "type": "number",
+                            "default": 10
+                        }
+                    },
+                    "required": [
+                        "q",
+                        "limit"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "inventory": {
+                                    "$ref": "#/definitions/Inventory"
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/SearchResult"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "inventory",
+                                "results"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Querystring",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemImageCreate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "imageId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId",
+                        "imageId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "itemId": {
+                                    "$ref": "#/definitions/UBigInt"
+                                },
+                                "imageId": {
+                                    "$ref": "#/definitions/UBigInt"
+                                }
+                            },
+                            "required": [
+                                "itemId",
+                                "imageId"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemCreate": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "variants": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "reasonablePrice": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "description",
+                                    "reasonablePrice"
+                                ],
+                                "additionalProperties": false
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "inventoryId": {
+                            "type": "number"
+                        },
+                        "folderId": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "amountUnitId": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "amountUnitId",
+                        "folderId",
+                        "inventoryId",
+                        "name"
+                    ]
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "item": {
+                                    "$ref": "#/definitions/Item"
+                                }
+                            },
+                            "required": [
+                                "item"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemUpdate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "itemId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "item": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "item"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "item": {
+                                    "$ref": "#/definitions/Item"
+                                }
+                            },
+                            "required": [
+                                "item"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemSearch": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "Params"
+            ],
+            "additionalProperties": false
+        },
+        "ItemGetById": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "itemId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "item": {
+                                    "$ref": "#/definitions/Item"
+                                }
+                            },
+                            "required": [
+                                "item"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "TagCreate": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "forms": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "forms"
+                    ],
+                    "additionalProperties": false
+                },
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "$ref": "#/definitions/Tag"
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "response"
+            ],
+            "additionalProperties": false
+        },
+        "Tag": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "forms": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "forms"
+            ],
+            "additionalProperties": false
+        },
+        "TagSearch": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "Params"
+            ],
+            "additionalProperties": false
+        },
+        "TagGetById": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id"
+                    ],
+                    "additionalProperties": false
+                },
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "$ref": "#/definitions/Tag"
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "response"
+            ],
+            "additionalProperties": false
+        },
+        "TreeGetBaseParams": {
+            "type": "object",
+            "properties": {
+                "inventory": {
+                    "type": "string"
+                },
+                "*": {
+                    "$ref": "#/definitions/UriPath"
+                }
+            },
+            "required": [
+                "inventory",
+                "*"
+            ],
+            "additionalProperties": false
+        },
+        "UriPath": {
+            "type": "string",
+            "pattern": "^[\\/-a-zA-z]*$"
+        },
+        "TreeFolderGet": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "$ref": "#/definitions/TreeGetBaseParams"
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "inventory": {
+                                    "$ref": "#/definitions/Inventory"
+                                },
+                                "targetFolderId": {
+                                    "$ref": "#/definitions/UBigInt"
+                                },
+                                "targetFolderPath": {
+                                    "$ref": "#/definitions/TreePath"
+                                },
+                                "folders": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Folder"
+                                    }
+                                },
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "inventory": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "uri": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "uri"
+                                                ],
+                                                "additionalProperties": false
+                                            },
+                                            "id": {
+                                                "$ref": "#/definitions/UBigInt"
+                                            },
+                                            "uri": {
+                                                "type": "string"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "inventoryId": {
+                                                "type": "number"
+                                            },
+                                            "folder": {
+                                                "$ref": "#/definitions/Folder"
+                                            },
+                                            "folderId": {
+                                                "$ref": "#/definitions/UBigInt"
+                                            },
+                                            "rawAmountValue": {
+                                                "$ref": "#/definitions/UBigInt"
+                                            },
+                                            "itemLocationId": {
+                                                "type": [
+                                                    "number",
+                                                    "null"
+                                                ]
+                                            },
+                                            "itemLocationNotes": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "buyLink": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "reasonablePrice": {
+                                                "type": [
+                                                    "number",
+                                                    "null"
+                                                ]
+                                            },
+                                            "createdAt": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updatedAt": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "amountUnitId": {
+                                                "type": "number"
+                                            },
+                                            "amountUnit": {
+                                                "$ref": "#/definitions/AmountUnit"
+                                            },
+                                            "images": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "image": {
+                                                            "$ref": "#/definitions/Image"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "image"
+                                                    ],
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "variants": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/ItemVariant"
+                                                }
+                                            },
+                                            "path": {
+                                                "$ref": "#/definitions/TreePath"
+                                            }
+                                        },
+                                        "required": [
+                                            "amountUnitId",
+                                            "createdAt",
+                                            "folderId",
+                                            "id",
+                                            "inventory",
+                                            "inventoryId",
+                                            "name",
+                                            "rawAmountValue",
+                                            "updatedAt",
+                                            "uri"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "inventory",
+                                "targetFolderId",
+                                "targetFolderPath",
+                                "folders",
+                                "items"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "TreeItemGet": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "$ref": "#/definitions/TreeGetBaseParams"
+                }
+            },
+            "required": [
+                "Params"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

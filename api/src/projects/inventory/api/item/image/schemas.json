@@ -1,0 +1,39 @@
+{
+    "ItemImageCreate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "imageId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId",
+                "imageId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "itemId": {
+                        "$ref": "refSchema#/definitions/UBigInt"
+                    },
+                    "imageId": {
+                        "$ref": "refSchema#/definitions/UBigInt"
+                    }
+                },
+                "required": [
+                    "itemId",
+                    "imageId"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "UBigInt": {}
+}

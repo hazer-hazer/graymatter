@@ -1,0 +1,31 @@
+{
+    "ImageUpload": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Image"
+                        }
+                    }
+                },
+                "required": [
+                    "images"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "consumes": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "const": "multipart/form-data"
+            },
+            "minItems": 1,
+            "maxItems": 1
+        }
+    },
+    "Image": {}
+}

@@ -1,0 +1,138 @@
+{
+    "AmountUnitCreate": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "powerPrefixes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "refSchema#/definitions/AmountUnitPowerPrefix"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "symbol",
+                "userId",
+                "powerPrefixes"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "unit": {
+                        "$ref": "refSchema#/definitions/AmountUnit"
+                    }
+                },
+                "required": [
+                    "unit"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "AmountUnitPowerPrefix": {},
+    "AmountUnit": {},
+    "AmountUnitSearch": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "amountUnits": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/AmountUnit"
+                        }
+                    }
+                },
+                "required": [
+                    "amountUnits"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "AmountUnitGetById": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "amountId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "amountId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "unit": {
+                        "$ref": "refSchema#/definitions/AmountUnit"
+                    }
+                },
+                "required": [
+                    "unit"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemAmountGet": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "object",
+                        "properties": {
+                            "unit": {
+                                "$ref": "refSchema#/definitions/AmountUnit"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "unit",
+                            "value"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "amount"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

@@ -1,22 +1,23 @@
-import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify'
+// import { UserPayload } from '@/types/auth'
+// import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify'
 
-const auth: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-    fastify.decorate('auth', async (req: FastifyRequest, res: FastifyReply) => {
-        const { token } = req.cookies
+// const jwtAuth: FastifyInstance['jwtAuth'] = async (req: FastifyRequest, res: FastifyReply) => {
+//     const { jwt } = req.cookies
 
-        if (!token) {
-            return res.status(401).send('Unauthorized')
-        }
+//     if (!jwt) {
+//         return res.status(401).send('Unauthorized')
+//     }
 
-        const cookie = req.unsignCookie(token)
-        if (!cookie.valid) {
-            return res.status(401).send('Invalid cookie')
-        }
+//     const cookie = req.unsignCookie(jwt)
+//     if (!cookie.valid || !cookie.value) {
+//         return res.status(401).send('Invalid cookie')
+//     }
 
-        const user = await fastify.getMe()
+//     const user = req.jwtVerify<UserPayload>(cookie.value)
 
-        fastify.decorateRequest('user', user)
-    })
-}
+//     req.user = user
+// }
 
-export default auth
+// export default {
+//     jwtAuth,
+// }

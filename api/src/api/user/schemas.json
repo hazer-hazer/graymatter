@@ -1,0 +1,34 @@
+{
+    "UserGetById": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "userId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "refSchema#/definitions/User"
+                    }
+                },
+                "required": [
+                    "user"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "UBigInt": {},
+    "User": {},
+    "App": {},
+    "UriPath": {}
+}

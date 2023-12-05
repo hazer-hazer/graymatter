@@ -1,7 +1,5 @@
-import auth from './auth'
-import getMe from './getMe'
+// import auth from './auth'
 
-export default [
-    auth,
-    getMe,
-]
+export default {
+    // ...auth,
+}

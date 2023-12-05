@@ -1,10 +1,10 @@
 import 'dotenv'
-import Fastify from 'fastify'
+import Fastify, { onRequestHookHandler } from 'fastify'
 import config from 'config'
 import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
-import { registerRoutes } from './utils/fastify'
-import projects from './projects'
+import { registerApi as registerApi } from './utils/fastify'
+import projects from './apps'
 import api from './api'
 import fastifyHealthcheck from 'fastify-healthcheck'
 import refSchema from './ref-schema.json'
@@ -14,6 +14,8 @@ import fastifyBearerAuth from '@fastify/bearer-auth'
 import fastifyAuth from '@fastify/auth'
 import decorators from './decorators'
 import db from './modules/prisma'
+import fastifyJwt from '@fastify/jwt'
+import plugins from './plugins'
 
 sourceMapSupport.install()
 
@@ -46,6 +48,7 @@ void (async () => {
     // await fastify.register(fastifyBearerAuth, {
     //     keys: new Set(['superKek']),
     // })
+    await Promise.all(plugins.map(pl => fastify.register(pl)))
 
     fastify.addHook('preHandler', function (req, _res, done) {
         if (req.body) {
@@ -54,40 +57,35 @@ void (async () => {
         done()
     })
 
-    // FIXME: Auth, this is stub
-    fastify.addHook('onRequest', async (req, res) => {
-        const testUser = await db.user.findUniqueOrThrow({
-            where: { email: 'test@test.com' },
-        })
-        req.user = {
-            id: testUser.id,
-        }
-    })
-
-    fastify.addHook('onRoute', (route) => {
-        console.log(route.method, route.path)
-    })
-
-    // fastify.addHook('onRequest', (req, res, done) => {
-    //     const method = req.method.toLowerCase()
-    //     if (method === 'get') {
-    //         req.log.info(`Got GET request ${req.url}: %o`, req.params)
-    //     } else if (method === 'post') {
-    //         req.log.info(`Got POST request ${req.url}: %o`, req.body)
-    //     }
-    //     done()
-    // })
-
-    // fastify.addHook('onError', (req, res, error, done) => {
-    //     console.log(error);
-    //     done()
-    // })
-
     // Ref schema logic //
     fastify.addSchema(refSchema)
 
     // Routes
-    await registerRoutes(fastify, [api, projects])
+    await registerApi(fastify, [
+        api,
+        projects,
+    ], {
+        auth: true,
+    })
+
+    // // !Note: Add this hook after registering API 
+    // fastify.addHook('onRoute', (route) => {
+    //     if (route.config?.auth) {
+    //         const onRequest = Array.isArray(route.onRequest) ? route.onRequest : route.onRequest ? [route.onRequest] : []
+    //         route.onRequest = [
+    //             ...onRequest,
+    //             fastify.auth([fastify.jwtAuth.bind(fastify)]),
+    //         ]
+    //     }
+
+    //     console.log(`Added route ${Array.isArray(route.method) ? route.method.join(', ') : route.method} ${route.url}; [auth=${route.config?.auth}]`)
+    // })
+
+    fastify.addHook('onRequest', async function (req, res) {
+        if (req.routeOptions.config.auth) {
+            await this.jwtAuth(req, res)
+        }
+    })
 
     try {
         await fastify.listen({ port: config.get('http.port'), host: 'localhost' })

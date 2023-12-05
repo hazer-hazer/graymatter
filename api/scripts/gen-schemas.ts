@@ -40,7 +40,7 @@ const basePath = './src'
 
 const apiPaths = [
     'api',
-    'projects/**/api',
+    'apps/**/api',
 ]
 
 const tsConfigPath = './tsconfig.json'

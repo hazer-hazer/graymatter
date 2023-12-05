@@ -1,4 +1,4 @@
-import { Api } from '@/Project'
+import { Api } from '@/App'
 import fastifyMultipart from '@fastify/multipart'
 import { FastifyPluginAsync } from 'fastify'
 import { promisify } from 'util'

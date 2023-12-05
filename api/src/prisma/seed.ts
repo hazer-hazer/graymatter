@@ -12,6 +12,7 @@ async function main(tx: Prisma.TransactionClient) {
         where: { uri: 'inventory' },
         create: {
             uri: 'inventory',
+            name: 'Inventory',
         },
         update: {},
     })
@@ -22,7 +23,7 @@ async function main(tx: Prisma.TransactionClient) {
         update: {},
         create: {
             email: 'test@test.com',
-            nickname: 'teat',
+            uri: 'teat',
             password: crypt.password.crypt('superKEK'),
             apps: {
                 create: {

@@ -10,12 +10,14 @@ generator client {
 
 // Some conventions:
 // - `name` is a "display name" which user sees
-// - `realId` is unique identifier of format `lower-case-kebab-case` for user-friendly search
+// - `uri` is unique identifier of format `lower-case-kebab-case` for user-friendly search and to use as url path
 
+/// Information for app, e.g. Inventory app
 model App {
     id Int @id @default(autoincrement())
 
-    uri String @unique @db.VarChar(255)
+    uri  String @unique @db.VarChar(255)
+    name String @db.VarChar(255)
 
     config Json @default("{}")
 
@@ -41,17 +43,21 @@ model UserApps {
 model User {
     id BigInt @id @default(autoincrement())
 
-    email    String @unique @db.VarChar(320)
-    nickname String @unique @db.VarChar(255)
-    password String @db.VarChar(255)
+    email    String  @unique @db.VarChar(320)
+    uri      String  @unique @db.VarChar(255)
+    password String  @db.VarChar(255)
+    online   Boolean @default(false) @db.Boolean
 
     createdAt DateTime @default(now())
 
-    operations  UserOperations[]
-    apps        UserApps[]
+    // Common info //
+    apps       UserApps[]
+    operations UserOperations[]
+
+    // Inventory App //
     inventories Inventory[]
-    AmountUnit  AmountUnit[]
-    Item        Item[]
+    items       Item[]
+    amountUnits AmountUnit[]
 
     @@map("users")
 }

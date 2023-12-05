@@ -1,0 +1,84 @@
+{
+    "Signup": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "$ref": "refSchema#/definitions/Email"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "uri": {
+                    "$ref": "refSchema#/definitions/UriPath"
+                }
+            },
+            "required": [
+                "email",
+                "password"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "refSchema#/definitions/User"
+                    }
+                },
+                "required": [
+                    "user"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "Email": {},
+    "UriPath": {},
+    "User": {},
+    "UBigInt": {},
+    "App": {},
+    "Login": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "$ref": "refSchema#/definitions/Email"
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "email",
+                "password"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "refSchema#/definitions/User"
+                    }
+                },
+                "required": [
+                    "user"
+                ],
+                "additionalProperties": false
+            },
+            "401": {
+                "type": "null"
+            }
+        }
+    },
+    "Logout": {
+        "response": {
+            "200": {
+                "type": "null"
+            }
+        }
+    }
+}

@@ -6,7 +6,10 @@
         "secret": "superKEK"
     },
     "auth": {
-        "secret": "superKEK"
+        "jwt": {
+            "secret": "superKEK",
+            "cookieName": "JWT"
+        }
     },
     "img": {
         "uploadcare": {

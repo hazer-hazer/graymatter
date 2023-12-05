@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt'
 
-const crypt: Record<string, {
+const crypt: Record<
+    | 'password'
+, {
     crypt(data: string): string
     check(data: string, hash: string): boolean
 }> = {

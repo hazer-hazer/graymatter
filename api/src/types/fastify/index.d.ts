@@ -1,5 +1,6 @@
-import { User } from '@prisma/client'
-import { FastifyPluginAsync } from 'fastify'
+import { UserPayload } from '../auth'
+import '@fastify/jwt'
+import 'fastify'
 
 declare module 'fastify' {
   export interface FastifyInstance<
@@ -7,15 +8,22 @@ declare module 'fastify' {
     // HttpRequest = IncomingMessage,
     // HttpResponse = ServerResponse
   > {
-    verifyJWT(): void
-    registerRoutes(routes: Record<string, FastifyPluginAsync>): this
-    getMe(): Promise<FastifyRequest['user']>
-    auth(req: FastifyRequest, res: FastifyReply): void
+    jwtAuth(req: FastifyRequest, res: FastifyReply): Promise<void>
   }
 
-  export interface FastifyRequest {
-    user: {
-      id: bigint
-    }
+  export interface FastifyContextConfig {
+    auth?: boolean
+  }
+
+  // export interface FastifyRequest {
+  //   user?: UserPayload
+  // }
+}
+
+
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: UserPayload
+    user: UserPayload
   }
 }

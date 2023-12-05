@@ -2,6 +2,192 @@
     "$id": "refSchema",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
+        "Signup": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "$ref": "#/definitions/Email"
+                        },
+                        "password": {
+                            "type": "string"
+                        },
+                        "uri": {
+                            "$ref": "#/definitions/UriPath"
+                        }
+                    },
+                    "required": [
+                        "email",
+                        "password"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "user": {
+                                    "$ref": "#/definitions/User"
+                                }
+                            },
+                            "required": [
+                                "user"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "Email": {
+            "type": "string",
+            "format": "email"
+        },
+        "UriPath": {
+            "type": "string",
+            "pattern": "^[\\/-a-zA-z]*$"
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/App"
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "email",
+                "uri",
+                "createdAt"
+            ],
+            "additionalProperties": false
+        },
+        "UBigInt": {
+            "type": "string",
+            "format": "int64",
+            "pattern": "^\\d+$"
+        },
+        "App": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "uri": {
+                    "$ref": "#/definitions/UriPath"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "uri",
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "Login": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "$ref": "#/definitions/Email"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "email",
+                        "password"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "user": {
+                                    "$ref": "#/definitions/User"
+                                }
+                            },
+                            "required": [
+                                "user"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "401": {
+                            "type": "null"
+                        }
+                    },
+                    "required": [
+                        "200",
+                        "401"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "Logout": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "null"
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
         "ImageUpload": {
             "type": "object",
             "properties": {
@@ -58,6 +244,49 @@
             "required": [
                 "id",
                 "src"
+            ],
+            "additionalProperties": false
+        },
+        "UserGetById": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "userId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "userId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "user": {
+                                    "$ref": "#/definitions/User"
+                                }
+                            },
+                            "required": [
+                                "user"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
             ],
             "additionalProperties": false
         },
@@ -403,11 +632,6 @@
                 "description"
             ],
             "additionalProperties": false
-        },
-        "UBigInt": {
-            "type": "string",
-            "format": "int64",
-            "pattern": "^\\d+$"
         },
         "InventoryStats": {
             "type": "object",
@@ -1321,10 +1545,6 @@
                 "*"
             ],
             "additionalProperties": false
-        },
-        "UriPath": {
-            "type": "string",
-            "pattern": "^[\\/-a-zA-z]*$"
         },
         "TreeFolderGet": {
             "type": "object",

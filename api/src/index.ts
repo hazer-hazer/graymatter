@@ -16,11 +16,17 @@ import decorators from './decorators'
 import db from './modules/prisma'
 import fastifyJwt from '@fastify/jwt'
 import plugins from './plugins'
+import { readFileSync } from 'fs'
+import path from 'path'
 
 sourceMapSupport.install()
 
 const fastify = Fastify({
     logger: loggerConfig.dev,
+    https: {
+        key: readFileSync(path.join(__dirname, '..', '..', 'ssl', 'gm.key')),
+        cert: readFileSync(path.join(__dirname, '..', '..x', 'ssl', 'gm.cert')),
+    },
 })
 
 // ;(BigInt.prototype as any).toJSON = function () {

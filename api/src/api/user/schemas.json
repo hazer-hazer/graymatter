@@ -29,6 +29,24 @@
     },
     "UBigInt": {},
     "User": {},
+    "Image": {},
+    "Currency": {},
     "App": {},
-    "UriPath": {}
+    "UriPath": {},
+    "UserGetMe": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "refSchema#/definitions/User"
+                    }
+                },
+                "required": [
+                    "user"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
 }

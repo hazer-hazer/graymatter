@@ -3,8 +3,15 @@ import { AmountUnit } from './AmountUnit'
 import { Folder } from './Folder'
 import { Image } from '../../../models/Image'
 import { Inventory } from './Inventory'
-import { ItemVariant } from './ItemVariant'
+import { ItemVariant, ItemVariantCreateFields } from './ItemVariant'
 import { UBigInt } from '../../../models/common'
+import { Currency, RealPrice } from '@/models/Currency'
+import { AttrValue, Attribute } from './Attribute'
+
+export interface ItemAttr {
+    attr: Attribute
+    value: AttrValue
+}
 
 export interface Item {
     id: UBigInt
@@ -20,16 +27,17 @@ export interface Item {
     folder?: Folder
     folderId: UBigInt
 
-    rawAmountValue: UBigInt
-
     /**
      * @type integer
      */
     itemLocationId?: number | null
     itemLocationNotes?: string | null
 
-    buyLink?: string | null
-    reasonablePrice?: number | null
+    buyLink: string | null
+    // Note: Never accept from clients
+    price: UBigInt | null
+    currencyId: Currency['id']
+    currency?: Currency
 
     createdAt: Date
     updatedAt: Date
@@ -39,10 +47,51 @@ export interface Item {
      */
     amountUnitId: number
     amountUnit?: AmountUnit
+    amountValue: number
 
     images?: { image: Image }[]
 
     variants?: ItemVariant[]
 
+    attributes?: ItemAttr[]
+
+    // Extended //
     path?: TreePath
+
+    variantsAmountSum?: number | null
+    totalPrice?: number | null
+
+    realPrice?: RealPrice | null
+    // Remove, done on client
+    displayPrice?: string | null
 }
+
+export type ItemCreateFields =
+    Required<Pick<Item,
+        | 'name'
+        | 'inventoryId'
+        | 'folderId'
+        | 'amountUnitId'
+    >>
+    & Partial<Pick<Item,
+        | 'uri'
+        | 'description'
+        | 'amountValue'
+        | 'realPrice'
+        | 'currencyId'
+    >>
+    & {
+        variants?: ItemVariantCreateFields[]
+    }
+
+export type ItemUpdateFields =
+    Partial<Pick<Item,
+        | 'uri'
+        | 'name'
+        | 'description'
+        | 'buyLink'
+        | 'realPrice'
+        | 'currencyId'
+        | 'amountUnitId'
+        | 'amountValue'
+    >>

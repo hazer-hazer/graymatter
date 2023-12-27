@@ -1,5 +1,8 @@
 <template>
-    <q-breadcrumbs gutter="sm" class="q-pb-md">
+    <q-breadcrumbs gutter="xs">
+        <template #separator>
+            <q-icon name="keyboard_arrow_right" size="xs"/>
+        </template>
         <q-breadcrumbs-el
             v-for="(segment, index) in path.segments"
             :key="index"
@@ -37,7 +40,7 @@ const pathSegmentToUrl = (segment: TreePathSegment, index: number): string => {
     if (segment.kind === 'item') {
         return `${segmentPathBaseUrl}/${segment.id}`
     }
-    throw new Error(`Unknown tree path segment kind ${segment.kind}`)
+    throw new Error(`Unknown tree path segment kind ${segment}`)
 }
 
 </script>

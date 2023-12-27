@@ -1,5 +1,5 @@
 <template>
-    <q-page padding class="justify-center full-width" style="max-width: 1400px;">
+    <DefaultPage>
         <div class="row q-pb-md">
             <InventoryCreateEntry />
         </div>
@@ -24,7 +24,7 @@
         <div v-else-if="error">
             <span class="text-h2">{{ error.message }}</span>
         </div>
-    </q-page>
+    </DefaultPage>
 </template>
 
 <script setup lang="ts">
@@ -35,26 +35,19 @@ import { TreePath } from '~/models/inventory/Tree'
 
 definePageMeta({
     validate: (route) => {
-        let path = route.params.path
-        if (Array.isArray(path)) {
-            path = path.join('/')
+        if (route.name === 'inventory-uri-tree-path') {
+            return /^[/-a-zA-z]*$/.test(route.params.path.join('/'))
         }
-        return /^[/-a-zA-z]*$/.test(path)
+        return true
     },
+    middleware: ['auth'],
 })
 
 const { $apiUseFetch } = useNuxtApp()
 
-// const formattedPath = Array.isArray(path) ? path.join('/') : path.split('/').filter(seg => !!seg.length).join('/')
+const route = useRoute('inventory-uri-tree-path')
 
-const route = useRoute()
-
-const path = computed(() => {
-    if (Array.isArray(route.params.path)) {
-        return route.params.path.join('/')
-    }
-    return route.params.path
-})
+const path = computed(() => route.params.path.join('/'))
 
 const { data, pending, error } = await $apiUseFetch<{
     inventory: Inventory
@@ -63,10 +56,6 @@ const { data, pending, error } = await $apiUseFetch<{
     folders: any[],
     items: Item[]
 }>(() => `inventory/${route.params.uri}/tree/${path.value}`)
-
-console.log(data.value?.targetFolderPath.segments)
-
-// inventoryLocation().value = new TreePath([])
 
 if (data.value?.targetFolderPath) {
     inventoryLocation().value = data.value?.targetFolderPath.segments

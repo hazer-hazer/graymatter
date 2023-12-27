@@ -1,11 +1,13 @@
 export { default as schemas } from './schemas.json'
-import { AmountUnit } from '@/apps/inventory/models/AmountUnit'
+import { AmountUnit, AmountUnitCreateFields } from '@/apps/inventory/models/AmountUnit'
 
 export interface AmountUnitCreate {
-    Body: Omit<AmountUnit, 'id'>
+    Body: {
+        amountUnit: AmountUnitCreateFields
+    }
     Reply: {
         200: {
-            unit: AmountUnit
+            amountUnit: AmountUnit
         }
     }
 }
@@ -25,20 +27,6 @@ export interface AmountUnitGetById {
     Reply: {
         200: {
             unit: AmountUnit
-        }
-    }
-}
-
-export interface ItemAmountGet {
-    Params: {
-        itemId: string
-    }
-    Reply: {
-        200: {
-            amount: {
-                unit: AmountUnit
-                value: bigint
-            }
         }
     }
 }

@@ -12,3 +12,11 @@ export interface UserGetById {
         }
     }
 }
+
+export interface UserGetMe {
+    Reply: {
+        200: {
+            user: User
+        }
+    }
+}

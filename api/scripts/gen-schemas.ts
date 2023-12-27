@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as tsj from 'ts-json-schema-generator'
 import { FastifySchema } from 'fastify'
 import _ from 'lodash'
-import { createHash } from 'crypto'
+import assert from 'assert'
 
 class BigIntParser implements tsj.SubNodeParser {
     supportsNode(node: tsj.ts.Node): boolean {
@@ -51,6 +51,10 @@ const refSchemaOutputFilepath = './src/ref-schema.json'
 const refSchemaName = 'refSchema'
 // const refSchemaHashFilepath = path.join(basePath, '.refschemahash.json')
 
+type Schema = tsj.Schema & {
+    nullable?: boolean
+}
+
 /**
  * body?: unknown;
   querystring?: unknown;
@@ -59,23 +63,87 @@ const refSchemaName = 'refSchema'
   response?: unknown;
  */
 
-const clarifySchemaRefs = (schema: tsj.Schema): tsj.Schema => {
+const clarifySchemaRefs = (schema: Schema): Schema => {
     return Object.fromEntries(
         Object.entries(schema).map(([key, subSchema]) => {
             if (key === '$ref' && typeof subSchema === 'string') {
                 return [key, `${refSchemaName}${subSchema}`]
             }
 
-            if (!_.isArray(subSchema) && _.isObject(subSchema)) {
+            const isArray = _.isArray(subSchema)
+
+            if (isArray && subSchema.every(sch => _.isObject(sch))) {
+                return [key, subSchema.map((sch: Schema) => clarifySchemaRefs(sch))]
+            } else if (!isArray && _.isObject(subSchema)) {
                 return [key, clarifySchemaRefs(subSchema)]
             }
 
             return [key, subSchema]
         }),
-    ) as tsj.Schema
+    ) as Schema
 }
 
-const formatSchemas = ({ definitions }: tsj.Schema): (Record<string, FastifySchema>) =>
+/**
+ * Some fixes applied:
+ * - anyOf/allOf nullable (fastify fails on `"anyOf": [{"type": "null"}, {"type": "string"}])` with bigint)
+ */
+const fixSchema = (schema: Schema): Schema => {
+    // return Object.fromEntries(
+    //     Object.entries(schema).map(([key, subSchema]) => {
+    //         const isArray = _.isArray(subSchema)
+
+    //         const isAnyOfNull = isArray ? subSchema.indexOf((sch: tsj.Schema) => sch.type === 'null') : -1
+    //         if (isArray && isAnyOfNull !== -1 && subSchema.length === 0) {
+                
+    //         }
+
+    //         if (isArray && subSchema.every(sch => _.isObject(sch))) {
+    //             return [key, subSchema.map((sch: tsj.Schema) => fixSchema(sch))]
+    //         } else if (!isArray && _.isObject(subSchema)) {
+    //             return [key, fixSchema(subSchema)]
+    //         }
+
+    //         return [key, subSchema]
+    //     }),
+    // ) as tsj.Schema
+
+    return schema
+
+    // if (!_.isObject(schema) || _.isArray(schema)) {
+    //     return schema
+    // }
+
+    // let fixed: Record<string, unknown> = {}
+    // for (const [key, subSchema] of Object.entries(schema)) {
+    //     const isArray = _.isArray(subSchema)
+
+    //     if (isArray) {
+    //         if (['anyOf', 'oneOf'].includes(key)) {
+    //             const withoutNull = (subSchema as tsj.Schema['anyOf'])!.filter((sch) => _.isObject(sch) && sch?.type !== 'null')
+    //             if (withoutNull.length <= 1) {
+    //                 fixed = {
+    //                     nullable: true,
+    //                     ...withoutNull[0] as tsj.Schema,
+    //                     ...fixed,
+    //                 }
+    //             } else {
+    //                 // console.warn(`Schema may fail in fastify:\n'${key}: ${JSON.stringify(subSchema, null, 2)}'`)
+    //                 fixed[key] = subSchema.map(fixSchema)
+    //             }
+    //         } else {
+    //             fixed[key] = subSchema.map(fixSchema)
+    //         }
+    //     } else if ( _.isObject(subSchema)) {
+    //         fixed[key] = fixSchema(subSchema) 
+    //     } else {
+    //         fixed[key] = subSchema
+    //     }
+    // }
+
+    // return fixed
+}
+
+const formatRoutesSchema = ({ definitions }: tsj.Schema): (Record<string, FastifySchema>) =>
     Object.fromEntries(
         Object.entries(definitions ?? {})
             .map(([schemaName, schema]) => {
@@ -127,7 +195,7 @@ const genSchema = (filepath: string, id?: string): tsj.Schema => {
     })
     const generator = new tsj.SchemaGenerator(program, parser, formatter, config)
 
-    return generator.createSchema(config.type)
+    return fixSchema(generator.createSchema(config.type))
 }
 
 void (async () => {
@@ -143,7 +211,7 @@ void (async () => {
     // const hash = createHash('sha256');
 
     for (const filepath of paths) {
-        const formattedSchema = clarifySchemaRefs(formatSchemas(genSchema(filepath)))
+        const formattedSchema = clarifySchemaRefs(formatRoutesSchema(genSchema(filepath)))
 
         const outputPath = path.join(path.dirname(filepath), outputFilename)
         const schemaString = JSON.stringify(formattedSchema, null, 4)

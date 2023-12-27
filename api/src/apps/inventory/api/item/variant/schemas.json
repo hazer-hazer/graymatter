@@ -1,0 +1,177 @@
+{
+    "ItemVariantQuickAdd": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "realPriceEach": {
+                    "anyOf": [
+                        {
+                            "$ref": "refSchema#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "amountValueEach": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "names"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "variants": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/ItemVariant"
+                        }
+                    }
+                },
+                "required": [
+                    "variants"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "UBigInt": {},
+    "RealPrice": {},
+    "ItemVariant": {},
+    "Image": {},
+    "ItemVariantAttr": {},
+    "ItemAttr": {},
+    "Attribute": {},
+    "AttrType": {},
+    "AttrValue": {},
+    "ItemVariantCreate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "variant": {
+                    "$ref": "refSchema#/definitions/ItemVariantCreateFields"
+                }
+            },
+            "required": [
+                "variant"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "variant": {
+                        "$ref": "refSchema#/definitions/ItemVariant"
+                    }
+                },
+                "required": [
+                    "variant"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemVariantCreateFields": {},
+    "ItemVariantUpdate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "variantId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "variantId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "variant": {
+                    "$ref": "refSchema#/definitions/ItemVariantUpdateFields"
+                }
+            },
+            "required": [
+                "variant"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "variant": {
+                        "$ref": "refSchema#/definitions/ItemVariant"
+                    }
+                },
+                "required": [
+                    "variant"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemVariantUpdateFields": {},
+    "ItemVariantDeleteBatch": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "variants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "refSchema#/definitions/UBigInt"
+                    }
+                }
+            },
+            "required": [
+                "variants"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "null"
+            }
+        }
+    }
+}

@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="open" transition-hide="slide-down" transition-show="slide-down">
+    <q-dialog v-model="confirm" transition-hide="slide-down" transition-show="slide-down">
         <div class="bg-white q-pa-md inventory-item-create-modal">
             <span class="text-h5">Add item</span>
             <q-space />
@@ -9,7 +9,6 @@
                 ref="form"
                 class="q-gutter-md col"
                 @submit="onSubmit"
-                @reset="onReset"
             >
                 <div class="row">
                     <div class="col">
@@ -39,17 +38,18 @@
                         <q-input v-model="buyLink" type="url" label="Buy link" />
                         <!-- TODO: Price -->
 
+                        <!-- TODO: Use InventoryAmountInput -->
                         <div class="row">
                             <div class="col">
-                                <inventory-amount-unit-search ref="amountUnit" />
+                                <inventory-amount-unit-search v-model="amountUnit" />
                             </div>
                             <div class="col">
                                 <q-input
                                     v-model="rawAmountValue"
-                                    :readonly="!amountUnit?.selected"
+                                    :readonly="!amountUnit"
                                     type="number"
                                     label="Amount"
-                                    :suffix="amountUnit?.selected?.symbol"
+                                    :suffix="amountUnit?.symbol"
                                     lazy-rules
                                     :rules="[
                                         val => !!val || 'Amount unit is required'
@@ -69,18 +69,11 @@
                         @click="showVariants = !showVariants"
                     />
                     <div v-show="showVariants" class="row full-width">
-                        <inventory-variant-create ref="variants" class="col" />
+                        <InventoryVariantQuickAddList v-model="variants" class="col" />
                     </div>
                 </div>
 
                 <div class="row justify-end q-gutter-sm">
-                    <q-btn
-                        outline
-                        label="Reset"
-                        type="reset"
-                        color="primary"
-                        class="q-ml-sm"
-                    />
                     <q-btn label="Create item" type="submit" color="primary" :loading="loading" />
                 </div>
             </q-form>
@@ -114,35 +107,21 @@
 
 <script lang="ts" setup>
 import type { QForm, QInput } from 'quasar'
+import type { ItemVariantQuickAddList } from '../variant/InventoryVariantQuickAddList.vue'
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
 import type { Item } from '~/models/inventory/Item'
 
-export interface IInventoryItemCreateModal {
-    modelValue: boolean
-}
-
-const props = defineProps<IInventoryItemCreateModal>()
-const emit = defineEmits<{(event: 'update:modelValue', payload: boolean): void}>()
-
+const confirm = showCreateItemModal()
 const form = ref<QForm>()
 const showVariants = ref(false)
 const path = computed(() => useInventoryLocation().targetFolderPath().toUserPath())
 
-const name = ref()
-const description = ref()
-const buyLink = ref()
-const amountUnit = ref<{selected: AmountUnit}>()
-const rawAmountValue = ref()
-const variants = ref<{variants: string[]}>()
-
-const open = computed({
-    get () {
-        return props.modelValue
-    },
-    set (value: boolean) {
-        emit('update:modelValue', value)
-    },
-})
+const name = ref<string>()
+const description = ref<string>()
+const buyLink = ref<string>()
+const amountUnit = ref<AmountUnit | null>(null)
+const rawAmountValue = ref<string>()
+const variants = ref<ItemVariantQuickAddList>({})
 
 const $q = useQuasar()
 
@@ -167,12 +146,12 @@ const onSubmit = async () => {
                 description: description.value ?? null,
                 inventoryId,
                 folderId: targetFolderId,
-                amountUnitId: amountUnit.value?.selected.id,
-                rawAmountValue,
-                variants: variants.value?.variants?.map(name => ({
+                amountUnitId: amountUnit.value?.id,
+                rawAmountValue: rawAmountValue.value,
+                variants: variants.value?.names?.map(name => ({
                     name,
-                    description: null,
-                    reasonablePrice: null,
+                    amountValue: variants.value?.amountValueEach,
+                    realPrice: variants.value?.realPriceEach,
                 })),
             },
         })
@@ -205,8 +184,6 @@ const onSubmit = async () => {
 
         form.value?.reset()
     } catch (err) {
-        console.error(err)
-
         if (err instanceof Error) {
             $q.notify({
                 type: 'negative',
@@ -217,8 +194,6 @@ const onSubmit = async () => {
         loading.value = false
     }
 }
-
-const onReset = () => {}
 
 </script>
 

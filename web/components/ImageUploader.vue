@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="confirm">
+    <q-dialog v-model="confirm" :persistent="done">
         <q-card>
             <q-uploader
                 ref="uploader"
@@ -9,7 +9,8 @@
                 bordered
                 accept="image/*"
                 :max-file-size="2 ** 21"
-                multiple
+                :multiple="props.multiple"
+                :headers="headers"
                 @uploaded="uploaded"
             />
         </q-card>
@@ -17,14 +18,39 @@
 </template>
 
 <script lang="ts" setup>
-import type { QUploader } from 'quasar';
-import { openImageUploaderModal } from '~/composables/states'
-import type { Image } from '~/models/inventory/Image';
+import type { QUploader } from 'quasar'
+import type { Image } from '~/models/Image'
 
-const confirm = openImageUploaderModal()
+const props = withDefaults(defineProps<{
+    multiple?: boolean
+    modelValue: boolean,
+}>(), {
+    multiple: true,
+})
+
+const done = ref<boolean>(false)
+
+const emit = defineEmits<{
+    uploaded: [result: UploadResult],
+    'update:modelValue': [confirm: boolean],
+}>()
+
+const confirm = computed({
+    get() {
+        return props.modelValue
+    },
+    set(val: boolean) {
+        emit('update:modelValue', val)
+    }
+})
+
 const uploader = ref<QUploader>()
 
 const { apiUrl } = useAppConfig()
+const { $getAuthHeaderAppendix } = useNuxtApp()
+const headers = Object.entries({
+    ...$getAuthHeaderAppendix(),
+}).map(([name, value]) => ({ name, value }))
 
 const uploadImgUrl = `${apiUrl}/img`
 
@@ -35,19 +61,18 @@ export type UploadResult = {
     }
 }
 
-const emit = defineEmits<{(event: 'uploaded', result: UploadResult): void}>()
-
-const uploaded = ({files, xhr}: {files: QUploader['uploadedFiles'], xhr: XMLHttpRequest}) => {
-    const {images} = JSON.parse(xhr.response)
+const uploaded = ({ files, xhr }: {files: QUploader['uploadedFiles'], xhr: XMLHttpRequest}) => {
+    const { images } = JSON.parse(xhr.response)
     const result = {
         files,
         res: {
             images,
-        }
+        },
     }
     uploader.value?.reset()
     confirm.value = false
     emit('uploaded', result)
+    done.value = true
 }
 
 </script>

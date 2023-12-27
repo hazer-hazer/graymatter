@@ -7,6 +7,7 @@
 
 <script lang="ts" setup>
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
+import { formatNumberWithPrefix } from '~/utils/format'
 
 export interface IInventoryItemAmount {
     unit: AmountUnit
@@ -47,12 +48,7 @@ const { amount } = defineProps<{
 //     value: 19,
 // }
 
-const formatNumberWithPrefix = (n: bigint, _prefixes: typeof amount['unit']['powerPrefixes']): string => {
-    // todo
-    return n.toString()
-}
-
-const label = `${formatNumberWithPrefix(BigInt(amount.value), amount.unit.powerPrefixes)}${amount.unit.symbol}`
+const label = `${formatNumberWithPrefix(amount.value, amount.unit.powerPrefixes)}${amount.unit.symbol}`
 const verboseAmount = `${amount.value} ${amount.unit.name}`
 </script>
 

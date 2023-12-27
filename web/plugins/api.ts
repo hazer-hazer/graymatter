@@ -6,14 +6,26 @@ import { defu } from 'defu'
 export default defineNuxtPlugin(() => {
     const { apiUrl } = useAppConfig()
 
+    const getAuthHeaderAppendix = (): Record<string, string> | null => {
+        const jwt = useAuthStore().jwt
+        if (jwt) {
+            return { Authorization: `Bearer ${jwt}` }
+        }
+        return null
+    }
+
     // TODO: Rewrite to `createFetch`
     return {
         provide: {
+            getAuthHeaderAppendix,
 
             // API_URL (path?: string) { return `${apiUrl}/${path}` },
 
             apiFetch: $fetch.create({
                 baseURL: apiUrl,
+                headers: {
+                    ...getAuthHeaderAppendix(),
+                },
             }),
 
             apiUseFetch<T extends Record<string, any>> (url: string | (() => string), opts: UseFetchOptions<T> = {}) {
@@ -25,6 +37,9 @@ export default defineNuxtPlugin(() => {
                     },
                     onRequestError (ctx) {
                         console.error(`${url} request error`, ctx.error)
+                    },
+                    headers: {
+                        ...getAuthHeaderAppendix(),
                     },
                 }
 

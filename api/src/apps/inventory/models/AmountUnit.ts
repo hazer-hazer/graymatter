@@ -1,3 +1,5 @@
+import { UBigInt } from '@/models/common'
+
 export interface AmountUnitPowerPrefix {
     power: number
     prefix: string
@@ -6,12 +8,30 @@ export interface AmountUnitPowerPrefix {
     amountUnit?: AmountUnit
 }
 
+export type AmountUnitPowerPrefixCreateFields =
+    Required<Pick<AmountUnitPowerPrefix, 
+        | 'power'
+        | 'prefix'
+    >>
+    & Partial<Pick<AmountUnitPowerPrefix, 
+        | 'name'
+    >>
+
 export interface AmountUnit {
     id: number
     name: string
     symbol: string
 
-    userId: bigint | null
+    userId: UBigInt | null
 
-    powerPrefixes: AmountUnitPowerPrefix[]
+    powerPrefixes?: AmountUnitPowerPrefix[]
 }
+
+export type AmountUnitCreateFields =
+    Required<Pick<AmountUnit, 
+        | 'name'
+        | 'symbol'
+    >>
+    & {
+        powerPrefixes?: AmountUnitPowerPrefixCreateFields[]
+    }

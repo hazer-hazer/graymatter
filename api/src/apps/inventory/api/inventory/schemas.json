@@ -29,6 +29,8 @@
     },
     "Inventory": {},
     "UBigInt": {},
+    "Image": {},
+    "Currency": {},
     "InventoryStats": {},
     "TreePath": {},
     "TreePathSegment": {},
@@ -38,10 +40,16 @@
     "SearchResult": {},
     "Item": {},
     "Folder": {},
-    "Image": {},
+    "FolderKind": {},
     "AmountUnit": {},
     "AmountUnitPowerPrefix": {},
     "ItemVariant": {},
+    "ItemVariantAttr": {},
+    "ItemAttr": {},
+    "Attribute": {},
+    "AttrType": {},
+    "AttrValue": {},
+    "RealPrice": {},
     "InventorySearch": {
         "params": {
             "type": "object",
@@ -93,5 +101,85 @@
                 "additionalProperties": false
             }
         }
-    }
+    },
+    "InventoryGetTrash": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "inventoryUri": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "inventoryUri"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "folders": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Folder"
+                        }
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Item"
+                        }
+                    }
+                },
+                "required": [
+                    "folders",
+                    "items"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "InventoryGetMy": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "inventories": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Inventory"
+                        }
+                    }
+                },
+                "required": [
+                    "inventories"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "InventoryCreate": {
+        "params": {
+            "type": "null"
+        },
+        "body": {
+            "$ref": "refSchema#/definitions/InventoryCreateFields"
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "inventory": {
+                        "$ref": "refSchema#/definitions/Inventory"
+                    }
+                },
+                "required": [
+                    "inventory"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "InventoryCreateFields": {}
 }

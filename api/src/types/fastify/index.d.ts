@@ -1,4 +1,4 @@
-import { UserPayload } from '../auth'
+import { UserData, UserPayload } from '../auth'
 import '@fastify/jwt'
 import 'fastify'
 
@@ -24,6 +24,6 @@ declare module 'fastify' {
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: UserPayload
-    user: UserPayload
+    user: UserData
   }
 }

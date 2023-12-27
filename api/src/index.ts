@@ -1,5 +1,5 @@
 import 'dotenv'
-import Fastify, { onRequestHookHandler } from 'fastify'
+import Fastify, { FastifyInstance, onRequestHookHandler } from 'fastify'
 import config from 'config'
 import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
@@ -13,20 +13,22 @@ import sourceMapSupport from 'source-map-support'
 import fastifyBearerAuth from '@fastify/bearer-auth'
 import fastifyAuth from '@fastify/auth'
 import decorators from './decorators'
-import db from './modules/prisma'
+import db, { DB } from './modules/prisma'
 import fastifyJwt from '@fastify/jwt'
 import plugins from './plugins'
 import { readFileSync } from 'fs'
 import path from 'path'
+import { Http2SecureServer, Http2ServerRequest, Http2ServerResponse } from 'http2'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 sourceMapSupport.install()
 
 const fastify = Fastify({
     logger: loggerConfig.dev,
-    https: {
-        key: readFileSync(path.join(__dirname, '..', '..', 'ssl', 'gm.key')),
-        cert: readFileSync(path.join(__dirname, '..', '..x', 'ssl', 'gm.cert')),
-    },
+    // https: {
+    //     key: readFileSync(path.join(__dirname, '..', '..', 'ssl', 'gm.key')),
+    //     cert: readFileSync(path.join(__dirname, '..', '..', 'ssl', 'gm.cert')),
+    // },
 })
 
 // ;(BigInt.prototype as any).toJSON = function () {
@@ -45,16 +47,21 @@ void (async () => {
         })
     })
 
-    await fastify.register(cors, {})
-    await fastify.register(fastifyHealthcheck, {})
-    await fastify.register(fastifyCookie, {
-        // secret: config.get('cookie.secret'),
+    await fastify.register(cors, {
+        origin: true,
+        credentials: true,
     })
+    await fastify.register(fastifyHealthcheck, {})
+    // await fastify.register(fastifyCookie)
     // await fastify.register(fastifyAuth)
     // await fastify.register(fastifyBearerAuth, {
     //     keys: new Set(['superKek']),
     // })
     await Promise.all(plugins.map(pl => fastify.register(pl)))
+
+    fastify.addHook('onRequest', async (req, res) => {
+        req.log.info({ headers: req.headers }, 'Headers')
+    })
 
     fastify.addHook('preHandler', function (req, _res, done) {
         if (req.body) {

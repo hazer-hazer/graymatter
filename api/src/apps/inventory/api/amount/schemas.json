@@ -3,30 +3,12 @@
         "body": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "powerPrefixes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "refSchema#/definitions/AmountUnitPowerPrefix"
-                    }
+                "amountUnit": {
+                    "$ref": "refSchema#/definitions/AmountUnitCreateFields"
                 }
             },
             "required": [
-                "name",
-                "symbol",
-                "userId",
-                "powerPrefixes"
+                "amountUnit"
             ],
             "additionalProperties": false
         },
@@ -34,19 +16,22 @@
             "200": {
                 "type": "object",
                 "properties": {
-                    "unit": {
+                    "amountUnit": {
                         "$ref": "refSchema#/definitions/AmountUnit"
                     }
                 },
                 "required": [
-                    "unit"
+                    "amountUnit"
                 ],
                 "additionalProperties": false
             }
         }
     },
-    "AmountUnitPowerPrefix": {},
+    "AmountUnitCreateFields": {},
+    "AmountUnitPowerPrefixCreateFields": {},
     "AmountUnit": {},
+    "UBigInt": {},
+    "AmountUnitPowerPrefix": {},
     "AmountUnitSearch": {
         "response": {
             "200": {
@@ -89,47 +74,6 @@
                 },
                 "required": [
                     "unit"
-                ],
-                "additionalProperties": false
-            }
-        }
-    },
-    "ItemAmountGet": {
-        "params": {
-            "type": "object",
-            "properties": {
-                "itemId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "itemId"
-            ],
-            "additionalProperties": false
-        },
-        "response": {
-            "200": {
-                "type": "object",
-                "properties": {
-                    "amount": {
-                        "type": "object",
-                        "properties": {
-                            "unit": {
-                                "$ref": "refSchema#/definitions/AmountUnit"
-                            },
-                            "value": {
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "unit",
-                            "value"
-                        ],
-                        "additionalProperties": false
-                    }
-                },
-                "required": [
-                    "amount"
                 ],
                 "additionalProperties": false
             }

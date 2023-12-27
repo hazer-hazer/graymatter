@@ -1,7 +1,9 @@
 import { Folder } from '@/apps/inventory/models/Folder'
 import { Inventory } from '@/apps/inventory/models/Inventory'
 import { Item } from '@/apps/inventory/models/Item'
-import {  PrismaClient } from '@prisma/client'
+import { Currency, RealPrice, WithPrice } from '@/models/Currency'
+import { UBigInt } from '@/models/common'
+import { AmountUnit, PrismaClient } from '@prisma/client'
 import { Prisma as DB } from '@prisma/client'
 import assert from 'assert'
 
@@ -10,7 +12,7 @@ import assert from 'assert'
 export type TreeNodeKind = 'inventory' | 'item' | 'folder'
 
 export interface Tree {
-    id: string | bigint | number
+    id: string | UBigInt | number
     uri: string
     kind: TreeNodeKind
     name: string
@@ -64,24 +66,46 @@ export class TreePath {
     }
 }
 
+// TODO: Add names to all extensions
 const db = new PrismaClient()
-    // .$extends({
+// .$extends({
+//     result: {
+//         inventory: {
+//             // Path of inventory can just be computed without additional query
+//             path: {
+//                 needs: {
+//                     id: true,
+//                     uri: true,
+//                     name: true,
+//                 },
+//                 compute({ id, uri, name }): TreePath {
+//                     return new TreePath([{
+//                         kind: 'inventory',
+//                         uri,
+//                         name,
+//                         id,
+//                     }])
+//                 },
+//             },
+//         },
+//     },
+// })
+// .$extends({
+//     model: {
+//         user: {
+//             async withPassword() {
+
+    //             }
+    //         }
+    //     },
     //     result: {
-    //         inventory: {
-    //             // Path of inventory can just be computed without additional query
-    //             path: {
+    //         user: {
+    //             password: {
     //                 needs: {
-    //                     id: true,
-    //                     uri: true,
-    //                     name: true,
+    //                     password: true,
     //                 },
-    //                 compute({ id, uri, name }): TreePath {
-    //                     return new TreePath([{
-    //                         kind: 'inventory',
-    //                         uri,
-    //                         name,
-    //                         id,
-    //                     }])
+    //                 compute() {
+    //                     return null
     //                 },
     //             },
     //         },
@@ -255,6 +279,29 @@ const db = new PrismaClient()
                         kind: 'item',
                         path,
                     }
+                },
+                async fallbackCurrency(where: DB.ItemWhereUniqueInput): Promise<Currency> {
+                    const { currency, inventoryId } = await db.item.findUniqueOrThrow({ where, select: { currency: true, inventoryId: true } })
+    
+                    if (currency) {
+                        return currency
+                    }
+    
+                    const { currency: inventoryCurrency, userId } = await db.inventory.findUniqueOrThrow({
+                        where: { id: inventoryId },
+                        select: { userId: true, currency: true },
+                    })
+    
+                    if (inventoryCurrency) {
+                        return inventoryCurrency
+                    }
+    
+                    const { currency: userCurrency } = await db.user.findUniqueOrThrow({
+                        where: { id: userId },
+                        select: { currency: true },
+                    })
+    
+                    return userCurrency
                 },
             },
         },

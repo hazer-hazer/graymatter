@@ -10,8 +10,14 @@ export default defineNuxtConfig({
     },
     modules: [
         'nuxt-quasar-ui',
+        '@pinia/nuxt',
+        '@pinia-plugin-persistedstate/nuxt',
+        'nuxt-typed-router',
     // '@nuxtjs/axios',
     // '@nuxtjs/auth-next',
+    ],
+    css: [
+        '@/assets/scss/main.scss',
     ],
     quasar: {
         sassVariables: 'assets/scss/quasar-variables.scss',
@@ -20,6 +26,12 @@ export default defineNuxtConfig({
         ],
         config: {
             // dark: 'auto',
+            // ripple: true,
+        },
+        extras: {
+            fontIcons: [
+                'fontawesome-v6',
+            ],
         },
     },
     appConfig: {

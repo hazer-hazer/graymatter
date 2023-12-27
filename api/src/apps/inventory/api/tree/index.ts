@@ -73,6 +73,7 @@ const tree: FastifyPluginAsync = async function (fastify) {
                 userId: true,
                 name: true,
                 description: true,
+                currencyId: true,
             },
         })
 
@@ -86,12 +87,7 @@ const tree: FastifyPluginAsync = async function (fastify) {
                 parentId: true,
                 images: {
                     select: {
-                        image: {
-                            select: {
-                                id: true,
-                                src: true,
-                            },
-                        },
+                        image: true,
                     },
                 },
             },
@@ -110,15 +106,13 @@ const tree: FastifyPluginAsync = async function (fastify) {
                 folderId: true,
                 createdAt: true,
                 updatedAt: true,
-                rawAmountValue: true,
+                amountValue: true,
+                buyLink: true,
+                price: true,
+                currencyId: true,
                 images: {
                     select: {
-                        image: {
-                            select: {
-                                id: true,
-                                src: true,
-                            },
-                        },
+                        image: true,
                     },
                 },
                 inventory: {

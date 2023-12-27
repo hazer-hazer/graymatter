@@ -38,6 +38,8 @@
     "UriPath": {},
     "User": {},
     "UBigInt": {},
+    "Image": {},
+    "Currency": {},
     "App": {},
     "Login": {
         "body": {
@@ -48,6 +50,10 @@
                 },
                 "password": {
                     "type": "string"
+                },
+                "rememberMe": {
+                    "type": "boolean",
+                    "description": "Store cookie for a longer time"
                 }
             },
             "required": [
@@ -62,10 +68,14 @@
                 "properties": {
                     "user": {
                         "$ref": "refSchema#/definitions/User"
+                    },
+                    "jwt": {
+                        "type": "string"
                     }
                 },
                 "required": [
-                    "user"
+                    "user",
+                    "jwt"
                 ],
                 "additionalProperties": false
             },

@@ -1,5 +1,5 @@
 <template>
-    <q-layout view="hHh Lpr fFf">
+    <q-layout view="hHh lpR fff">
         <NuxtLoadingIndicator />
         <q-header class="header text-dark">
             <q-toolbar>
@@ -11,48 +11,44 @@
                     @click="toggleLeftDrawer"
                 />
 
-                <q-avatar text-color="primary">
-                    <!-- <img src="/logo.svg"/> -->
-                    <q-icon name="inventory_2" />
-                </q-avatar>
+                <InventoryToolbarHeader v-if="app.uri === 'inventory'" />
+                <DefaultHeaderToolbar v-else />
 
-                <q-toolbar-title class="text-h6 q-pa-none">
-                    Inventory
-                </q-toolbar-title>
-
-                <q-space />
-
-                <InventorySearch ref="inventorySearch" class="q-pr-sm" />
-
-                <q-btn
-                    flat
-                    icon="add"
-                    padding="sm"
-                    size="md"
-                    dense
-                    @click="openCreateItemModal().value = true"
-                >
-                    <q-tooltip>
-                        Add item
-                    </q-tooltip>
-                </q-btn>
                 <q-separator spaced inset vertical />
-                <q-btn flat round color="dark">
-                    <q-avatar icon="account_circle" />
+
+                <q-btn v-if="isLoggedIn" flat round color="dark">
+                    <q-avatar v-if="me?.avatar">
+                        <q-img
+                            :src="me.avatar.src"
+                            spinner-color="primary"
+                            spinner-size="20px"
+                            height="100%"
+                        />
+                    </q-avatar>
+                    <q-avatar v-else icon="account_circle" />
+
                     <q-menu anchor="bottom start" self="top start">
                         <q-list style="min-width: 100px">
                             <q-item v-close-popup clickable>
                                 <q-item-section>Profile</q-item-section>
                             </q-item>
-                            <q-separator spaced />
-                            <q-item v-close-popup clickable>
-                                <q-item-section>
+                            <q-separator />
+                            <q-item v-close-popup clickable :onclick="() => useAuthStore().logout()">
+                                <q-item-section class="text-red text-bold">
                                     Logout
                                 </q-item-section>
                             </q-item>
                         </q-list>
                     </q-menu>
                 </q-btn>
+
+                <q-btn
+                    v-else
+                    flat
+                    round
+                    icon="login"
+                    @click="showAuthModal().value = true"
+                />
                 <!-- <q-btn-dropdown icon="add" color="white">
                     <q-list>
                         <q-item v-close-popup clickable @click="openItemCreateModal = true">
@@ -65,26 +61,63 @@
             </q-toolbar>
         </q-header>
 
-        <q-page-container class="row justify-center">
-            <NuxtPage />
-        </q-page-container>
-
         <q-drawer
             v-model="leftDrawerOpen"
             show-if-above
             side="left"
             bordered
             overlay
-        />
+            :breakpoint="1200"
+            :width="250"
+            class="column full-height"
+        >
+            <div class="col">
+                <q-list>
+                    <q-item v-ripple clickable>
+                        <q-item-section avatar>
+                            <q-icon color="primary" name="bluetooth" />
+                        </q-item-section>
+                        <q-item-section>Icon as avatar</q-item-section>
+                    </q-item>
+                </q-list>
+            </div>
 
-        <InventoryItemCreateModal v-model="openCreateItemModal().value" />
-        <InventoryFolderCreateModal v-model="openCreateFolderModal().value" />
+            <q-separator />
+
+            <q-btn
+                padding="md 0"
+                flat
+                no-caps
+                size="sm"
+                label="GrayMatter"
+                icon="water_drop"
+                text-color="grey-6"
+                dense
+                :ripple="{
+                    color: 'grey-8',
+                }"
+            />
+        </q-drawer>
+
+        <!-- TODO: Page scroller -->
+        <q-page-container class="row justify-center">
+            <NuxtPage />
+        </q-page-container>
+
+        <InventoryItemCreateModal />
+        <InventoryFolderCreateModal />
+        <InventoryCreateModal />
+        <AuthModal />
     </q-layout>
 </template>
 
 <script lang="ts" setup>
 const leftDrawerOpen = ref(false)
-const inventorySearch = ref()
+
+const isLoggedIn = useIsLoggedIn()
+const app = useApp()
+const { data: user } = await useAuthStore().refreshed()
+const me = user.value?.user
 
 const toggleLeftDrawer = () => { leftDrawerOpen.value = !leftDrawerOpen.value }
 
@@ -107,8 +140,8 @@ const toggleLeftDrawer = () => { leftDrawerOpen.value = !leftDrawerOpen.value }
 @use 'sass:color';
 
 .header {
-    box-shadow: 0 2px 5px #dfdfdf;
-    background-color: #fffa;
+    box-shadow: 0 1px 5px #dfdfdf;
+    background-color: #fff9;
     // background-color: color.adjust($primary, $alpha: -0.4);
     backdrop-filter: blur(6px);
 }

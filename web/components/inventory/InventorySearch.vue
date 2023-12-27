@@ -4,7 +4,7 @@
             ref="inputField"
             v-model="input"
             type="search"
-            standout
+            outlined
             dense
             input-class="text-right"
             class="q-pa-none"

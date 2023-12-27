@@ -1,6 +1,11 @@
 import _ from 'lodash'
 
-export const formatUri = (name: string) => {
+export const RESERVED_URIS = [
+    'trash',
+    'root',
+]
+
+export const nameToUri = (name: string) => {
     return _.kebabCase(name)
 }
 

@@ -1,63 +1,7 @@
 {
     "ItemCreate": {
         "body": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "variants": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string"
-                            },
-                            "description": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "reasonablePrice": {
-                                "type": [
-                                    "number",
-                                    "null"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "name",
-                            "description",
-                            "reasonablePrice"
-                        ],
-                        "additionalProperties": false
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "inventoryId": {
-                    "type": "number"
-                },
-                "folderId": {
-                    "$ref": "refSchema#/definitions/UBigInt"
-                },
-                "amountUnitId": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "amountUnitId",
-                "folderId",
-                "inventoryId",
-                "name"
-            ]
+            "$ref": "refSchema#/definitions/ItemCreateFields"
         },
         "response": {
             "200": {
@@ -74,17 +18,27 @@
             }
         }
     },
+    "ItemCreateFields": {},
     "UBigInt": {},
+    "RealPrice": {},
+    "ItemVariantCreateFields": {},
     "Item": {},
     "Inventory": {},
+    "Image": {},
+    "Currency": {},
     "InventoryStats": {},
     "TreePath": {},
     "TreePathSegment": {},
     "Folder": {},
-    "Image": {},
+    "FolderKind": {},
     "AmountUnit": {},
     "AmountUnitPowerPrefix": {},
     "ItemVariant": {},
+    "ItemVariantAttr": {},
+    "ItemAttr": {},
+    "Attribute": {},
+    "AttrType": {},
+    "AttrValue": {},
     "FolderTree": {},
     "Tree": {},
     "TreeNodeKind": {},
@@ -93,7 +47,7 @@
             "type": "object",
             "properties": {
                 "itemId": {
-                    "type": "string"
+                    "$ref": "refSchema#/definitions/UBigInt"
                 }
             },
             "required": [
@@ -105,22 +59,7 @@
             "type": "object",
             "properties": {
                 "item": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": [
-                                "string",
-                                "null"
-                            ]
-                        },
-                        "uri": {
-                            "type": "string"
-                        }
-                    },
-                    "additionalProperties": false
+                    "$ref": "refSchema#/definitions/ItemUpdateFields"
                 }
             },
             "required": [
@@ -143,6 +82,7 @@
             }
         }
     },
+    "ItemUpdateFields": {},
     "ItemSearch": {
         "params": {
             "type": "null"
@@ -153,7 +93,35 @@
             "type": "object",
             "properties": {
                 "itemId": {
-                    "type": "string"
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "item": {
+                        "$ref": "refSchema#/definitions/Item"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemMoveToTrash": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
                 }
             },
             "required": [

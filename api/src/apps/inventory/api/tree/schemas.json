@@ -66,9 +66,6 @@
                                 "folderId": {
                                     "$ref": "refSchema#/definitions/UBigInt"
                                 },
-                                "rawAmountValue": {
-                                    "$ref": "refSchema#/definitions/UBigInt"
-                                },
                                 "itemLocationId": {
                                     "type": [
                                         "number",
@@ -87,11 +84,21 @@
                                         "null"
                                     ]
                                 },
-                                "reasonablePrice": {
-                                    "type": [
-                                        "number",
-                                        "null"
+                                "price": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "refSchema#/definitions/UBigInt"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
                                     ]
+                                },
+                                "currencyId": {
+                                    "type": "number"
+                                },
+                                "currency": {
+                                    "$ref": "refSchema#/definitions/Currency"
                                 },
                                 "createdAt": {
                                     "type": "string",
@@ -106,6 +113,9 @@
                                 },
                                 "amountUnit": {
                                     "$ref": "refSchema#/definitions/AmountUnit"
+                                },
+                                "amountValue": {
+                                    "type": "number"
                                 },
                                 "images": {
                                     "type": "array",
@@ -128,19 +138,56 @@
                                         "$ref": "refSchema#/definitions/ItemVariant"
                                     }
                                 },
+                                "attributes": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "refSchema#/definitions/ItemAttr"
+                                    }
+                                },
                                 "path": {
                                     "$ref": "refSchema#/definitions/TreePath"
+                                },
+                                "variantsAmountSum": {
+                                    "type": [
+                                        "number",
+                                        "null"
+                                    ]
+                                },
+                                "totalPrice": {
+                                    "type": [
+                                        "number",
+                                        "null"
+                                    ]
+                                },
+                                "realPrice": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "refSchema#/definitions/RealPrice"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                },
+                                "displayPrice": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
                                 }
                             },
                             "required": [
                                 "amountUnitId",
+                                "amountValue",
+                                "buyLink",
                                 "createdAt",
+                                "currencyId",
                                 "folderId",
                                 "id",
                                 "inventory",
                                 "inventoryId",
                                 "name",
-                                "rawAmountValue",
+                                "price",
                                 "updatedAt",
                                 "uri"
                             ]
@@ -160,6 +207,8 @@
     },
     "Inventory": {},
     "UBigInt": {},
+    "Image": {},
+    "Currency": {},
     "InventoryStats": {},
     "TreePath": {},
     "TreePathSegment": {},
@@ -167,10 +216,16 @@
     "Tree": {},
     "TreeNodeKind": {},
     "Folder": {},
-    "Image": {},
+    "FolderKind": {},
     "AmountUnit": {},
     "AmountUnitPowerPrefix": {},
     "ItemVariant": {},
+    "ItemVariantAttr": {},
+    "ItemAttr": {},
+    "Attribute": {},
+    "AttrType": {},
+    "AttrValue": {},
+    "RealPrice": {},
     "TreeItemGet": {
         "params": {
             "$ref": "refSchema#/definitions/TreeGetBaseParams"

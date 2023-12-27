@@ -76,6 +76,32 @@
                     "type": "string",
                     "format": "date-time"
                 },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "currencyId": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "currency": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Currency"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
                 "apps": {
                     "type": "array",
                     "items": {
@@ -87,7 +113,9 @@
                 "id",
                 "email",
                 "uri",
-                "createdAt"
+                "createdAt",
+                "avatar",
+                "currencyId"
             ],
             "additionalProperties": false
         },
@@ -95,6 +123,55 @@
             "type": "string",
             "format": "int64",
             "pattern": "^\\d+$"
+        },
+        "Image": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "src": {
+                    "type": "string"
+                },
+                "userId": {
+                    "$ref": "#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "id",
+                "src",
+                "userId"
+            ],
+            "additionalProperties": false
+        },
+        "Currency": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string",
+                    "pattern": "[A-Z]{3}"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "decimals": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "code",
+                "symbol",
+                "decimals"
+            ],
+            "additionalProperties": false
         },
         "App": {
             "type": "object",
@@ -127,6 +204,10 @@
                         },
                         "password": {
                             "type": "string"
+                        },
+                        "rememberMe": {
+                            "type": "boolean",
+                            "description": "Store cookie for a longer time"
                         }
                     },
                     "required": [
@@ -143,10 +224,14 @@
                             "properties": {
                                 "user": {
                                     "$ref": "#/definitions/User"
+                                },
+                                "jwt": {
+                                    "type": "string"
                                 }
                             },
                             "required": [
-                                "user"
+                                "user",
+                                "jwt"
                             ],
                             "additionalProperties": false
                         },
@@ -231,22 +316,6 @@
             ],
             "additionalProperties": false
         },
-        "Image": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "src": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "src"
-            ],
-            "additionalProperties": false
-        },
         "UserGetById": {
             "type": "object",
             "properties": {
@@ -290,36 +359,48 @@
             ],
             "additionalProperties": false
         },
+        "UserGetMe": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "user": {
+                                    "$ref": "#/definitions/User"
+                                }
+                            },
+                            "required": [
+                                "user"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
         "AmountUnitCreate": {
             "type": "object",
             "properties": {
                 "Body": {
                     "type": "object",
                     "properties": {
-                        "name": {
-                            "type": "string"
-                        },
-                        "symbol": {
-                            "type": "string"
-                        },
-                        "userId": {
-                            "type": [
-                                "string",
-                                "null"
-                            ]
-                        },
-                        "powerPrefixes": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/AmountUnitPowerPrefix"
-                            }
+                        "amountUnit": {
+                            "$ref": "#/definitions/AmountUnitCreateFields"
                         }
                     },
                     "required": [
-                        "name",
-                        "symbol",
-                        "userId",
-                        "powerPrefixes"
+                        "amountUnit"
                     ],
                     "additionalProperties": false
                 },
@@ -329,12 +410,12 @@
                         "200": {
                             "type": "object",
                             "properties": {
-                                "unit": {
+                                "amountUnit": {
                                     "$ref": "#/definitions/AmountUnit"
                                 }
                             },
                             "required": [
-                                "unit"
+                                "amountUnit"
                             ],
                             "additionalProperties": false
                         }
@@ -348,6 +429,79 @@
             "required": [
                 "Body",
                 "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "AmountUnitCreateFields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "powerPrefixes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AmountUnitPowerPrefixCreateFields"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        },
+        "AmountUnitPowerPrefixCreateFields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "power": {
+                    "type": "number"
+                },
+                "prefix": {
+                    "type": "string"
+                }
+            }
+        },
+        "AmountUnit": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "userId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "powerPrefixes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AmountUnitPowerPrefix"
+                    }
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "symbol",
+                "userId"
             ],
             "additionalProperties": false
         },
@@ -378,40 +532,6 @@
                 "prefix",
                 "name",
                 "amountUnitId"
-            ],
-            "additionalProperties": false
-        },
-        "AmountUnit": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "symbol": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "powerPrefixes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AmountUnitPowerPrefix"
-                    }
-                }
-            },
-            "required": [
-                "id",
-                "name",
-                "symbol",
-                "userId",
-                "powerPrefixes"
             ],
             "additionalProperties": false
         },
@@ -491,18 +611,18 @@
             ],
             "additionalProperties": false
         },
-        "ItemAmountGet": {
+        "AttrCreate": {
             "type": "object",
             "properties": {
-                "Params": {
+                "Body": {
                     "type": "object",
                     "properties": {
-                        "itemId": {
-                            "type": "string"
+                        "attr": {
+                            "$ref": "#/definitions/AttributeCreateFields"
                         }
                     },
                     "required": [
-                        "itemId"
+                        "attr"
                     ],
                     "additionalProperties": false
                 },
@@ -512,25 +632,164 @@
                         "200": {
                             "type": "object",
                             "properties": {
-                                "amount": {
-                                    "type": "object",
-                                    "properties": {
-                                        "unit": {
-                                            "$ref": "#/definitions/AmountUnit"
-                                        },
-                                        "value": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "unit",
-                                        "value"
-                                    ],
-                                    "additionalProperties": false
+                                "attr": {
+                                    "$ref": "#/definitions/Attribute"
                                 }
                             },
                             "required": [
-                                "amount"
+                                "attr"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeCreateFields": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "type": {
+                            "$ref": "#/definitions/AttrType"
+                        },
+                        "description": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "allowedValues": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "type": {
+                            "$ref": "#/definitions/AttrType"
+                        },
+                        "description": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ]
+                }
+            ]
+        },
+        "AttrType": {
+            "type": "string",
+            "enum": [
+                "String",
+                "Enum"
+            ]
+        },
+        "Attribute": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "type": {
+                    "$ref": "#/definitions/AttrType"
+                },
+                "allowedValues": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userId": {
+                    "$ref": "#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "description",
+                "type",
+                "allowedValues",
+                "userId"
+            ],
+            "additionalProperties": false
+        },
+        "AttrUpdate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "attrId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "attrId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "attr": {
+                            "$ref": "#/definitions/AttributeUpdateFields"
+                        }
+                    },
+                    "required": [
+                        "attr"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "attr": {
+                                    "$ref": "#/definitions/Attribute"
+                                }
+                            },
+                            "required": [
+                                "attr"
                             ],
                             "additionalProperties": false
                         }
@@ -543,6 +802,104 @@
             },
             "required": [
                 "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeUpdateFields": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "allowedValues": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        },
+        "AttrGetById": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "attrId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "attrId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "attr": {
+                                    "$ref": "#/definitions/Attribute"
+                                }
+                            },
+                            "required": [
+                                "attr"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "AttrGetMy": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "attrs": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Attribute"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "attrs"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
                 "Reply"
             ],
             "additionalProperties": false
@@ -611,6 +968,35 @@
                         "null"
                     ]
                 },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "avatarImageId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "currencyId": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "currency": {
+                    "$ref": "#/definitions/Currency"
+                },
                 "stats": {
                     "$ref": "#/definitions/InventoryStats"
                 },
@@ -622,6 +1008,9 @@
                 },
                 "rootFolderId": {
                     "$ref": "#/definitions/UBigInt"
+                },
+                "trashFolderId": {
+                    "$ref": "#/definitions/UBigInt"
                 }
             },
             "required": [
@@ -629,7 +1018,8 @@
                 "uri",
                 "userId",
                 "name",
-                "description"
+                "description",
+                "currencyId"
             ],
             "additionalProperties": false
         },
@@ -647,13 +1037,17 @@
                 },
                 "priceValue": {
                     "type": "number"
+                },
+                "itemsInTrashFolderCount": {
+                    "$ref": "#/definitions/UBigInt"
                 }
             },
             "required": [
                 "itemsCount",
                 "variantsCount",
                 "foldersCount",
-                "priceValue"
+                "priceValue",
+                "itemsInTrashFolderCount"
             ],
             "additionalProperties": false
         },
@@ -760,9 +1154,16 @@
             "type": "object",
             "properties": {
                 "id": {
-                    "type": [
-                        "string",
-                        "number"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "number"
+                        }
                     ]
                 },
                 "uri": {
@@ -802,9 +1203,16 @@
             "type": "object",
             "properties": {
                 "id": {
-                    "type": [
-                        "string",
-                        "number"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "number"
+                        }
                     ]
                 },
                 "uri": {
@@ -905,9 +1313,6 @@
                 "folderId": {
                     "$ref": "#/definitions/UBigInt"
                 },
-                "rawAmountValue": {
-                    "$ref": "#/definitions/UBigInt"
-                },
                 "itemLocationId": {
                     "type": [
                         "number",
@@ -926,11 +1331,21 @@
                         "null"
                     ]
                 },
-                "reasonablePrice": {
-                    "type": [
-                        "number",
-                        "null"
+                "price": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
+                },
+                "currencyId": {
+                    "type": "number"
+                },
+                "currency": {
+                    "$ref": "#/definitions/Currency"
                 },
                 "createdAt": {
                     "type": "string",
@@ -945,6 +1360,9 @@
                 },
                 "amountUnit": {
                     "$ref": "#/definitions/AmountUnit"
+                },
+                "amountValue": {
+                    "type": "number"
                 },
                 "images": {
                     "type": "array",
@@ -967,8 +1385,42 @@
                         "$ref": "#/definitions/ItemVariant"
                     }
                 },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ItemAttr"
+                    }
+                },
                 "path": {
                     "$ref": "#/definitions/TreePath"
+                },
+                "variantsAmountSum": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "totalPrice": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "displayPrice": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "required": [
@@ -977,10 +1429,13 @@
                 "name",
                 "inventoryId",
                 "folderId",
-                "rawAmountValue",
+                "buyLink",
+                "price",
+                "currencyId",
                 "createdAt",
                 "updatedAt",
-                "amountUnitId"
+                "amountUnitId",
+                "amountValue"
             ],
             "additionalProperties": false
         },
@@ -1029,6 +1484,16 @@
                         ],
                         "additionalProperties": false
                     }
+                },
+                "kind": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FolderKind"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -1040,6 +1505,13 @@
                 "parentId"
             ],
             "additionalProperties": false
+        },
+        "FolderKind": {
+            "type": "string",
+            "enum": [
+                "Root",
+                "Trash"
+            ]
         },
         "ItemVariant": {
             "type": "object",
@@ -1059,12 +1531,61 @@
                         "null"
                     ]
                 },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "avatarImageId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
                 "itemId": {
                     "$ref": "#/definitions/UBigInt"
                 },
-                "reasonablePrice": {
+                "amountValue": {
+                    "type": "number"
+                },
+                "price": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ItemVariantAttr"
+                    }
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "displayPrice": {
                     "type": [
-                        "number",
+                        "string",
                         "null"
                     ]
                 }
@@ -1074,10 +1595,50 @@
                 "uri",
                 "name",
                 "description",
+                "avatarImageId",
                 "itemId",
-                "reasonablePrice"
+                "amountValue",
+                "price"
             ],
             "additionalProperties": false
+        },
+        "ItemVariantAttr": {
+            "type": "object",
+            "properties": {
+                "itemAttr": {
+                    "$ref": "#/definitions/ItemAttr"
+                },
+                "value": {
+                    "$ref": "#/definitions/AttrValue"
+                }
+            },
+            "required": [
+                "itemAttr",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ItemAttr": {
+            "type": "object",
+            "properties": {
+                "attr": {
+                    "$ref": "#/definitions/Attribute"
+                },
+                "value": {
+                    "$ref": "#/definitions/AttrValue"
+                }
+            },
+            "required": [
+                "attr",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttrValue": {
+            "type": "string"
+        },
+        "RealPrice": {
+            "type": "number"
         },
         "InventorySearch": {
             "type": "object",
@@ -1147,6 +1708,306 @@
             ],
             "additionalProperties": false
         },
+        "InventoryGetTrash": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "inventoryUri": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "inventoryUri"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "folders": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Folder"
+                                    }
+                                },
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Item"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "folders",
+                                "items"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "InventoryGetMy": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "inventories": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Inventory"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "inventories"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "InventoryCreate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "null"
+                },
+                "Body": {
+                    "$ref": "#/definitions/InventoryCreateFields"
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "inventory": {
+                                    "$ref": "#/definitions/Inventory"
+                                }
+                            },
+                            "required": [
+                                "inventory"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "InventoryCreateFields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "ItemAttrCreate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "attrId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId",
+                        "attrId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "#/definitions/AttrValue"
+                        }
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "itemAttr": {
+                                    "$ref": "#/definitions/ItemAttr"
+                                }
+                            },
+                            "required": [
+                                "itemAttr"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemAttrUpdate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "attrId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId",
+                        "attrId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "#/definitions/AttrValue"
+                        }
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "itemAttr": {
+                                    "$ref": "#/definitions/ItemAttr"
+                                }
+                            },
+                            "required": [
+                                "itemAttr"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemAttrDelete": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        "attrId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId",
+                        "attrId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "null"
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
         "ItemImageCreate": {
             "type": "object",
             "properties": {
@@ -1202,63 +2063,7 @@
             "type": "object",
             "properties": {
                 "Body": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "variants": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "description": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ]
-                                    },
-                                    "reasonablePrice": {
-                                        "type": [
-                                            "number",
-                                            "null"
-                                        ]
-                                    }
-                                },
-                                "required": [
-                                    "name",
-                                    "description",
-                                    "reasonablePrice"
-                                ],
-                                "additionalProperties": false
-                            }
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": [
-                                "string",
-                                "null"
-                            ]
-                        },
-                        "inventoryId": {
-                            "type": "number"
-                        },
-                        "folderId": {
-                            "$ref": "#/definitions/UBigInt"
-                        },
-                        "amountUnitId": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "amountUnitId",
-                        "folderId",
-                        "inventoryId",
-                        "name"
-                    ]
+                    "$ref": "#/definitions/ItemCreateFields"
                 },
                 "Reply": {
                     "type": "object",
@@ -1288,6 +2093,86 @@
             ],
             "additionalProperties": false
         },
+        "ItemCreateFields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "variants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ItemVariantCreateFields"
+                    }
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "amountValue": {
+                    "type": "number"
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "currencyId": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "inventoryId": {
+                    "type": "number"
+                },
+                "folderId": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "amountUnitId": {
+                    "type": "number"
+                }
+            }
+        },
+        "ItemVariantCreateFields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "amountValue": {
+                    "type": "number"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "ItemUpdate": {
             "type": "object",
             "properties": {
@@ -1295,7 +2180,7 @@
                     "type": "object",
                     "properties": {
                         "itemId": {
-                            "type": "string"
+                            "$ref": "#/definitions/UBigInt"
                         }
                     },
                     "required": [
@@ -1307,22 +2192,7 @@
                     "type": "object",
                     "properties": {
                         "item": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "description": {
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ]
-                                },
-                                "uri": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false
+                            "$ref": "#/definitions/ItemUpdateFields"
                         }
                     },
                     "required": [
@@ -1359,6 +2229,49 @@
             ],
             "additionalProperties": false
         },
+        "ItemUpdateFields": {
+            "type": "object",
+            "properties": {
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "buyLink": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "currencyId": {
+                    "type": "number"
+                },
+                "amountUnitId": {
+                    "type": "number"
+                },
+                "amountValue": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        },
         "ItemSearch": {
             "type": "object",
             "properties": {
@@ -1378,7 +2291,7 @@
                     "type": "object",
                     "properties": {
                         "itemId": {
-                            "type": "string"
+                            "$ref": "#/definitions/UBigInt"
                         }
                     },
                     "required": [
@@ -1410,6 +2323,317 @@
             },
             "required": [
                 "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemMoveToTrash": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "item": {
+                                    "$ref": "#/definitions/Item"
+                                }
+                            },
+                            "required": [
+                                "item"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemVariantQuickAdd": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "names": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "realPriceEach": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/definitions/RealPrice"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        },
+                        "amountValueEach": {
+                            "type": [
+                                "number",
+                                "null"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "names"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "variants": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ItemVariant"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "variants"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemVariantCreate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "itemId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "itemId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "variant": {
+                            "$ref": "#/definitions/ItemVariantCreateFields"
+                        }
+                    },
+                    "required": [
+                        "variant"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "variant": {
+                                    "$ref": "#/definitions/ItemVariant"
+                                }
+                            },
+                            "required": [
+                                "variant"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemVariantUpdate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "variantId": {
+                            "$ref": "#/definitions/UBigInt"
+                        }
+                    },
+                    "required": [
+                        "variantId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "variant": {
+                            "$ref": "#/definitions/ItemVariantUpdateFields"
+                        }
+                    },
+                    "required": [
+                        "variant"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "variant": {
+                                    "$ref": "#/definitions/ItemVariant"
+                                }
+                            },
+                            "required": [
+                                "variant"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "ItemVariantUpdateFields": {
+            "type": "object",
+            "properties": {
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "avatarImageId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "amountValue": {
+                    "type": "number"
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "ItemVariantDeleteBatch": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "variants": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UBigInt"
+                            }
+                        }
+                    },
+                    "required": [
+                        "variants"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "null"
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
                 "Reply"
             ],
             "additionalProperties": false
@@ -1615,9 +2839,6 @@
                                             "folderId": {
                                                 "$ref": "#/definitions/UBigInt"
                                             },
-                                            "rawAmountValue": {
-                                                "$ref": "#/definitions/UBigInt"
-                                            },
                                             "itemLocationId": {
                                                 "type": [
                                                     "number",
@@ -1636,11 +2857,21 @@
                                                     "null"
                                                 ]
                                             },
-                                            "reasonablePrice": {
-                                                "type": [
-                                                    "number",
-                                                    "null"
+                                            "price": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "#/definitions/UBigInt"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
                                                 ]
+                                            },
+                                            "currencyId": {
+                                                "type": "number"
+                                            },
+                                            "currency": {
+                                                "$ref": "#/definitions/Currency"
                                             },
                                             "createdAt": {
                                                 "type": "string",
@@ -1655,6 +2886,9 @@
                                             },
                                             "amountUnit": {
                                                 "$ref": "#/definitions/AmountUnit"
+                                            },
+                                            "amountValue": {
+                                                "type": "number"
                                             },
                                             "images": {
                                                 "type": "array",
@@ -1677,19 +2911,56 @@
                                                     "$ref": "#/definitions/ItemVariant"
                                                 }
                                             },
+                                            "attributes": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/ItemAttr"
+                                                }
+                                            },
                                             "path": {
                                                 "$ref": "#/definitions/TreePath"
+                                            },
+                                            "variantsAmountSum": {
+                                                "type": [
+                                                    "number",
+                                                    "null"
+                                                ]
+                                            },
+                                            "totalPrice": {
+                                                "type": [
+                                                    "number",
+                                                    "null"
+                                                ]
+                                            },
+                                            "realPrice": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "#/definitions/RealPrice"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            },
+                                            "displayPrice": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
                                             }
                                         },
                                         "required": [
                                             "amountUnitId",
+                                            "amountValue",
+                                            "buyLink",
                                             "createdAt",
+                                            "currencyId",
                                             "folderId",
                                             "id",
                                             "inventory",
                                             "inventoryId",
                                             "name",
-                                            "rawAmountValue",
+                                            "price",
                                             "updatedAt",
                                             "uri"
                                         ]

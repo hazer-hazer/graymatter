@@ -1,5 +1,5 @@
-import db, { DB } from '@/modules/prisma'
-import { AmountUnitCreate, AmountUnitGetById, AmountUnitSearch, ItemAmountGet, schemas } from './schemas'
+import db from '@/modules/prisma'
+import { AmountUnitCreate, AmountUnitGetById, AmountUnitSearch, schemas } from './schemas'
 import { FastifyPluginAsync } from 'fastify'
 import { Api } from '@/App'
 
@@ -19,9 +19,13 @@ const amount: FastifyPluginAsync = async function (fastify) {
     })
 
     fastify.post<AmountUnitCreate>('/', { schema: schemas.AmountUnitCreate }, async (req, res) => {
-        const { powerPrefixes, ...amountUnit } = req.body
+        const {
+            amountUnit: {
+                powerPrefixes, ...amountUnit
+            },
+        } = req.body
 
-        const unit = await db.amountUnit.create({
+        const result = await db.amountUnit.create({
             include: {
                 powerPrefixes: true,
             },
@@ -39,7 +43,7 @@ const amount: FastifyPluginAsync = async function (fastify) {
         })
 
         return res.code(200).send({
-            unit,
+            amountUnit: result,
         })
     })
 
@@ -69,62 +73,6 @@ const amount: FastifyPluginAsync = async function (fastify) {
 
         return res.code(200).send({
             unit,
-        })
-    })
-
-    /// Get amount of items available
-    fastify.get<ItemAmountGet>('/item/:itemId', { schema: schemas.ItemAmountGet }, async (req, res) => {
-        const itemId = BigInt(req.params.itemId)
-        // const { _sum: value } = await db.arrivalItems.aggregate({
-        //     where: {
-        //         itemId,
-        //         item: {
-        //             userId: req.user.userId,
-        //         },
-        //     },
-        //     _sum: {
-        //         value: true,
-        //     },
-        // })
-
-        // TODO: For now, this route is useless cause uses rawAmountValue but is
-        // intended to make complex calculation of amount value, including
-        // arrivals, usages, returns, etc.
-
-        const { amountUnit, rawAmountValue } = await db.item.findUniqueOrThrow({
-            select: {
-                rawAmountValue: true,
-                amountUnit: {
-                    select: {
-                        id: true,
-                        name: true,
-                        symbol: true,
-                        userId: true,
-                        powerPrefixes: {
-                            select: {
-                                amountUnitId: true,
-                                power: true,
-                                prefix: true,
-                                name: true,
-                            },
-                            orderBy: {
-                                power: 'asc',
-                            },
-                        },
-                    },
-                },
-            },
-            where: {
-                id: itemId,
-                userId: req.user.userId,
-            },
-        })
-
-        return res.code(200).send({
-            amount: {
-                unit: amountUnit,
-                value: rawAmountValue,
-            },
         })
     })
 }

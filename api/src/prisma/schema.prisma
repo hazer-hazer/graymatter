@@ -48,16 +48,24 @@ model User {
     password String  @db.VarChar(255)
     online   Boolean @default(false) @db.Boolean
 
+    avatar Image? @relation(fields: [avatarImageId], references: [id])
+
     createdAt DateTime @default(now())
 
+    currency Currency @relation(fields: [currencyId], references: [id])
+
     // Common info //
-    apps       UserApps[]
-    operations UserOperations[]
+    apps          UserApps[]
+    operations    UserOperations[]
+    images        Image[]          @relation("UserImages")
+    avatarImageId BigInt?
 
     // Inventory App //
     inventories Inventory[]
     items       Item[]
     amountUnits AmountUnit[]
+    currencyId  Int          @default(840) @db.SmallInt
+    attributes  Attribute[]
 
     @@map("users")
 }
@@ -75,6 +83,23 @@ model UserOperations {
     @@map("user_operations")
 }
 
+// ISO Stuff //
+
+// $USD ISO code is 840
+model Currency {
+    // Id is ISO code
+    id Int @id @db.SmallInt
+
+    name     String @db.VarChar(127)
+    code     String @db.VarChar(3)
+    symbol   String @db.VarChar(10)
+    decimals Int    @db.SmallInt
+
+    users     User[]
+    Inventory Inventory[]
+    Item      Item[]
+}
+
 // Inventory //
 model Inventory {
     id Int @id @default(autoincrement())
@@ -86,21 +111,58 @@ model Inventory {
     name        String  @db.VarChar(255)
     description String? @db.VarChar(1023)
 
-    userId  BigInt
-    items   Item[]
-    folders Folder[]
+    avatar Image? @relation(fields: [avatarImageId], references: [id])
+
+    currency Currency? @relation(fields: [currencyId], references: [id])
+
+    userId        BigInt
+    items         Item[]
+    folders       Folder[]
+    avatarImageId BigInt?
+    currencyId    Int?     @db.SmallInt
 
     @@unique([userId, uri])
     @@map("inventories")
+}
+
+model AmountUnit {
+    id     Int    @id @default(autoincrement())
+    name   String @db.VarChar(255)
+    symbol String @unique @db.VarChar(10)
+
+    user User? @relation(fields: [userId], references: [id])
+
+    items         Item[]
+    userId        BigInt?
+    powerPrefixes AmountUnitPowerPrefix[]
+
+    @@map("amount_units")
+}
+
+model AmountUnitPowerPrefix {
+    amountUnit AmountUnit @relation(fields: [amountUnitId], references: [id])
+    power      Int        @db.SmallInt
+    prefix     String
+    name       String?
+
+    amountUnitId Int
+
+    @@id([amountUnitId, power])
+    @@map("amount_unit_power_prefixes")
 }
 
 model Image {
     id  BigInt @id @default(autoincrement())
     src String
 
-    items        ItemImage[]
-    itemVariants ItemVariantImage[]
-    folders      FolderImages[]
+    user User @relation("UserImages", fields: [userId], references: [id])
+
+    items              ItemImage[]
+    folders            FolderImages[]
+    userId             BigInt
+    inventoriesAvatars Inventory[]
+    usersAvatars       User[]
+    ItemVariant        ItemVariant[]
 
     @@map("images")
 }
@@ -113,6 +175,25 @@ model Tag {
     forms       String[] @unique @default([])
 
     @@map("tags")
+}
+
+enum AttributeType {
+    String
+    Enum
+}
+
+model Attribute {
+    id BigInt @id @default(autoincrement())
+
+    name        String
+    description String?
+    type        AttributeType
+
+    allowedValues String[] @default([])
+
+    user   User       @relation(fields: [userId], references: [id])
+    userId BigInt
+    items  ItemAttr[]
 }
 
 model Item {
@@ -137,24 +218,41 @@ model Item {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    buyLink         String? @db.VarChar(255)
-    reasonablePrice Float?  @db.Real
+    buyLink  String?  @db.VarChar(255)
+    price    BigInt?
+    currency Currency @relation(fields: [currencyId], references: [id])
 
-    amountUnitId   Int
-    amountUnit     AmountUnit @relation(fields: [amountUnitId], references: [id])
-    rawAmountValue BigInt     @default(0)
+    amountUnitId Int
+    amountUnit   AmountUnit @relation(fields: [amountUnitId], references: [id])
+    amountValue  Float      @default(0.0) @db.DoublePrecision
 
     user User @relation(fields: [userId], references: [id])
 
-    variants ItemVariant[]
-    usages   ItemUsage[]
-    returns  ItemReturn[]
-    arrivals ArrivalItems[]
-    images   ItemImage[]
-    userId   BigInt
+    variants   ItemVariant[]
+    usages     ItemUsage[]
+    returns    ItemReturn[]
+    arrivals   ArrivalItems[]
+    images     ItemImage[]
+    userId     BigInt
+    currencyId Int            @default(840) @db.SmallInt
+    attributes ItemAttr[]
 
     @@unique([folderId, uri])
     @@map("items")
+}
+
+model ItemAttr {
+    id BigInt @id @default(autoincrement())
+
+    item   Item      @relation(fields: [itemId], references: [id])
+    attr   Attribute @relation(fields: [attrId], references: [id])
+    itemId BigInt
+    attrId BigInt
+
+    value           String
+    variants ItemVariantAttr[]
+
+    @@unique([itemId, attrId])
 }
 
 model ItemImage {
@@ -163,6 +261,8 @@ model ItemImage {
 
     image   Image  @relation(fields: [imageId], references: [id])
     imageId BigInt
+
+    createdAt DateTime @default(now())
 
     @@id([itemId, imageId])
     @@map("item_images")
@@ -176,27 +276,42 @@ model ItemVariant {
     name        String  @db.VarChar(255)
     description String? @db.VarChar(1023)
 
+    avatar Image? @relation(fields: [avatarImageId], references: [id])
+
+    amountValue Float @default(0.0) @db.DoublePrecision
+
     itemId BigInt
     item   Item   @relation(fields: [itemId], references: [id])
 
-    reasonablePrice Float? @db.Real
-
-    images ItemVariantImage[]
+    price           BigInt?
+    avatarImageId   BigInt?
+    attributes ItemVariantAttr[]
 
     @@unique([itemId, uri])
     @@map("item_variants")
 }
 
-model ItemVariantImage {
-    itemVariant   ItemVariant @relation(fields: [itemVariantId], references: [id])
+model ItemVariantAttr {
+    variant       ItemVariant @relation(fields: [itemVariantId], references: [id])
+    itemAttr      ItemAttr    @relation(fields: [itemAttrId], references: [id])
     itemVariantId BigInt
+    itemAttrId    BigInt
 
-    image   Image  @relation(fields: [imageId], references: [id])
-    imageId BigInt
+    value String
 
-    @@id([itemVariantId, imageId])
-    @@map("item_variant_images")
+    @@id([itemVariantId, itemAttrId])
 }
+
+// model ItemVariantImage {
+//     itemVariant   ItemVariant @relation(fields: [itemVariantId], references: [id])
+//     itemVariantId BigInt
+
+//     image   Image  @relation(fields: [imageId], references: [id])
+//     imageId BigInt
+
+//     @@id([itemVariantId, imageId])
+//     @@map("item_variant_images")
+// }
 
 model ItemLocation {
     id          Int     @id @default(autoincrement())
@@ -206,32 +321,6 @@ model ItemLocation {
     items Item[]
 
     @@map("item_locations")
-}
-
-model AmountUnit {
-    id     Int    @id @default(autoincrement())
-    name   String @db.VarChar(255)
-    symbol String @unique @db.VarChar(10)
-
-    user User? @relation(fields: [userId], references: [id])
-
-    items         Item[]
-    userId        BigInt?
-    powerPrefixes AmountUnitPowerPrefix[]
-
-    @@map("amount_units")
-}
-
-model AmountUnitPowerPrefix {
-    amountUnit AmountUnit @relation(fields: [amountUnitId], references: [id])
-    power      Int
-    prefix     String
-    name       String?
-
-    amountUnitId Int
-
-    @@id([amountUnitId, power])
-    @@map("amount_unit_power_prefixes")
 }
 
 model ItemUsage {
@@ -294,6 +383,8 @@ model FolderImages {
     folderId BigInt
     imageId  BigInt
 
+    createdAt DateTime @default(now())
+
     @@id([folderId, imageId])
 }
 
@@ -317,9 +408,7 @@ model ArrivalItems {
     itemId    BigInt
     value     Int
 
-    // Better use BigInt and currency minor units, e.g. for cryptocurrencies
-    priceUsd Float? @db.Real
-    price    Float? @db.Real
+    price BigInt
 
     @@id([arrivalId, itemId])
     @@map("arrival_items")

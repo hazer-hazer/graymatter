@@ -6,7 +6,8 @@ import { emailToUri } from '@/utils/names-format'
 import crypt from '@/modules/crypt'
 import config from 'config'
 
-const JWT_COOKIE_NAME = config.get<string>('auth.jwt.cookieName')
+const JWT_EXPIRES_IN = config.get<number>('auth.jwt.expiresIn')
+const JWT_REMEMBER_ME_EXPIRES_IN = config.get<number>('auth.jwt.rememberMeExpiresIn')
 
 const auth: FastifyPluginAsync = async (fastify) => {
     fastify.post<Logout>('/logout', { schema: schemas.Logout }, async (req, res) => {
@@ -19,9 +20,7 @@ const auth: FastifyPluginAsync = async (fastify) => {
             },
         })
 
-        await res.clearCookie(JWT_COOKIE_NAME)
-
-        return res.code(200)
+        return res.code(200).send({})
     })
 
     fastify.post<Signup>('/signup', { schema: schemas.Signup, config: { auth: false } }, async (req, res) => {
@@ -43,6 +42,9 @@ const auth: FastifyPluginAsync = async (fastify) => {
                 password: encryptedPassword,
                 uri: uri ?? emailToUri(email),
             },
+            include: {
+                avatar: true,
+            },
         })
 
         return res.code(200).send({
@@ -51,11 +53,14 @@ const auth: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.post<Login>('/login', { schema: schemas.Login, config: { auth: false } }, async (req, res) => {
-        const { email, password } = req.body
+        const { email, password, rememberMe } = req.body
 
         const user = await db.user.findUniqueOrThrow({
             where: {
                 email,
+            },
+            include: {
+                avatar: true,
             },
         })
 
@@ -66,20 +71,22 @@ const auth: FastifyPluginAsync = async (fastify) => {
             })
         }
 
+        const expiresIn = rememberMe ? JWT_REMEMBER_ME_EXPIRES_IN : JWT_EXPIRES_IN
+
         const jwt = await res.jwtSign({
-            userId: user.id,
+            userId: user.id.toString(),
             email: user.email,
             uri: user.uri,
+        }, {
+            expiresIn,
         })
 
-        await res.setCookie(JWT_COOKIE_NAME, jwt, {
-            path: '/',
-            httpOnly: true,
-        })
-
-        return res.code(200).send({
-            user,
-        })
+        return res
+            .code(200)
+            .send({
+                user,
+                jwt,
+            })
     })
 }
 

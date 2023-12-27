@@ -1,4 +1,4 @@
-import { Inventory } from '@/apps/inventory/models/Inventory'
+import { Inventory, InventoryCreateFields } from '@/apps/inventory/models/Inventory'
 import { Folder } from '../../models/Folder'
 import { Item } from '../../models/Item'
 
@@ -38,6 +38,36 @@ export interface InventorySearch {
         200: {
             inventory: Inventory
             results: SearchResult[]
+        }
+    }
+}
+
+export interface InventoryGetTrash {
+    Params: {
+        inventoryUri: string
+    }
+    Reply: {
+        200: {
+            folders: Folder[]
+            items: Item[]
+        }
+    }
+}
+
+export interface InventoryGetMy {
+    Reply: {
+        200: {
+            inventories: Inventory[]
+        }
+    }
+}
+
+export interface InventoryCreate {
+    Params: void
+    Body: InventoryCreateFields
+    Reply: {
+        200: {
+            inventory: Inventory
         }
     }
 }

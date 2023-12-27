@@ -1,0 +1,118 @@
+{
+    "ItemAttrCreate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "attrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId",
+                "attrId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "$ref": "refSchema#/definitions/AttrValue"
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "itemAttr": {
+                        "$ref": "refSchema#/definitions/ItemAttr"
+                    }
+                },
+                "required": [
+                    "itemAttr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "UBigInt": {},
+    "AttrValue": {},
+    "ItemAttr": {},
+    "Attribute": {},
+    "AttrType": {},
+    "ItemAttrUpdate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "attrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId",
+                "attrId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "$ref": "refSchema#/definitions/AttrValue"
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "itemAttr": {
+                        "$ref": "refSchema#/definitions/ItemAttr"
+                    }
+                },
+                "required": [
+                    "itemAttr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemAttrDelete": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "attrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId",
+                "attrId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "null"
+            }
+        }
+    }
+}

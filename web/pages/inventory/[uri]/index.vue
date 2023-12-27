@@ -1,5 +1,5 @@
 <template>
-    <q-page padding class="col" style="max-width: 1400px;">
+    <DefaultPage>
         <span class="text-h4 row">
             <span class="text-weight-medium q-pr-xs">
                 {{ data?.inventory.name }}
@@ -10,28 +10,32 @@
         <q-separator spaced />
 
         <div class="row q-gutter-md justify-center text-h6 vertical-middle">
-            <q-card
+            <checked-fetch
                 v-for="(card, index) in statsCards"
                 :key="index"
-                class="col-auto"
-                bordered
-                flat
+                :fetched="fetched"
             >
-                <q-card-section horizontal>
-                    <q-card-section class="q-pr-none">
-                        <q-avatar :icon="card.icon" />
+                <q-card
+                    class="col-auto"
+                    bordered
+                    flat
+                >
+                    <q-card-section horizontal class="q-pa-sm q-pr-md">
+                        <q-card-section class="q-pa-none">
+                            <q-avatar :icon="card.icon" text-color="accent" />
+                        </q-card-section>
+                        <q-card-section class="q-pa-none column justify-center items-start self-center">
+                            <div>
+                                <span v-if="card.text">
+                                    {{ card.text }}
+                                </span>
+                                <q-skeleton v-else type="text" />
+                            </div>
+                            <span v-if="card.subtext" class="text-body2">{{ card.subtext }}</span>
+                        </q-card-section>
                     </q-card-section>
-                    <q-card-section class="column justify-center items-start self-center q-pl-none">
-                        <div>
-                            <span v-if="card.text">
-                                {{ card.text }}
-                            </span>
-                            <q-skeleton v-else type="text" />
-                        </div>
-                        <span v-if="card.subtext" class="text-body2">{{ card.subtext }}</span>
-                    </q-card-section>
-                </q-card-section>
-            </q-card>
+                </q-card>
+            </checked-fetch>
         </div>
 
         <q-separator spaced />
@@ -61,15 +65,17 @@
                 </q-splitter> -->
             </div>
         </div>
-    </q-page>
+    </DefaultPage>
 </template>
 
 <script lang="ts" setup>
 import type { Inventory } from '~/models/inventory/Inventory'
 
 const { $apiUseFetch } = useNuxtApp()
-const route = useRoute()
-const { data } = await $apiUseFetch<{inventory: Inventory}>(() => `inventory/${route.params.uri}`)
+const route = useRoute('inventory-uri')
+const fetched = await $apiUseFetch<{inventory: Inventory}>(() => `inventory/${route.params.uri}`)
+
+const { data } = fetched
 
 if (data.value?.inventory.path) {
     inventoryLocation().value = data.value?.inventory.path.segments
@@ -80,13 +86,18 @@ const statsCards: ComputedRef<{
     text: string
     subtext?: string
 }[]> = computed(() => [
-    { icon: 'category', text: `Items count: ${data.value?.inventory.stats?.itemsCount}`, subtext: `Variants count: ${data.value?.inventory.stats?.variantsCount}` },
-    { icon: 'folder', text: `Folders count: ${data.value?.inventory.stats?.foldersCount}` },
+    { icon: 'category', text: `${data.value?.inventory.stats?.itemsCount} items`, subtext: `${data.value?.inventory.stats?.variantsCount} variants` },
+    { icon: 'folder', text: `${data.value?.inventory.stats?.foldersCount} folders` },
+    {icon: 'delete', text: `${data.value?.inventory.stats?.itemsInTrashFolderCount} items in trash`}
 ])
 
 // const lookupTreeSplitter = ref(50)
 
 useHead({
     title: `${data.value?.inventory.name} dashboard`,
+})
+
+definePageMeta({
+    middleware: ['auth'],
 })
 </script>

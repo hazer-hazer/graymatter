@@ -8,7 +8,9 @@
     "auth": {
         "jwt": {
             "secret": "superKEK",
-            "cookieName": "JWT"
+            "cookieName": "JWT",
+            "expiresIn": "7d",
+            "rememberMeExpiresIn": "365d"
         }
     },
     "img": {

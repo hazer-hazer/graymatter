@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="open">
+    <q-dialog v-model="confirm">
         <div class="bg-white q-pa-md inventory-folder-create-modal">
             <span class="text-h5">Add folder</span>
             <q-separator spaced inset />
@@ -24,20 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-export interface IInventoryItemCreateModal {
-    modelValue: boolean
-}
-
-const props = defineProps<IInventoryItemCreateModal>()
-const emit = defineEmits<{(event: 'update:modelValue', payload: boolean): void}>()
-const open = computed({
-    get () {
-        return props.modelValue
-    },
-    set (value: boolean) {
-        emit('update:modelValue', value)
-    },
-})
+const confirm = showCreateFolderModal()
 
 const onSubmit = () => {
 

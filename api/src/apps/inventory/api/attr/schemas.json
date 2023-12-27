@@ -1,0 +1,122 @@
+{
+    "AttrCreate": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "attr": {
+                    "$ref": "refSchema#/definitions/AttributeCreateFields"
+                }
+            },
+            "required": [
+                "attr"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "attr": {
+                        "$ref": "refSchema#/definitions/Attribute"
+                    }
+                },
+                "required": [
+                    "attr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "AttributeCreateFields": {},
+    "AttrType": {},
+    "Attribute": {},
+    "UBigInt": {},
+    "AttrUpdate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "attrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "attrId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "attr": {
+                    "$ref": "refSchema#/definitions/AttributeUpdateFields"
+                }
+            },
+            "required": [
+                "attr"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "attr": {
+                        "$ref": "refSchema#/definitions/Attribute"
+                    }
+                },
+                "required": [
+                    "attr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "AttributeUpdateFields": {},
+    "AttrGetById": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "attrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "attrId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "attr": {
+                        "$ref": "refSchema#/definitions/Attribute"
+                    }
+                },
+                "required": [
+                    "attr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "AttrGetMy": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "attrs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Attribute"
+                        }
+                    }
+                },
+                "required": [
+                    "attrs"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

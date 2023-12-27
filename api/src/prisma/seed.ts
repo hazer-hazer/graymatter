@@ -2,12 +2,15 @@ import { Prisma, PrismaClient } from '@prisma/client'
 import crypt from '../modules/crypt'
 import assert from 'assert'
 import { DB } from '@/modules/prisma'
-import { formatUri } from '@/utils/names-format'
+import { nameToUri } from '@/utils/names-format'
 import sourceMapSupport from 'source-map-support'
+import primaryData from './primary-data'
 
 sourceMapSupport.install()
 
 async function main(tx: Prisma.TransactionClient) {
+    await primaryData(tx)
+
     const inventoryApp = await tx.app.upsert({
         where: { uri: 'inventory' },
         create: {
@@ -17,13 +20,12 @@ async function main(tx: Prisma.TransactionClient) {
         update: {},
     })
 
-
     const testUser = await tx.user.upsert({
         where: { email: 'test@test.com' },
         update: {},
         create: {
             email: 'test@test.com',
-            uri: 'teat',
+            uri: 'test',
             password: crypt.password.crypt('superKEK'),
             apps: {
                 create: {
@@ -37,6 +39,7 @@ async function main(tx: Prisma.TransactionClient) {
         where: { id: 1 },
         create: {
             src: 'https://random.imagecdn.app/500/150',
+            userId: testUser.id,
         },
         update: {},
     })
@@ -96,9 +99,20 @@ async function main(tx: Prisma.TransactionClient) {
     const rootFolder = await tx.folder.upsert({
         where: { inventoryId_kind: { inventoryId: testInventory.id, kind: 'Root' } },
         create: {
-            uri: '',
+            uri: '/',
             kind: 'Root',
             name: 'Root',
+            inventory: { connect: { id: testInventory.id } },
+        },
+        update: {},
+    })
+
+    const trashFolder = await tx.folder.upsert({
+        where: { inventoryId_kind: { inventoryId: testInventory.id, kind: 'Trash' } },
+        create: {
+            uri: '/trash',
+            kind: 'Trash',
+            name: 'Trash',
             inventory: { connect: { id: testInventory.id } },
         },
         update: {},
@@ -198,7 +212,7 @@ async function main(tx: Prisma.TransactionClient) {
             variants: {
                 createMany: {
                     data: resistorValues.map((value: string): DB.ItemVariantCreateManyItemInput => ({
-                        uri: formatUri(value),
+                        uri: nameToUri(value),
                         name: value,
                         description: `Resistance of ${value}`,
                     })),

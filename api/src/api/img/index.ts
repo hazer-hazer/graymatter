@@ -64,6 +64,7 @@ const img: FastifyPluginAsync = async function (fastify) {
             images.push(await db.image.create({
                 data: {
                     src: result.cdnUrl,
+                    userId: req.user.userId,
                 },
             }))
         }

@@ -19,10 +19,15 @@ export interface Login {
     Body: {
         email: Email
         password: string
+        /**
+         * @description Store cookie for a longer time
+         */
+        rememberMe?: boolean
     }
     Reply: {
         200: {
             user: User
+            jwt: string
         }
         401: void
     }

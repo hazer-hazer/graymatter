@@ -54,6 +54,14 @@ export class TreePath {
         return this.segments.at(-1)!
     }
 
+    public targetItemId (): Item['id'] | null {
+        const target = this.target()
+        if (target.kind === 'item') {
+            return target.id
+        }
+        return null
+    }
+
     public rootFolderId (): Folder['id'] | null {
         if (this.segments[0]?.kind === 'inventory') {
             return this.segments[0].rootFolderId
@@ -61,18 +69,18 @@ export class TreePath {
         return null
     }
 
-    public inventoryUri(): Inventory['uri'] | null {
+    public inventoryUri (): Inventory['uri'] | null {
         if (this.segments[0]?.kind === 'inventory') {
             return this.segments[0].uri
         }
         return null
     }
 
-    public slice(from?: number, to?: number): TreePath {
+    public slice (from?: number, to?: number): TreePath {
         return new TreePath(this.segments.slice(from, to))
     }
 
-    public targetFolderPath(): TreePath {
+    public targetFolderPath (): TreePath {
         const target = this.target()
 
         if (target.kind === 'item') {
@@ -117,6 +125,9 @@ export class TreePath {
             return target.id
         }
 
+        if (target.kind === 'inventory') {
+            return target.rootFolderId
+        }
 
         throw new InvalidPathError(this)
     }
@@ -136,7 +147,7 @@ export class TreePath {
         return this.segments.map(seg => seg.name).join('/')
     }
 
-    public toJSON(): Object {
-        return {...this}
+    public toJSON (): Object {
+        return { ...this }
     }
 }

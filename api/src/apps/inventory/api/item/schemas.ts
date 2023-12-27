@@ -1,12 +1,10 @@
-import { Item } from '@/apps/inventory/models/Item'
-import { ItemVariant } from '@/apps/inventory/models/ItemVariant'
+import { Item, ItemCreateFields, ItemUpdateFields } from '@/apps/inventory/models/Item'
+import { UBigInt } from '@/models/common'
 
 export { default as schemas } from './schemas.json'
 
 export interface ItemCreate {
-    Body: Pick<Item, 'name' | 'description' | 'inventoryId' | 'folderId' | 'amountUnitId'> & {
-        variants?: Pick<ItemVariant, 'name' | 'description' | 'reasonablePrice'>[]
-    }
+    Body: ItemCreateFields
     Reply: {
         200: {
             item: Item
@@ -16,10 +14,10 @@ export interface ItemCreate {
 
 export interface ItemUpdate {
     Params: {
-        itemId: bigint
+        itemId: UBigInt
     }
     Body: {
-        item: Partial<Pick<Item, 'name' | 'description' | 'uri'>>
+        item: ItemUpdateFields
     }
     Reply: {
         200: {
@@ -34,7 +32,18 @@ export interface ItemSearch {
 
 export interface ItemGetById {
     Params: {
-        itemId: bigint
+        itemId: UBigInt
+    }
+    Reply: {
+        200: {
+            item: Item
+        }
+    }
+}
+
+export interface ItemMoveToTrash {
+    Params: {
+        itemId: UBigInt
     }
     Reply: {
         200: {

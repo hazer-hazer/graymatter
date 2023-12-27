@@ -5,7 +5,7 @@
             outline
             color="grey-5"
             icon="create_new_folder"
-            @click="openCreateFolderModal().value = true"
+            @click="showCreateFolderModal().value = true"
         >
             <q-tooltip>Add folder</q-tooltip>
         </q-btn>
@@ -14,7 +14,7 @@
             outline
             color="grey-5"
             icon="note_add"
-            @click="openCreateItemModal().value = true"
+            @click="showCreateItemModal().value = true"
         >
             <q-tooltip>Add item</q-tooltip>
         </q-btn>
@@ -22,6 +22,4 @@
 </template>
 
 <script lang="ts" setup>
-import { openCreateFolderModal, openCreateItemModal } from '~/composables/states'
-
 </script>

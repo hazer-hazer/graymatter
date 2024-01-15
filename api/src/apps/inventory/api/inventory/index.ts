@@ -1,7 +1,6 @@
-
 import { FastifyPluginAsync } from 'fastify'
 import { InventoryCreate, InventoryGetByUri, InventoryGetMy, InventoryGetTrash, InventorySearch, schemas } from './schemas'
-import { DB, default as baseDb } from '@/modules/prisma'
+import { default as baseDb } from '@/modules/prisma'
 import { Api } from '@/App'
 import { nameToUri } from '@/utils/names-format'
 import { Inventory } from '../../models/Inventory'
@@ -16,9 +15,7 @@ const db = baseDb.$extends({
             }> {
                 const findMetaFolder = async (kind: FolderKind): Promise<Folder['id']> => {
                     const result = await db.folder.findUniqueOrThrow({
-                        select: {
-                            id: true,
-                        }, 
+                        select: { id: true },
                         where: {
                             inventoryId_kind: {
                                 inventoryId,
@@ -56,6 +53,8 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
             where: { userId_uri: { uri: inventoryUri, userId: req.user.userId } },
         })
 
+        const where = { id: inventory.id }
+
         const { rootFolderId, trashFolderId } = await db.inventory.metaFolders(inventory.id)
 
         const { _sum: { id: itemsInTrashFolderCount } } = await db.item.aggregate({
@@ -63,20 +62,20 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
                 inventoryId: inventory.id,
                 folderId: trashFolderId,
             },
-            _sum: {
-                id: true,
-            },
+            _sum: { id: true },
         })
 
-        const path = await db.inventory.path({ id: inventory.id })
-        const tree = await db.inventory.tree({ id: inventory.id })
+        const path = await db.inventory.path(where)
+        const tree = await db.inventory.tree(where)
+        const totalPrice = await db.inventory.totalPrice(where)
 
-        const variantsCount = await db.itemVariant.count({
-            where: { item: { inventoryId: inventory.id } },
-        })
+        const variantsCount = await db.itemVariant.count({ where: { item: { inventoryId: inventory.id, folderId: { not: trashFolderId } } } })
+
+        const currency = await db.inventory.fallbackCurrency(where)
 
         const resultInventory: InventoryGetByUri['Reply']['200']['inventory'] = {
             ...inventory,
+            currency,
             path,
             rootFolderId,
             trashFolderId,
@@ -84,7 +83,7 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
                 itemsCount,
                 variantsCount,
                 foldersCount,
-                priceValue: 0,
+                totalPrice,
                 itemsInTrashFolderCount: itemsInTrashFolderCount ?? 0n,
             },
             tree,
@@ -162,13 +161,9 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
     })
 
     fastify.get<InventoryGetMy>('/', { schema: schemas.InventoryGetMy }, async (req, res) => {
-        const inventories = await db.inventory.findMany({
-            where: { userId: req.user.userId },
-        })
+        const inventories = await db.inventory.findMany({ where: { userId: req.user.userId } })
 
-        return res.code(200).send({
-            inventories,
-        })
+        return res.code(200).send({ inventories })
     })
 
     fastify.post<InventoryCreate>('/', { schema: schemas.InventoryCreate }, async (req, res) => {
@@ -203,12 +198,8 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
         inventory.rootFolderId = rootFolder.id
         inventory.trashFolderId = trashFolder.id
 
-        return res.code(200).send({
-            inventory,
-        })
+        return res.code(200).send({ inventory })
     })
 }
 
-export default new Api({
-    fastifyPlugin: dashboard,
-})
+export default new Api({ fastifyPlugin: dashboard })

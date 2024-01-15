@@ -44,12 +44,17 @@
     "AmountUnit": {},
     "AmountUnitPowerPrefix": {},
     "ItemVariant": {},
-    "ItemVariantAttr": {},
     "ItemAttr": {},
     "Attribute": {},
     "AttrType": {},
     "AttrValue": {},
+    "ItemVariantAttr": {},
     "RealPrice": {},
+    "BuyList": {},
+    "User": {},
+    "App": {},
+    "UriPath": {},
+    "BuyListItem": {},
     "InventorySearch": {
         "params": {
             "type": "object",

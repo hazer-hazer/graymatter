@@ -14,6 +14,8 @@ export default defineNuxtPlugin(() => {
         return null
     }
 
+    const $q = useQuasar()
+
     // TODO: Rewrite to `createFetch`
     return {
         provide: {
@@ -25,6 +27,14 @@ export default defineNuxtPlugin(() => {
                 baseURL: apiUrl,
                 headers: {
                     ...getAuthHeaderAppendix(),
+                },
+                onRequestError ({ error }) {
+                    if (error instanceof Error) {
+                        $q.notify({
+                            type: 'negative',
+                            message: error.message,
+                        })
+                    }
                 },
             }),
 

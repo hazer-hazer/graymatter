@@ -82,7 +82,8 @@
                                     "type": [
                                         "string",
                                         "null"
-                                    ]
+                                    ],
+                                    "format": "url"
                                 },
                                 "price": {
                                     "anyOf": [
@@ -142,6 +143,92 @@
                                     "type": "array",
                                     "items": {
                                         "$ref": "refSchema#/definitions/ItemAttr"
+                                    }
+                                },
+                                "buyLists": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "buyList": {
+                                                "$ref": "refSchema#/definitions/BuyList"
+                                            },
+                                            "id": {
+                                                "$ref": "refSchema#/definitions/UBigInt"
+                                            },
+                                            "name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "description": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "itemId": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "refSchema#/definitions/Item"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            },
+                                            "item": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "refSchema#/definitions/Item"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            },
+                                            "itemVariantId": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "refSchema#/definitions/UBigInt"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            },
+                                            "itemVariant": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "refSchema#/definitions/ItemVariant"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            },
+                                            "amountValue": {
+                                                "type": "number"
+                                            },
+                                            "checked": {
+                                                "type": "boolean"
+                                            },
+                                            "buyListId": {
+                                                "$ref": "refSchema#/definitions/UBigInt"
+                                            }
+                                        },
+                                        "required": [
+                                            "amountValue",
+                                            "buyListId",
+                                            "checked",
+                                            "description",
+                                            "id",
+                                            "itemId",
+                                            "itemVariantId",
+                                            "name"
+                                        ]
                                     }
                                 },
                                 "path": {
@@ -220,12 +307,17 @@
     "AmountUnit": {},
     "AmountUnitPowerPrefix": {},
     "ItemVariant": {},
-    "ItemVariantAttr": {},
+    "Item": {},
     "ItemAttr": {},
     "Attribute": {},
     "AttrType": {},
     "AttrValue": {},
+    "ItemVariantAttr": {},
     "RealPrice": {},
+    "BuyList": {},
+    "User": {},
+    "App": {},
+    "BuyListItem": {},
     "TreeItemGet": {
         "params": {
             "$ref": "refSchema#/definitions/TreeGetBaseParams"

@@ -30,6 +30,17 @@
                         class="col"
                     />
                 </div>
+
+                <div class="col">
+                    <q-input
+                        v-model="description"
+                        type="textarea"
+                        label="Description"
+                        maxlength="1024"
+                        outlined
+                        autogrow
+                    />
+                </div>
             </q-card-section>
             <q-card-actions align="right">
                 <q-btn v-close-popup flat label="Cancel" color="primary" />
@@ -39,6 +50,7 @@
                     color="primary"
                     type="submit"
                     :loading="loading"
+                    :disable="!canSubmit"
                     @click="submit"
                 />
             </q-card-actions>
@@ -71,6 +83,7 @@ const confirm = computed<boolean>({
     },
 })
 
+const canSubmit = computed<boolean>(() => !!type.value && !!name.value?.length)
 const loading = ref<boolean>(false)
 const showAllowedValues = computed<boolean>(() => {
     return type.value === 'Enum'
@@ -78,6 +91,7 @@ const showAllowedValues = computed<boolean>(() => {
 
 const type = ref<AttrType>()
 const name = ref<string>()
+const description = ref<string | null>(null)
 const allowedValues = ref<string[]>([])
 
 const submit = async () => {
@@ -91,6 +105,7 @@ const submit = async () => {
                 attr: {
                     type: type.value,
                     name: name.value,
+                    description: description.value?.length ? description.value : null,
                     allowedValues: type.value === 'Enum' ? allowedValues.value : null,
                 },
             },

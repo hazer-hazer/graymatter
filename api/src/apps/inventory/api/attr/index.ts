@@ -1,6 +1,6 @@
 import { Api } from '@/App'
 import { FastifyPluginAsync } from 'fastify'
-import { AttrCreate, AttrGetById, AttrGetMy, AttrUpdate, schemas } from './schemas'
+import { AttrCreate, AttrDelete, AttrGetById, AttrGetMy, AttrUpdate, schemas } from './schemas'
 import db from '@/modules/prisma'
 import { Attribute } from '../../models/Attribute'
 
@@ -27,7 +27,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         const { attr: data } = req.body
 
         const attr: Attribute = await db.attribute.update({
-            where: { id: attrId },
+            where: { id: attrId, userId: req.user.userId },
             data,
         })
 
@@ -39,8 +39,20 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
     fastify.get<AttrGetById>('/:attrId', { schema: schemas.AttrGetById }, async (req, res) => {
         const { attrId } = req.params
 
-        const attr: Attribute = await db.attribute.findUniqueOrThrow({
-            where: { id: attrId },
+        const attr = await db.attribute.findUniqueOrThrow({
+            where: { id: attrId, userId: req.user.userId },
+        })
+
+        return res.code(200).send({
+            attr,
+        })
+    })
+
+    fastify.delete<AttrDelete>('/:attrId', async (req, res) => {
+        const { attrId } = req.params
+
+        const attr = await db.attribute.delete({
+            where: { id: attrId, userId: req.user.userId },
         })
 
         return res.code(200).send({

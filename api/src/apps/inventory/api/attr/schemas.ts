@@ -37,6 +37,17 @@ export interface AttrGetById {
     }
 }
 
+export interface AttrDelete {
+    Params: {
+        attrId: Attribute['id']
+    }
+    Reply: {
+        200: {
+            attr: Attribute
+        }
+    }
+}
+
 export interface AttrGetMy {
     Reply: {
         200: {

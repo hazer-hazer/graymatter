@@ -1,10 +1,10 @@
 <template>
-    <q-dialog v-model="confirm" :persistent="done">
+    <q-dialog v-model="confirm" :persistent="persistent">
         <q-card>
             <q-uploader
                 ref="uploader"
                 :url="uploadImgUrl"
-                color="teal"
+                color="primary"
                 flat
                 bordered
                 accept="image/*"
@@ -28,20 +28,18 @@ const props = withDefaults(defineProps<{
     multiple: true,
 })
 
-const done = ref<boolean>(false)
-
 const emit = defineEmits<{
     uploaded: [result: UploadResult],
     'update:modelValue': [confirm: boolean],
 }>()
 
 const confirm = computed({
-    get() {
+    get () {
         return props.modelValue
     },
-    set(val: boolean) {
+    set (val: boolean) {
         emit('update:modelValue', val)
-    }
+    },
 })
 
 const uploader = ref<QUploader>()
@@ -72,7 +70,8 @@ const uploaded = ({ files, xhr }: {files: QUploader['uploadedFiles'], xhr: XMLHt
     uploader.value?.reset()
     confirm.value = false
     emit('uploaded', result)
-    done.value = true
 }
+
+const persistent = computed(() => !!uploader.value?.files.length)
 
 </script>

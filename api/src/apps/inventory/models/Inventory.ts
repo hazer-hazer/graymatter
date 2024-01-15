@@ -29,7 +29,7 @@ export interface InventoryStats {
     itemsCount: number
     variantsCount: number
     foldersCount: number
-    priceValue: number
+    totalPrice: number | null
     itemsInTrashFolderCount: UBigInt
 }
 

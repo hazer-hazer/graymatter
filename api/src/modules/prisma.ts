@@ -1,9 +1,9 @@
 import { Folder } from '@/apps/inventory/models/Folder'
 import { Inventory } from '@/apps/inventory/models/Inventory'
 import { Item } from '@/apps/inventory/models/Item'
-import { Currency, RealPrice, WithPrice } from '@/models/Currency'
+import { Currency, RealPrice, toRealValue } from '@/models/Currency'
 import { UBigInt } from '@/models/common'
-import { AmountUnit, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { Prisma as DB } from '@prisma/client'
 import assert from 'assert'
 
@@ -67,50 +67,9 @@ export class TreePath {
 }
 
 // TODO: Add names to all extensions
-const db = new PrismaClient()
-// .$extends({
-//     result: {
-//         inventory: {
-//             // Path of inventory can just be computed without additional query
-//             path: {
-//                 needs: {
-//                     id: true,
-//                     uri: true,
-//                     name: true,
-//                 },
-//                 compute({ id, uri, name }): TreePath {
-//                     return new TreePath([{
-//                         kind: 'inventory',
-//                         uri,
-//                         name,
-//                         id,
-//                     }])
-//                 },
-//             },
-//         },
-//     },
-// })
-// .$extends({
-//     model: {
-//         user: {
-//             async withPassword() {
-
-    //             }
-    //         }
-    //     },
-    //     result: {
-    //         user: {
-    //             password: {
-    //                 needs: {
-    //                     password: true,
-    //                 },
-    //                 compute() {
-    //                     return null
-    //                 },
-    //             },
-    //         },
-    //     },
-    // })
+const db = new PrismaClient({
+    log: ['query'],
+})
     .$extends({
         model: {
             inventory: {
@@ -287,15 +246,24 @@ const db = new PrismaClient()
                         return currency
                     }
     
+                    return db.inventory.fallbackCurrency({ id: inventoryId })
+                },
+            },
+        },
+    })
+    .$extends({
+        model: {
+            inventory: {
+                async fallbackCurrency(where: DB.InventoryWhereUniqueInput): Promise<Currency> {
                     const { currency: inventoryCurrency, userId } = await db.inventory.findUniqueOrThrow({
-                        where: { id: inventoryId },
-                        select: { userId: true, currency: true },
+                        where,
+                        select: { currency: true, userId: true },
                     })
-    
+
                     if (inventoryCurrency) {
                         return inventoryCurrency
                     }
-    
+
                     const { currency: userCurrency } = await db.user.findUniqueOrThrow({
                         where: { id: userId },
                         select: { currency: true },
@@ -306,6 +274,109 @@ const db = new PrismaClient()
             },
         },
     })
+    // Price //
+    .$extends({
+        model: {
+            item: {
+                async totalPrice(where: DB.ItemWhereUniqueInput): Promise<RealPrice | null> {
+                    const item = await db.item.findUniqueOrThrow({
+                        where,
+                        include: {
+                            currency: true,
+                            variants: {
+                                select: {
+                                    price: true,
+                                    amountValue: true,
+                                },
+                            },
+                        },
+                    })
+
+                    item.currency ??= await db.item.fallbackCurrency(where)
+
+                    const itemRealPrice = item.price ? toRealValue(item.price, item.currency) : null
+
+                    if (item.variants?.length) {
+                        // TODO: Maybe if some variant's price is null then total price is null too?
+                        return item.variants.reduce((total: RealPrice | null, { price, amountValue }) => {
+                            const useRealPrice = price ? toRealValue(price, item.currency) : itemRealPrice
+                            if (typeof useRealPrice !== 'number') {
+                                return total
+                            }
+
+                            return (total ?? 0.0) + useRealPrice * amountValue
+                        }, null)
+                    } else if (itemRealPrice) {
+                        return itemRealPrice * (item.amountValue ?? 0.0)
+                    }
+
+                    return null
+                },
+            },
+            folder: {
+                async totalPrice(where: DB.FolderWhereUniqueInput): Promise<RealPrice | null> {
+                    const folder = await db.folder.findUniqueOrThrow({
+                        where,
+                        select: {
+                            items: true,
+                        },
+                    })
+
+                    return folder.items.reduce(async (sum_, item): Promise<RealPrice | null> => {
+                        const sum = await sum_
+
+                        const itemTotalPrice = await db.item.totalPrice({ id: item.id })
+                        if (typeof itemTotalPrice !== 'number') {
+                            return sum
+                        }
+
+                        return (sum ?? 0.0) + itemTotalPrice
+                    }, Promise.resolve<RealPrice | null>(null))
+                },
+            },
+        },
+    })
+    .$extends({
+        model: {
+            inventory: {
+                async totalPrice(where: Pick<Inventory, 'id'>): Promise<RealPrice | null> {
+                    return db.folder.totalPrice({
+                        inventoryId_kind: {
+                            inventoryId: where.id,
+                            kind: 'Root',
+                        },
+                    })
+                },
+            },
+        },
+    })
+    // .$extends({
+    //     model: {
+    //         buyList: {
+    //             async autocheck(id: BuyList['id']) {
+    //                 await db.$queryRaw`
+    //                     UPDATE
+    //                         public.buy_list_items AS bli
+    //                     SET
+    //                         checked = TRUE
+    //                     FROM
+    //                         public.buy_lists AS bl
+    //                         INNER JOIN public.items AS i ON i.id = bli.item_id
+    //                         LEFT JOIN public.item_variants AS iv ON iv.id = bli.item_variant_id
+    //                     WHERE
+    //                         NOT bli.checked
+    //                         AND bl.id = bli.buy_list_id
+    //                         AND i.id = bli.item_id
+    //                         AND (
+    //                             bli.item_variant_id IS NULL AND i.amount_value >= bli.amount_value
+    //                             OR bli.item_variant_id IS NOT NULL AND iv.amount_value >= bli.amount_value
+    //                         )
+    //                         AND bli.buy_list_id = ${id}
+    //                         AND bl.watch;`
+    //             },
+    //         },
+    //     },
+    // })
 
 export default db
 

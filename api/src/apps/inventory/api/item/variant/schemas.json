@@ -47,7 +47,7 @@
             "200": {
                 "type": "object",
                 "properties": {
-                    "variants": {
+                    "itemVariants": {
                         "type": "array",
                         "items": {
                             "$ref": "refSchema#/definitions/ItemVariant"
@@ -55,7 +55,7 @@
                     }
                 },
                 "required": [
-                    "variants"
+                    "itemVariants"
                 ],
                 "additionalProperties": false
             }
@@ -86,12 +86,12 @@
         "body": {
             "type": "object",
             "properties": {
-                "variant": {
+                "itemVariant": {
                     "$ref": "refSchema#/definitions/ItemVariantCreateFields"
                 }
             },
             "required": [
-                "variant"
+                "itemVariant"
             ],
             "additionalProperties": false
         },
@@ -99,12 +99,12 @@
             "200": {
                 "type": "object",
                 "properties": {
-                    "variant": {
+                    "itemVariant": {
                         "$ref": "refSchema#/definitions/ItemVariant"
                     }
                 },
                 "required": [
-                    "variant"
+                    "itemVariant"
                 ],
                 "additionalProperties": false
             }
@@ -115,24 +115,24 @@
         "params": {
             "type": "object",
             "properties": {
-                "variantId": {
+                "itemVariantId": {
                     "$ref": "refSchema#/definitions/UBigInt"
                 }
             },
             "required": [
-                "variantId"
+                "itemVariantId"
             ],
             "additionalProperties": false
         },
         "body": {
             "type": "object",
             "properties": {
-                "variant": {
+                "itemVariant": {
                     "$ref": "refSchema#/definitions/ItemVariantUpdateFields"
                 }
             },
             "required": [
-                "variant"
+                "itemVariant"
             ],
             "additionalProperties": false
         },
@@ -140,12 +140,12 @@
             "200": {
                 "type": "object",
                 "properties": {
-                    "variant": {
+                    "itemVariant": {
                         "$ref": "refSchema#/definitions/ItemVariant"
                     }
                 },
                 "required": [
-                    "variant"
+                    "itemVariant"
                 ],
                 "additionalProperties": false
             }
@@ -156,7 +156,7 @@
         "body": {
             "type": "object",
             "properties": {
-                "variants": {
+                "itemVariantIds": {
                     "type": "array",
                     "items": {
                         "$ref": "refSchema#/definitions/UBigInt"
@@ -164,13 +164,103 @@
                 }
             },
             "required": [
-                "variants"
+                "itemVariantIds"
             ],
             "additionalProperties": false
         },
         "response": {
             "200": {
                 "type": "null"
+            }
+        }
+    },
+    "ItemVariantAttrUpsert": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemVariantId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "itemAttrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemVariantId",
+                "itemAttrId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "$ref": "refSchema#/definitions/AttrValue"
+                }
+            },
+            "required": [
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "itemVariantAttr": {
+                        "$ref": "refSchema#/definitions/ItemVariantAttr"
+                    }
+                },
+                "required": [
+                    "itemVariantAttr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemVariantSearch": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "itemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "itemId"
+            ],
+            "additionalProperties": false
+        },
+        "querystring": {
+            "type": "object",
+            "properties": {
+                "q": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "q"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "itemVariants": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/ItemVariant"
+                        }
+                    }
+                },
+                "required": [
+                    "itemVariants"
+                ],
+                "additionalProperties": false
             }
         }
     }

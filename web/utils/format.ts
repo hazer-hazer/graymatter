@@ -25,3 +25,9 @@ export const priceFormatter = ({ code }: Currency, locale = DEFAULT_LOCALE): Int
         currencyDisplay: 'narrowSymbol',
         currency: code,
     })
+
+export const listFormatter = (locale = DEFAULT_LOCALE): Intl.ListFormat =>
+    new Intl.ListFormat(locale, {
+        style: 'long',
+        type: 'disjunction',
+    })

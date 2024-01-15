@@ -78,22 +78,26 @@
                 <q-separator spaced inset vertical />
                 <q-card-section class="col q-pl-none">
                     <q-btn
-                        color="dark"
                         icon="more_vert"
                         flat
-                        outline
                         class="absolute-top-right q-ma-md q-pa-sm"
                     >
                         <q-menu>
-                            <q-list style="min-width: 120px">
+                            <q-list dense>
+                                <DialogAreYouSure v-model="showMoveToTrashConfirmation" :message="`Move ${item.name} to trash?`" @yes="moveToTrash" />
                                 <q-item v-close-popup clickable @click="showMoveToTrashConfirmation = true">
-                                    <q-item-section>Move to trash</q-item-section>
+                                    <q-item-section side>
+                                        <q-icon name="delete" size="xs" />
+                                    </q-item-section>
+                                    <q-item-section side>
+                                        <q-item-label lines="1">
+                                            Move to trash
+                                        </q-item-label>
+                                    </q-item-section>
                                 </q-item>
                             </q-list>
                         </q-menu>
                     </q-btn>
-
-                    <DialogAreYouSure v-model="showMoveToTrashConfirmation" :message="`Move ${item.name} to trash?`" @yes="moveToTrash" />
 
                     <div class="row">
                         <span class="text-h5 ellipsis">{{ item.name }}</span>
@@ -191,7 +195,7 @@
                     <BadgeTooltip />
 
                     <q-card-section class="col column" style="padding: 0 20px;">
-                        <div v-if="item.price === null" class="col text-h6 text-grey-6 text-center">
+                        <div v-if="!price.total && !price.perUnit" class="col text-h6 text-grey-6 text-center">
                             set price
                         </div>
 
@@ -205,8 +209,18 @@
                         </div>
                     </q-card-section>
 
-                    <q-popup-edit v-slot="scope" v-model="item.realPrice" @save="val => updateAndSaveItem('realPrice', val)">
-                        <InventoryPriceInput v-model="scope.value" @keyup.enter="scope.set" />
+                    <q-popup-edit
+                        v-slot="scope"
+                        v-model="item.realPrice"
+                        class="q-pa-xs"
+                        @save="val => updateAndSaveItem('realPrice', val)"
+                    >
+                        <InventoryPriceInput
+                            v-model="scope.value"
+                            :currency="item.currency"
+                            autofocus
+                            @keyup.enter="scope.set"
+                        />
                     </q-popup-edit>
                 </q-card>
 
@@ -237,7 +251,7 @@
                         <div v-if="!item.buyLink" class="text-h6 text-grey-6">
                             set buy link
                         </div>
-                        <div class="col">
+                        <div v-else class="col">
                             <div class="text-caption text-grey">
                                 buy here:
                             </div>
@@ -252,7 +266,7 @@
                     <q-popup-edit
                         v-slot="scope"
                         v-model="item.buyLink"
-                        class="row column"
+                        class="row column q-pa-xs"
                         max-width="250px"
                         @save="val => updateAndSaveItem('buyLink', val)"
                     >
@@ -279,9 +293,43 @@
                             type="url"
                             label="Edit buy link"
                             autofocus
+                            outlined
                             @keyup.enter="scope.set"
                         />
                     </q-popup-edit>
+                </q-card>
+
+                <q-card
+                    v-if="displayBuyLists?.length"
+                    bordered
+                    flat
+                    class="row item-prop-card justify-center"
+                >
+                    <q-card-section class="col row items-center q-pa-none q-px-md">
+                        <div class="text-body1">
+                            Appears in {{ displayBuyLists?.length }} buy lists
+                        </div>
+                        <q-popup-proxy class="column" max-width="13rem">
+                            <q-list dense class="col">
+                                <q-item
+                                    v-for="(buyList, index) in displayBuyLists"
+                                    :key="index"
+                                    v-ripple
+                                    clickable
+                                    @click="navigateTo(buyList.buyListUrl)"
+                                >
+                                    <q-item-section>
+                                        <q-item-label class="ellipsis">
+                                            <span class="text-bold">{{ buyList.need }}{{ item.amountUnit.symbol }}</span>
+                                            <span>
+                                                in {{ buyList.name }}
+                                            </span>
+                                        </q-item-label>
+                                    </q-item-section>
+                                </q-item>
+                            </q-list>
+                        </q-popup-proxy>
+                    </q-card-section>
                 </q-card>
             </q-card-section>
 
@@ -303,24 +351,27 @@
                         </q-tooltip>
                     </q-icon>
 
-                    <InventoryAttrBindModal v-model="showAddAttributeModal" @save="addAttribute" />
+                    <InventoryAttrBindModal v-model="showAddAttributeModal" :existing="Object.keys(item.attrMap)" @save="addItemAttribute" />
                 </div>
 
-                <div v-if="attributes?.length" class="col">
-                    <q-list bordered separator>
-                        <q-item v-for="(attr, index) in attributes" :key="index">
-                            <q-item-section class="col-6-md">
+                <div v-if="item.attrMap.length" class="col">
+                    <q-list bordered separator class="rounded-borders">
+                        <q-item v-for="(attr, id) in item.attrMap" :key="id" class="q-pr-sm item-attr-list-el">
+                            <q-item-section class="col">
                                 <q-item-label class="text-body1" lines="1">
                                     {{ attr.name }}
                                 </q-item-label>
+
                                 <q-item-label v-if="attr.description?.length" caption lines="2">
                                     {{ attr.description }}
                                 </q-item-label>
                             </q-item-section>
-                            <!-- <q-item-section class="col-grow">
+
+                            <!-- <q-item-section class="col-grow item-attr-list-separator">
                                 <q-separator spaced inset />
                             </q-item-section> -->
-                            <q-item-section class="col-auto cursor-pointer editable-cell rounded-borders">
+
+                            <q-item-section class="col-shrink cursor-pointer editable-cell rounded-borders">
                                 <!-- <BadgeTooltip anchor="top start" :offset="[20, 0]" /> -->
                                 <BadgeTooltip />
 
@@ -328,24 +379,28 @@
                                     {{ attr.value }}
                                 </q-item-label>
 
-                                <q-popup-edit v-slot="scope" v-model="attr.value" auto-save @save="(val) => editItemAttrValue(attr, val)">
+                                <q-popup-edit v-slot="scope" v-model="attr.value" auto-save @save="(val) => saveItemAttrValue(attr, val)">
                                     <InventoryAttrValueInput v-model="scope.value" :attr="attr" @keyup.enter="scope.set" />
                                 </q-popup-edit>
                             </q-item-section>
+
+                            <!-- <q-item-section class="col-grow item-attr-list-separator">
+                                <q-separator spaced inset />
+                            </q-item-section> -->
+
                             <q-item-section class="col" side>
                                 <div class="">
                                     <q-btn
                                         icon="more_horiz"
                                         flat
                                         dense
-                                        round
                                     >
                                         <q-menu auto-close>
                                             <q-list style="min-width: 100px">
                                                 <q-item
                                                     v-close-popup
                                                     clickable
-                                                    @click="deleteItemAttr(attr)"
+                                                    @click="item.attrMap[attr.id].showConfirmDelete = true"
                                                 >
                                                     <q-item-section class="text-red">
                                                         Delete
@@ -356,6 +411,12 @@
                                     </q-btn>
                                 </div>
                             </q-item-section>
+
+                            <DialogAreYouSure
+                                v-model="item.attrMap[attr.id].showConfirmDelete"
+                                :message="`Are you sure you want to delete attribute '${attr.name}'? It will be deleted for all variants`"
+                                @yes="deleteItemAttr(attr)"
+                            />
                         </q-item>
                     </q-list>
                 </div>
@@ -365,225 +426,19 @@
 
             <q-card-section ref="variantsSection" class="row q-pt-none">
                 <div dense class="col">
-                    <q-table
-                        v-model:selected="variantsSelected"
-                        title="Variants"
-                        :columns="variantsTableColumns"
-                        :rows="variants ?? undefined"
-                        row-key="id"
-                        flat
-                        bordered
-                        selection="multiple"
-                        :loading="itemFieldsLoading.variants"
-                        style="max-height: 500px;"
-                    >
-                        <template #top-right>
-                            <div v-if="variantsSelected.length > 0" class="row q-gutter-sm">
-                                <q-btn
-                                    color="primary"
-                                    icon="delete"
-                                    outline
-                                    @click="deleteSelectedVariants"
-                                />
-                            </div>
-                            <div v-else class="row q-gutter-sm">
-                                <q-btn
-                                    color="dark"
-                                    icon="auto_awesome"
-                                    label="Quickly add variants"
-                                    outline
-                                    :loading="quickVariantAddLoading"
-                                >
-                                    <q-popup-edit
-                                        v-slot="scope"
-                                        v-model="quickVariantAdd"
-                                        buttons
-                                        persistent
-                                        label-set="Add variants"
-                                        max-width="400px"
-                                        :validate="quickAdd => !!quickAdd?.names?.length"
-                                        @save="saveQuickVariantAdd"
-                                    >
-                                        <InventoryVariantQuickAddList v-model="scope.value" :amount-unit="item.amountUnit" />
-                                    </q-popup-edit>
-                                </q-btn>
-                                <q-btn
-                                    color="primary q-px-md"
-                                    outline
-                                    icon="add_box"
-                                    label="Add variant"
-                                    dense
-                                    @click="showVariantCreateModal = true"
-                                />
-                            </div>
-                        </template>
-
-                        <template #no-data>
-                            <span class="text-italic text-caption">This item does not have variants</span>
-                        </template>
-
-                        <template #body="props">
-                            <q-tr :props="props">
-                                <q-td>
-                                    <q-checkbox
-                                        :model-value="props.selected"
-                                        @update:model-value="(val) => {
-                                            const selected = Object.getOwnPropertyDescriptor(props, 'selected')
-                                            if (selected?.set) {
-                                                selected.set(val)
-                                            }
-                                        }"
-                                    />
-                                </q-td>
-
-                                <q-td
-                                    key="avatar"
-                                    v-ripple
-                                    :props="props"
-                                    auto-width
-                                    class="editable-cell"
-                                    @click="showVariantImageUploader[props.row.id] = true"
-                                >
-                                    <BadgeTooltip />
-                                    <q-avatar v-if="props.row?.avatar?.src" rounded>
-                                        <q-img
-                                            :src="props.row.avatar.src"
-                                            spinner-color="primary"
-                                            spinner-size="20px"
-                                            height="90%"
-                                            class="rounded-borders"
-                                        />
-                                    </q-avatar>
-                                    <q-avatar v-else icon="image" text-color="grey" />
-                                    <!-- <q-tooltip
-                                    anchor="center middle"
-                                    self="center middle"
-                                    transition-show="fade"
-                                    transition-hide="fade"
-                                    class="q-pa-md"
-                                >
-                                    <q-icon name="add_photo_alternate" size="24px" />
-                                </q-tooltip> -->
-                                    <ImageUploader v-model="showVariantImageUploader[props.row.id]" :multiple="false" @uploaded="res => variantImageChanged(props.row.id, res)" />
-                                </q-td>
-
-                                <q-td
-                                    key="name"
-                                    v-ripple
-                                    :props="props"
-                                    auto-width
-                                    class="editable-cell"
-                                >
-                                    <BadgeTooltip />
-                                    <q-badge v-if="props.row.isNew" color="primary" label="new" />
-                                    <span class="text-body2">{{ props.row.name }}</span>
-                                    <q-popup-edit v-slot="scope" v-model="props.row.name">
-                                        <q-input
-                                            v-model="scope.value"
-                                            label="Name"
-                                            dense
-                                            autofocus
-                                            @keyup.enter="scope.set"
-                                        />
-                                    </q-popup-edit>
-                                </q-td>
-
-                                <q-td key="description" v-ripple :props="props" class="editable-cell">
-                                    <BadgeTooltip />
-                                    <div class="row">
-                                        <span v-if="props.row?.description?.length" class="ellipsis" style="max-width: 400px; overflow: hidden; display: inline-block;">{{ props.row.description }}</span>
-                                        <span v-else class="text-italic">No description</span>
-                                        <q-tooltip v-if="props.row?.description?.length > 20" max-width="400px" style=" overflow-wrap: anywhere; word-break: normal;">
-                                            {{ props.row.description }}
-                                        </q-tooltip>
-                                    </div>
-                                </q-td>
-
-                                <q-td key="amountValue" v-ripple :props="props" class="editable-cell">
-                                    <BadgeTooltip />
-                                    <span class="text-subtitle1">{{ props.row.amountValue }}</span>
-
-                                    <q-popup-edit v-slot="scope" v-model="props.row.amountValue">
-                                        <InventoryAmountInput v-model="scope.value" :amount-unit="item.amountUnit" @keyup.enter="scope.set" />
-                                    </q-popup-edit>
-                                </q-td>
-
-                                <q-td key="displayPrice" v-ripple :props="props" class="editable-cell">
-                                    <BadgeTooltip />
-                                    <span v-if="props.row.displayPrice" class="text-subtitle1">{{ props.row.displayPrice }}</span>
-                                    <div v-else class="row items-center q-gutter-xs">
-                                        <span class="text-subtitle1">{{ item.displayPrice }}</span>
-                                        <span class="text-grey">(from item)</span>
-                                    </div>
-
-                                    <q-popup-edit v-slot="scope" v-model="props.row.realPrice">
-                                        <InventoryPriceInput v-model="scope.value" @keyup.enter="scope.set" />
-                                    </q-popup-edit>
-                                </q-td>
-
-                                <q-td
-                                    v-for="(attr) in attributes"
-                                    :key="attrKey(attr)"
-                                    v-ripple
-                                    :props="props"
-                                    class="editable-cell"
-                                >
-                                    <BadgeTooltip />
-
-                                    <span v-if="props.row.attrMap?.[attr.id]" class="text-subtitle1">{{ props.row[attr.id].value }}</span>
-                                    <div v-else class="row items-center q-gutter-xs">
-                                        <span class="text-subtitle1">{{ attr.value }}</span>
-                                        <span class="text-grey">(from item)</span>
-                                    </div>
-
-                                    <q-popup-edit
-                                        v-slot="scope"
-                                        :model-value="props.row.attrMap?.[attr.id] ?? null"
-                                        @update:model-value="set => {
-                                            props.row.attrMap ??= {}
-                                            props.row.attrMap[attr.id] = set
-                                        }"
-                                    >
-                                        <InventoryAttrValueInput v-model="scope.value" :attr="attr" @keyup.enter="scope.set" />
-                                    </q-popup-edit>
-                                </q-td>
-                            </q-tr>
-                        </template>
-                    </q-table>
+                    <InventoryItemVariantTable :item="item" />
                 </div>
             </q-card-section>
         </q-card>
-
-        <InventoryVariantCreateModal v-if="item" v-model="showVariantCreateModal" :item="item" @save="newVariantSaved" />
     </DefaultPage>
 </template>
 
 <script setup lang="ts">
-import type { QTableColumn } from 'quasar'
-import type { ComponentPublicInstance } from 'vue'
 import type { UploadResult } from '~/components/ImageUploader.vue'
-import type { ItemVariantQuickAddList } from '~/components/inventory/variant/InventoryVariantQuickAddList.vue'
 import type { Image } from '~/models/Image'
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
 import type { AttrValue, AttrWithValue, Attribute } from '~/models/inventory/Attribute'
-import type { Item } from '~/models/inventory/Item'
-import type { ItemVariant } from '~/models/inventory/ItemVariant'
-
-interface AmountDynamic {
-    unit: AmountUnit
-    value: number
-}
-
-type ItemDynamic = Item & {
-    variants?: ItemVariantDynamic[]
-}
-
-function itemToDynamic (item: Item): ItemDynamic {
-    return {
-        ...item,
-        variants: item.variants?.map(variantToDynamic),
-    }
-}
+import type { Item, ItemAttr } from '~/models/inventory/Item'
 
 definePageMeta({
     validate: (route) => {
@@ -595,22 +450,42 @@ definePageMeta({
     middleware: ['auth'],
 })
 
+interface AmountDynamic {
+    unit: AmountUnit
+    value: number
+}
+
+type ItemDynamic =
+    Omit<Item, 'attributes' | 'displayPrice'>
+    & {
+        attrMap: Record<Attribute['id'], ItemAttrDynamic>
+    }
+
+function itemToDynamic (item: Item): ItemDynamic {
+    return {
+        ...item,
+        attrMap: mapIdList(item.attributes ?? [], itemAttr => itemAttr.attr.id, itemAttrToDynamic),
+    }
+}
+
 const $q = useQuasar()
+const { $apiUseFetch, $apiFetch } = useNuxtApp()
 const route = useRoute('inventory-item-id')
 const imageSlide = ref(0)
 const imageGroupSize = 2
-
-const { $apiUseFetch, $apiFetch } = useNuxtApp()
 
 const { data, pending, error } = await $apiUseFetch<{
     item: Item
 }>(() => `inventory/item/${route.params.id}`)
 
 if (!data.value?.item) {
-    throw new Error('kek')
+    throw createError({
+        statusCode: 404,
+        statusMessage: 'Page Not Found',
+    })
 }
 
-const originalItem: Item = { ...data.value.item }
+const originalItem: ItemDynamic = itemToDynamic({ ...data.value.item })
 const item = reactive<ItemDynamic>(itemToDynamic(data.value.item))
 
 if (item.path) {
@@ -650,13 +525,11 @@ const photoUploaded = async (res: UploadResult) => {
     }
 }
 
-const itemFieldsLoading = reactive(mapValues(item, false))
-const itemFieldsChanged = computed(() => shallowDiff(item, originalItem))
+const itemFieldsLoading = reactive(mapValuesToDefault(item, false))
+const itemFieldsChanged = computed(() => shallowDiff(pick(item, 'name', 'description', 'realPrice', 'amountUnitId'), pick(originalItem, 'name', 'description', 'realPrice', 'amountUnitId')))
 
-const saveUpdatedItem = async (...fields: (keyof Item)[]) => {
-    const pickedFields = pick(item, fields)
-
-    console.log('[saveUpdatedItem] updates changes on', fields, pickedFields)
+const saveUpdatedItem = async (...fields: (keyof ItemDynamic)[]) => {
+    const pickedFields = pick(item, ...fields)
 
     let success = false
     try {
@@ -670,7 +543,7 @@ const saveUpdatedItem = async (...fields: (keyof Item)[]) => {
 
         Object.assign(item, {
             ...item,
-            ...updated,
+            ...itemToDynamic(updated),
         })
         Object.assign(originalItem, {
             ...item,
@@ -689,30 +562,23 @@ const saveUpdatedItem = async (...fields: (keyof Item)[]) => {
         }
     } finally {
         assignPicked(itemFieldsLoading, fields, false)
-        console.log('changed', itemFieldsChanged.value)
     }
 }
 
-const discardItemChanges = (...fields: (keyof Item)[]) => {
-    console.log('discard changes on', fields)
-
+const discardItemChanges = (...fields: (keyof ItemDynamic)[]) => {
     Object.assign(item, {
         ...item,
-        ...pick(originalItem, fields),
+        ...pick(originalItem, ...fields),
     })
 }
 
 const updateAndSaveItem = <K extends keyof ItemDynamic> (field: K, value: ItemDynamic[K]) => {
-    console.log(`set item.${field} = ${value}`, 'from', item[field])
-
     item[field] = value
-    console.log(`item.${field} = ${item[field]}`)
-
     saveUpdatedItem(field)
 }
 
 // Amount //
-const useVariantsAmount = computed<boolean>(() => !!variants.value?.length)
+const useVariantsAmount = computed<boolean>(() => !!item.variants?.length)
 const displayAmount = computed<number>(() => useVariantsAmount.value ? item.variantsAmountSum! : item.amountValue)
 const cannotChangeItemAmountHint = computed<string | null>(() => useVariantsAmount.value ? 'You need to update each variant amount individually' : null)
 
@@ -729,8 +595,6 @@ const amount = computed<AmountDynamic>({
         }
     },
     set (val: AmountDynamic) {
-        console.log('set amount', val)
-
         item.amountUnit = val.unit
         item.amountUnitId = val.unit.id
         item.amountValue = val.value
@@ -749,7 +613,7 @@ const amount = computed<AmountDynamic>({
 const showMoveToTrashConfirmation = ref<boolean>(false)
 const moveToTrash = async () => {
     try {
-        await $apiFetch(`/inventory/item/:${item.id}`, {
+        await $apiFetch(`/inventory/item/${item.id}`, {
             method: 'DELETE',
         })
         $q.notify({
@@ -774,38 +638,37 @@ const moveToTrash = async () => {
 // Price //
 interface DisplayPrice {
     total: string | null
-    perUnit?: string
+    itemDisplayPrice: string | null
+    perUnit: string | null
 }
 
-const price = computed<DisplayPrice>({
-    get () {
-        const formatter = itemPriceFormatter()
-        const total = item.totalPrice ? formatter.format(item.totalPrice) : null
+const price = computed<DisplayPrice>(() => {
+    const formatter = itemPriceFormatter()
+    const itemDisplayPrice = item.realPrice ? formatter.format(item.realPrice) : null
+    const total = item.totalPrice ? formatter.format(item.totalPrice) : null
 
-        let perUnit: DisplayPrice['perUnit']
-        if (item.variants?.length) {
-            const variantsPrices = new Set(item.variants.filter(({ realPrice }) => realPrice !== null).map(({ realPrice }) => realPrice!))
-            if (variantsPrices.size > 1) {
-                const min = Math.min(...variantsPrices)
-                const max = Math.min(...variantsPrices)
-                perUnit = formatter.formatRange(min, max)
-            } else if (variantsPrices.size === 1) {
-                perUnit = formatter.format([...variantsPrices][0])
-            }
-        }
+    let perUnit: DisplayPrice['perUnit'] = null
+    if (item.variants?.length) {
+        const variantsPrices = new Set(item.variants.filter(({ realPrice }) => typeof realPrice === 'number').map(({ realPrice }) => realPrice!))
+        if (variantsPrices.size > 1) {
+            const min = Math.min(...variantsPrices)
+            const max = Math.min(...variantsPrices)
 
-        if (!perUnit && item.realPrice) {
-            perUnit = formatter.format(item.realPrice)
+            perUnit = formatter.formatRange(min, max)
+        } else if (variantsPrices.size === 1) {
+            perUnit = formatter.format([...variantsPrices][0])
         }
+    }
 
-        return {
-            total,
-            perUnit,
-        }
-    },
-    set (_val: DisplayPrice) {
-        // Nothing
-    },
+    if (!perUnit && item.realPrice) {
+        perUnit = itemDisplayPrice
+    }
+
+    return {
+        total,
+        itemDisplayPrice,
+        perUnit,
+    }
 })
 
 // Buy link //
@@ -815,38 +678,59 @@ const displayBuyLink = computed<string | null>(() => {
         return null
     }
 
-    const url = new URL(item.buyLink)
-    return url.hostname
+    try {
+        return new URL(item.buyLink).hostname
+    } catch (err) {
+        return 'Invalid URL'
+    }
+})
+
+// Buy lists //
+interface DisplayBuyList {
+    name: string
+    need: number
+    buyListUrl: string
+}
+
+const displayBuyLists = computed<DisplayBuyList[] | null>(() => {
+    if (!item.buyLists) {
+        return null
+    }
+
+    return item.buyLists.reduce((buyLists: DisplayBuyList[], item) => {
+        if (item.checked && item.itemVariantId !== null) {
+            return buyLists
+        }
+        buyLists.push({
+            name: item.buyList.name,
+            need: item.amountValue,
+            buyListUrl: `/inventory/buy-list/${item.buyListId}`,
+        })
+        return buyLists
+    }, [])
 })
 
 // Attributes //
+type ItemAttrDynamic = AttrWithValue & {
+    loading: boolean
+    showConfirmDelete: boolean
+    itemAttrId: ItemAttr['id']
+}
+
+function itemAttrToDynamic (itemAttr: ItemAttr): ItemAttrDynamic {
+    return {
+        ...itemAttr.attr,
+        itemAttrId: itemAttr.id,
+        value: itemAttr.value,
+        loading: false,
+        showConfirmDelete: false,
+    }
+}
+
 const showAddAttributeModal = ref<boolean>(false)
-const attributes = computed<AttrWithValue[] | null>({
-    get () {
-        return item.attributes?.map(({ attr, value }) => ({
-            ...attr,
-            value,
-            loading: false,
-        })) ?? null
-    },
-    set (attrs) {
-        if (attrs) {
-            item.attributes = attrs.map(({ value, ...attr }) => ({
-                attr,
-                value,
-            }))
-        }
-    },
-})
-
-const addAttribute = async (addAttr: AttrWithValue) => {
-    console.log('add attr', addAttr)
-
+const addItemAttribute = async (addAttr: AttrWithValue) => {
     const { itemAttr } = await $apiFetch<{
-        itemAttr: {
-            attr: Attribute
-            value: AttrValue
-        }
+        itemAttr: ItemAttr
     }>(`/inventory/item/${item.id}/attr/${addAttr.id}`, {
         method: 'POST',
         body: {
@@ -854,10 +738,7 @@ const addAttribute = async (addAttr: AttrWithValue) => {
         },
     })
 
-    console.log('response', itemAttr)
-
-    item.attributes ??= []
-    item.attributes.push(itemAttr)
+    item.attrMap[itemAttr.attr.id] = itemAttrToDynamic(itemAttr)
 }
 
 const deleteItemAttr = async (attr: Attribute) => {
@@ -865,21 +746,19 @@ const deleteItemAttr = async (attr: Attribute) => {
         await $apiFetch(`/inventory/item/${item.id}/attr/${attr.id}`, {
             method: 'DELETE',
         })
-        if (item.attributes) {
-            item.attributes = item.attributes.filter(({ attr: { id } }) => id !== attr.id)
-        }
+
+        delete item.attrMap[attr.id]
     } catch (err) {
         console.log(err)
     }
 }
 
-const editItemAttrValue = async (attr: Attribute, value: AttrValue) => {
+const saveItemAttrValue = async (attr: Attribute, value: AttrValue) => {
     try {
+        item.attrMap[attr.id].loading = true
+
         const { itemAttr } = await $apiFetch<{
-            itemAttr: {
-                attr: Attribute,
-                value: AttrValue,
-            }
+            itemAttr: ItemAttr
         }>(`/inventory/item/${item.id}/attr/${attr.id}`, {
             method: 'PUT',
             body: {
@@ -887,194 +766,19 @@ const editItemAttrValue = async (attr: Attribute, value: AttrValue) => {
             },
         })
 
-        const attrIndex = item.attributes?.findIndex(({ attr: { id } }) => id === attr.id) ?? -1
-        if (attrIndex !== -1) {
-            item.attributes ??= []
-            item.attributes[attrIndex] = itemAttr
-        }
+        item.attrMap[attr.id] = itemAttrToDynamic(itemAttr)
     } catch (err) {
         console.log(err)
+    } finally {
+        item.attrMap[attr.id].loading = false
     }
 }
-
-// Variants //
-type ItemVariantDynamic = ItemVariant & {
-    isNew?: boolean
-    displayPrice?: string | null
-    attrMap: Record<Attribute['id'], AttrWithValue> | null
-}
-
-function variantToDynamic (variant: ItemVariant): ItemVariantDynamic {
-    return {
-        ...variant,
-        isNew: false,
-        displayPrice: variant.realPrice ? itemPriceFormatter().format(variant.realPrice) : null,
-        attrMap: variant.attributes ? mapIdList(variant.attributes, ({ itemAttr: { attr } }) => attr.id) : null,
-    }
-}
-
-const showVariantCreateModal = ref<boolean>(false)
 
 const variantsSection = ref<ComponentPublicInstance<HTMLDivElement> | null>(null)
 const scrollToVariants = () => {
     variantsSection.value?.$el.scrollIntoView({
         behavior: 'smooth',
     })
-}
-
-const variants = computed<ItemVariantDynamic[] | null>({
-    get () {
-        return item.variants?.map(variantToDynamic) ?? null
-    },
-    set (val: ItemVariantDynamic[] | null) {
-        if (val) {
-            item.variants = val
-        }
-    },
-})
-
-/// Must be called every time new variant added
-const newVariantSaved = (...variants: ItemVariant[]) => {
-    item?.variants?.push(...variants.map(variantToDynamic))
-    Object.assign(showVariantImageUploader, mapIdList(item.variants ?? [], 'id', () => false))
-}
-
-type TableColumn = QTableColumn<ItemVariantDynamic, keyof ItemVariantDynamic>
-
-const variantsSelected = ref<ItemVariantDynamic[]>([])
-
-const attrKey = (attr: AttrWithValue) => `attr_${attr.id}`
-const baseVariantsTableColumns: TableColumn[] = [
-    {
-        name: 'avatar',
-        label: '',
-        field: 'avatar',
-        align: 'left',
-        sortable: false,
-    },
-    {
-        name: 'name',
-        label: 'Name',
-        field: 'name',
-        align: 'left',
-        sortable: true,
-    },
-    {
-        name: 'description',
-        label: 'Description',
-        field: 'description',
-        align: 'left',
-    },
-    {
-        name: 'amountValue',
-        label: 'Amount',
-        field: 'amountValue',
-        align: 'left',
-        sortable: true,
-    },
-    {
-        name: 'displayPrice',
-        label: 'Price',
-        field: 'displayPrice',
-        align: 'left',
-        sortable: true,
-    },
-]
-const variantsTableColumns = computed<TableColumn[]>(() => {
-    const columns = baseVariantsTableColumns
-    if (attributes.value) {
-        columns.push(...attributes.value.map((attr): TableColumn => ({
-            name: attrKey(attr),
-            label: attr.name,
-            field: (row: ItemVariantDynamic) => row.attrMap?.[attr.id],
-            align: 'left',
-            sortable: true,
-        })))
-    }
-    console.log('columns', columns)
-    return columns
-})
-
-const deleteSelectedVariants = async () => {
-    const variantsIds = variantsSelected.value.map(({ id }: ItemVariantDynamic) => id)
-    itemFieldsLoading.variants = true
-    try {
-        await $apiFetch('/inventory/item/variant', {
-            method: 'DELETE',
-            body: {
-                variants: variantsIds,
-            },
-        })
-        item.variants = item.variants?.filter((variant: ItemVariantDynamic) => !variantsIds.includes(variant.id))
-        variantsSelected.value = []
-    } catch (err) {
-        console.log(err)
-    } finally {
-        itemFieldsLoading.variants = false
-    }
-}
-
-const updateVariant = async<K extends keyof ItemVariant>(id: ItemVariant['id'], field: K, val: ItemVariant[K]) => {
-    console.log('todo updateVariant')
-}
-
-const updateVariantAttr = async (id: ItemVariant['id'], attrId: Attribute['id'], val: AttrValue) => {
-    try {
-        const result = await $apiFetch<>(`/inventory/item/variant/attr`)
-    }
-}
-
-// TODO: Fix variants saving `computed` cannot be set
-const quickVariantAdd = ref<ItemVariantQuickAddList>({})
-const quickVariantAddLoading = ref<boolean>(false)
-const saveQuickVariantAdd = async (variants: ItemVariantQuickAddList) => {
-    console.log('save quick variant add', variants)
-
-    quickVariantAddLoading.value = true
-
-    try {
-        const result = await $apiFetch<{
-            variants: ItemVariant[]
-        }>(`/inventory/item/${item?.id}/variant/quick`, {
-            method: 'POST',
-            body: {
-                names: variants.names,
-                amountValueEach: variants.amountValueEach,
-                realPriceEach: variants.realPriceEach,
-            },
-        })
-
-        quickVariantAdd.value = {}
-        newVariantSaved(...result.variants)
-    } catch (err) {
-        console.log(err)
-    } finally {
-        quickVariantAddLoading.value = false
-    }
-}
-
-const showVariantImageUploader = reactive<Record<ItemVariant['id'], boolean>>(mapIdList(item.variants ?? [], 'id', false))
-const variantImageChanged = async (id: ItemVariantDynamic['id'], res: UploadResult) => {
-    if (!item || !item.variants?.length) {
-        throw new Error('kek')
-    }
-    if (!res.res.images.length) {
-        return
-    }
-    const { variant: result } = await $apiFetch<{
-        variant: ItemVariant
-    }>(`/inventory/item/variant/${id}`, {
-        method: 'PUT',
-        body: {
-            variant: {
-                avatarImageId: res.res.images[0].id,
-            },
-        },
-    })
-
-    const index = item.variants.findIndex(variant => variant.id === id)
-
-    item.variants[index] = variantToDynamic(result)
 }
 </script>
 
@@ -1100,14 +804,24 @@ const variantImageChanged = async (id: ItemVariantDynamic['id'], res: UploadResu
     box-shadow: 0 5px 10px #ddd !important;
 }
 
-.editable-cell {
-    transition: all .2s;
-}
+// .item-attr-list-el::before {
+//     background-color: grey;
+//     width: 100%;
+//     height: 2px;
+//     content: '';
+//     position: absolute;
+//     top: 0; left: 0; bottom: 0; right: 0;
+//     opacity: 0;
+//     margin: auto;
 
-.editable-cell:hover {
-    cursor: pointer;
-    box-shadow: inset 0 5px 10px #ddd !important;
-    color: $primary;
-    // border-radius: 5px;
-}
+//     transition: opacity .25s ease-in;
+// }
+
+// .item-attr-list-el .q-item__section {
+//     background: white !important;
+// }
+
+// .item-attr-list-el:hover::before {
+//     opacity: 0.5;
+// }
 </style>

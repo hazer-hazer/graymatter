@@ -8,16 +8,16 @@
                 <q-btn
                     v-close-popup
                     flat
-                    label="Change amount unit"
+                    :label="yesLabel"
                     color="red"
-                    @click="onYes"
+                    @click="$emit('yes')"
                 />
                 <q-btn
                     v-close-popup
                     outline
-                    label="No"
+                    :label="noLabel"
                     color="green"
-                    @click="onNo"
+                    @click="$emit('no')"
                 />
             </q-card-actions>
         </q-card>
@@ -27,10 +27,15 @@
 <!-- Use for cases when better answer is "No", such as if I ask you to date me -->
 
 <script setup lang="ts">
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     modelValue: boolean,
     message: string,
-}>()
+    yesLabel?: string
+    noLabel?: string
+}>(), {
+    yesLabel: 'Yes',
+    noLabel: 'No',
+})
 
 const emit = defineEmits<{
     'update:modelValue': [val: boolean],

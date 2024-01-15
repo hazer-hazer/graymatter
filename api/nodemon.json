@@ -5,6 +5,7 @@
         "nodemon.json",
         "**/*schemas.ts"
     ],
+    "env": {},
     "events": {
         "start": "clear"
     },
@@ -14,5 +15,5 @@
     ],
     "inspect": "0.0.0.0",
     "ext": "ts,json,env",
-    "exec": "tsc && tsc-alias && npm run start:dev"
+    "exec": "(tsc || exit 1) && tsc-alias && npm run start:dev"
 }

@@ -1,13 +1,12 @@
 <template>
     <q-select
         v-model="attr"
-        :options="data?.attrs"
+        :options="options"
         option-label="name"
         :loading="pending"
         label="Attribute"
         outlined
         use-input
-        hide-bottom-space
         :input-debounce="500"
     />
 </template>
@@ -16,7 +15,8 @@
 import type { Attribute } from '~/models/inventory/Attribute'
 
 const props = defineProps<{
-    modelValue: Attribute | null
+    modelValue: Attribute | null,
+    filter?:(attr: Attribute) => boolean,
 }>()
 
 const emit = defineEmits<{
@@ -38,5 +38,12 @@ const { data, pending } = await $apiUseFetch<{
     attrs: Attribute[]
 }>('/inventory/attr/my', {
     method: 'GET',
+})
+
+const options = computed(() => {
+    if (props.filter) {
+        return data.value?.attrs.filter(props.filter)
+    }
+    return data.value?.attrs
 })
 </script>

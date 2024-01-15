@@ -39,6 +39,11 @@
     "Attribute": {},
     "AttrType": {},
     "AttrValue": {},
+    "BuyList": {},
+    "User": {},
+    "App": {},
+    "UriPath": {},
+    "BuyListItem": {},
     "FolderTree": {},
     "Tree": {},
     "TreeNodeKind": {},
@@ -83,11 +88,6 @@
         }
     },
     "ItemUpdateFields": {},
-    "ItemSearch": {
-        "params": {
-            "type": "null"
-        }
-    },
     "ItemGetById": {
         "params": {
             "type": "object",
@@ -139,6 +139,52 @@
                 },
                 "required": [
                     "item"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemSearch": {
+        "querystring": {
+            "type": "object",
+            "properties": {
+                "q": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "number"
+                },
+                "excludeItems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "refSchema#/definitions/UBigInt"
+                    }
+                },
+                "excludeItemVariants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "refSchema#/definitions/UBigInt"
+                    }
+                }
+            },
+            "required": [
+                "q"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Item"
+                        }
+                    }
+                },
+                "required": [
+                    "items"
                 ],
                 "additionalProperties": false
             }

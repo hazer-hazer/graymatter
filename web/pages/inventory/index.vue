@@ -1,6 +1,5 @@
 <template>
     <DefaultPage>
-        <q-separator spaced />
         <div class="col items-center">
             <div class="col row">
                 <q-btn

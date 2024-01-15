@@ -1,46 +1,14 @@
 import { Api } from '@/App'
-import baseDb from '@/modules/prisma'
+import baseDb, { DB } from '@/modules/prisma'
 import { FastifyPluginAsync } from 'fastify'
-import { ItemVariantCreate, ItemVariantDeleteBatch, ItemVariantQuickAdd, ItemVariantUpdate, schemas } from './schemas'
+import { ItemVariantAttrUpsert, ItemVariantCreate, ItemVariantDeleteBatch, ItemVariantQuickAdd, ItemVariantSearch, ItemVariantUpdate, schemas } from './schemas'
 import { nameToUri } from '@/utils/names-format'
 import { Currency,  extendWithRealPrice, fromRealValue } from '@/models/Currency'
 import { ItemVariant } from '@/apps/inventory/models/ItemVariant'
 
-// /// Determine `price` from `realPrice` for creation and update
-// async function priceDetermined<T extends {
-//     realPrice?: RealPrice | null
-//     currencyId?: Currency['id']
-// } & ({
-//     id: ItemVariant['id']
-//     itemId?: Item['id']
-// } | {
-//     id?: ItemVariant['id']
-//     itemId: Item['id']
-// })>(input: T): Promise<T & WithPrice> {
-//     if (typeof input.realPrice !== 'number') {
-//         return {
-//             ...input,
-//             price: null,
-//         }
-//     }
-
-//     let currency: Currency | null = null
-//     if (input.currencyId) {
-//         currency = await db.currency.findUniqueOrThrow({ where: { id: input.currencyId } })
-//     } else {
-//         const itemId = input.itemId ?? (await db.itemVariant.findUniqueOrThrow({ where: { id: input.id }, select: { itemId: true } })).itemId
-//         const result = await db.item.findUniqueOrThrow({
-//             where: { id: itemId },
-//             select: { currency: true },
-//         })
-//         currency = result.currency
-//     }
-
-//     return {
-//         ...input,
-//         price: fromRealValue(input.realPrice, currency),
-//     }
-// }
+export const itemVariantClientResInclude = {
+    avatar: true,
+} satisfies DB.ItemVariantInclude
 
 type ItemVariantCurrencyIdentify = Pick<ItemVariant, 'id'> | Pick<ItemVariant, 'itemId'>
 
@@ -55,14 +23,6 @@ const db = baseDb.$extends({
         },
     },
 })
-
-// const getPrice = async (realPrice: RealPrice | null | undefined, where: ItemVariantCurrencyIdentify): Promise<ItemVariant['price']> => {
-//     if (typeof realPrice !== 'number') {
-//         return null
-//     }
-
-//     return fromRealValue(realPrice, await db.itemVariant.currency(where))
-// }
 
 const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
     fastify.post<ItemVariantQuickAdd>('/:itemId/variant/quick', { schema: schemas.ItemVariantQuickAdd }, async (req, res) => {
@@ -84,9 +44,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
 
         const result = await db.itemVariant.findMany({
             where: { itemId },
-            include: {
-                avatar: true,
-            },
+            include: itemVariantClientResInclude,
         })
 
         const extended = result.map(variant => extendWithRealPrice({
@@ -95,7 +53,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         }))
 
         return res.code(200).send({
-            variants: extended,
+            itemVariants: extended,
         })
     })
 
@@ -106,7 +64,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             description,
             uri,
             realPrice,
-        } = req.body.variant
+        } = req.body.itemVariant
 
         const currency = await db.itemVariant.currency({ itemId })
         const price = realPrice ? fromRealValue(realPrice, currency) : null
@@ -119,9 +77,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
                 price,
                 uri: uri ?? nameToUri(name),
             },
-            include: {
-                avatar: true,
-            },
+            include: itemVariantClientResInclude,
         })
 
         const extended = extendWithRealPrice({
@@ -130,12 +86,12 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         })
 
         return res.code(200).send({
-            variant: extended,
+            itemVariant: extended,
         })
     })
 
-    fastify.put<ItemVariantUpdate>('/variant/:variantId', { schema: schemas.ItemVariantUpdate }, async (req, res) => {
-        const { variantId } = req.params
+    fastify.put<ItemVariantUpdate>('/variant/:itemVariantId', { schema: schemas.ItemVariantUpdate }, async (req, res) => {
+        const { itemVariantId } = req.params
         const {
             uri,
             name,
@@ -143,13 +99,13 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             avatarImageId,
             amountValue,
             realPrice,
-        } = req.body.variant
+        } = req.body.itemVariant
 
-        const currency = await db.itemVariant.currency({ id: variantId })
+        const currency = await db.itemVariant.currency({ id: itemVariantId })
         const price = realPrice ? fromRealValue(realPrice, currency) : null
 
         const result = await db.itemVariant.update({
-            where: { id: variantId },
+            where: { id: itemVariantId },
             data: {
                 uri,
                 name,
@@ -158,9 +114,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
                 price,
                 avatarImageId,
             },
-            include: {
-                avatar: true,
-            },
+            include: itemVariantClientResInclude,
         })
 
         const extended = extendWithRealPrice({
@@ -169,18 +123,89 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         })
 
         return res.code(200).send({
-            variant: extended,
+            itemVariant: extended,
         })
     })
 
     fastify.delete<ItemVariantDeleteBatch>('/variant', { schema: schemas.ItemVariantDeleteBatch }, async (req, res) => {
-        const { variants } = req.body
+        const { itemVariantIds } = req.body
         await db.itemVariant.deleteMany({
             where: {
                 id: {
-                    in: variants,
+                    in: itemVariantIds,
                 },
             },
+        })
+
+        return res.code(200).send({})
+    })
+
+    fastify.put<ItemVariantAttrUpsert>('/variant/:itemVariantId/attr/:itemAttrId', { schema: schemas.ItemVariantAttrUpsert }, async (req, res) => {
+        const { itemVariantId, itemAttrId } = req.params
+        const { value } = req.body
+
+        const data = {
+            itemAttrId,
+            itemVariantId,
+            value,
+        }
+
+        const itemVariantAttr = await db.itemVariantAttr.upsert({
+            where: {
+                itemVariantId_itemAttrId: {
+                    itemVariantId,
+                    itemAttrId,
+                },
+            },
+            create: data,
+            update: data,
+            include: {
+                itemAttr: {
+                    include: {
+                        attr: true,
+                    },
+                },
+            },
+        })
+
+        return res.code(200).send({
+            itemVariantAttr,
+        })
+    })
+
+    fastify.get<ItemVariantSearch>('/:itemId/variant/search', { schema: schemas.ItemVariantSearch }, async (req, res) => {
+        const { itemId } = req.params
+        const { q, limit } = req.query
+
+        const foundVariants = await db.$queryRaw<{
+            itemVariantId: ItemVariant['id'][]
+        }>`
+            SELECT
+                iv.id AS "itemVariantId"
+                ,sim
+            FROM
+                public.item_variants AS iv
+                ,similarity(iv.name, ${q}) AS sim
+            WHERE
+                sim >= 0.1
+                AND iv.item_id = ${itemId}
+            ORDER BY
+                sim DESC
+                ,iv.updated_at DESC
+                ,iv.created_at DESC
+            LIMIT ${limit ?? 10}`
+        
+        const itemVariants = await db.itemVariant.findMany({
+            where: {
+                id: {
+                    in: foundVariants.itemVariantId,
+                },
+            },
+            include: itemVariantClientResInclude,
+        })
+
+        return res.code(200).send({
+            itemVariants,
         })
     })
 }

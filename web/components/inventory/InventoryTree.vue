@@ -17,7 +17,13 @@
                 <div :class="prop.node.current ? 'text-primary' : ''">
                     {{ prop.node.label }}
                 </div>
-                <q-btn flat dense label="go to" class="q-ma-auto on-right text-caption" @click="navigateTo(prop.node.url)" />
+                <q-btn
+                    flat
+                    dense
+                    label="go to"
+                    class="q-ma-auto on-right text-caption"
+                    @click="navigateTo(prop.node.url)"
+                />
             </template>
             <!-- <template #body-link="prop">
             </template> -->

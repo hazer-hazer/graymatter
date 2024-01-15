@@ -68,12 +68,28 @@
             "200": {
                 "type": "object",
                 "properties": {
-                    "unit": {
+                    "amountUnit": {
                         "$ref": "refSchema#/definitions/AmountUnit"
                     }
                 },
                 "required": [
-                    "unit"
+                    "amountUnit"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "AmountUnitGetDefault": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "amountUnit": {
+                        "$ref": "refSchema#/definitions/AmountUnit"
+                    }
+                },
+                "required": [
+                    "amountUnit"
                 ],
                 "additionalProperties": false
             }

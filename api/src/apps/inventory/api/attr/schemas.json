@@ -100,6 +100,34 @@
             }
         }
     },
+    "AttrDelete": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "attrId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "attrId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "attr": {
+                        "$ref": "refSchema#/definitions/Attribute"
+                    }
+                },
+                "required": [
+                    "attr"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
     "AttrGetMy": {
         "response": {
             "200": {

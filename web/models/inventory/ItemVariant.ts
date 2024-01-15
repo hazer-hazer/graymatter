@@ -1,6 +1,6 @@
 import type { Image } from '../Image'
 import type { AttrValue } from './Attribute'
-import type { ItemAttr } from './Item'
+import type { Item, ItemAttr } from './Item'
 
 export interface ItemVariantAttr {
     itemAttr: ItemAttr
@@ -14,6 +14,7 @@ export interface ItemVariant {
     description: string | null
     avatar: Image | null
     itemId: string
+    item?: Item
     // price: number | null
     amountValue: number
 

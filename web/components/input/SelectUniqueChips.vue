@@ -18,10 +18,11 @@
 import type { QSelect } from 'quasar'
 
 const props = withDefaults(defineProps<{
-    modelValue: string[],
+    modelValue?: string[],
     // Note: I'm not using regex because the value is displayed in hint
     delimiters?: string
 }>(), {
+    modelValue: () => [],
     delimiters: () => ';,',
 })
 

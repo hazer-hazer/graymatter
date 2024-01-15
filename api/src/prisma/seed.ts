@@ -45,11 +45,14 @@ async function main(tx: Prisma.TransactionClient) {
     })
 
     const quantityAmountUnit = await tx.amountUnit.upsert({
-        where: { symbol: 'pcs' },
+        where: {
+            default: true,
+        },
         update: {},
         create: {
             name: 'pcs',
             symbol: 'pcs',
+            default: true,
             powerPrefixes: {
                 createMany: {
                     data: [
@@ -155,7 +158,12 @@ async function main(tx: Prisma.TransactionClient) {
     const superNestedFolder = await tx.folder.upsert({
         where: { parentId_uri: { parentId: rootFolder.id, uri: superNestedFolderInput.create.uri } },
         update: {},
-        create: superNestedFolderInput.create,
+        create: {
+            ...superNestedFolderInput.create,
+            inventory: undefined,
+            parentId: rootFolder.id,
+            inventoryId: testInventory.id,
+        },
     })
 
     const testNestedItem = await tx.item.upsert({
@@ -216,6 +224,27 @@ async function main(tx: Prisma.TransactionClient) {
                         name: value,
                         description: `Resistance of ${value}`,
                     })),
+                },
+            },
+        },
+        update: {},
+    })
+
+    const testBuyList = await tx.buyList.upsert({
+        where: { userId_uri: { userId: testUser.id, uri: 'test' } },
+        create: {
+            name: 'Test buy list',
+            uri: 'test',
+            description: 'Test buy list',
+            userId: testUser.id,
+            watch: true,
+            items: {
+                createMany: {
+                    data: [{
+                        itemId: testRootItem.id,
+                        amountValue: 10.0,
+                        userId: testUser.id,
+                    }],
                 },
             },
         },

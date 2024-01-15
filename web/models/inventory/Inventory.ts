@@ -1,3 +1,4 @@
+import type { Currency } from '../Currency'
 import type { Image } from '../Image'
 import type { Folder } from './Folder'
 import type { Tree, TreePath } from './Tree'
@@ -9,6 +10,8 @@ export interface Inventory {
     name: string
     description?: string
 
+    currency?: Currency
+
     avatar?: Image | null
 
     rootFolderId?: Folder['id']
@@ -16,7 +19,7 @@ export interface Inventory {
         itemsCount: number
         variantsCount: number
         foldersCount: number
-        priceValue: number
+        totalPrice: number | null
         itemsInTrashFolderCount: number
     }
 

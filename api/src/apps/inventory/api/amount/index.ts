@@ -1,13 +1,19 @@
 import db from '@/modules/prisma'
-import { AmountUnitCreate, AmountUnitGetById, AmountUnitSearch, schemas } from './schemas'
+import { AmountUnitCreate, AmountUnitGetById, AmountUnitGetDefault, AmountUnitSearch, schemas } from './schemas'
 import { FastifyPluginAsync } from 'fastify'
 import { Api } from '@/App'
 
 
 const amount: FastifyPluginAsync = async function (fastify) {
-    fastify.get<AmountUnitSearch>('/', { schema: schemas.AmountUnitSearch }, async (_req, res) => {
+    fastify.get<AmountUnitSearch>('/', { schema: schemas.AmountUnitSearch }, async (req, res) => {
         const amountUnits = await db.amountUnit.findMany({
-            where: {},
+            where: {
+                OR: [{
+                    userId: null,
+                }, {
+                    userId: req.user.userId,
+                }],
+            },
             include: {
                 powerPrefixes: true,
             },
@@ -48,7 +54,7 @@ const amount: FastifyPluginAsync = async function (fastify) {
     })
 
     fastify.get<AmountUnitGetById>('/:amountId', { schema: schemas.AmountUnitGetById }, async (req, res) => {
-        const unit = await db.amountUnit.findUniqueOrThrow({
+        const amountUnit = await db.amountUnit.findUniqueOrThrow({
             select: {
                 id: true,
                 name: true,
@@ -68,11 +74,22 @@ const amount: FastifyPluginAsync = async function (fastify) {
             },
             where: {
                 id: Number(req.params.amountId),
+                userId: req.user.userId,
             },
         })
 
         return res.code(200).send({
-            unit,
+            amountUnit,
+        })
+    })
+
+    fastify.get<AmountUnitGetDefault>('/default', { schema: schemas.AmountUnitGetDefault }, async (req, res) => {
+        const amountUnit = await db.amountUnit.findUniqueOrThrow({
+            where: { default: true },
+        })
+
+        return res.code(200).send({
+            amountUnit,
         })
     })
 }

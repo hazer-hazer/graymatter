@@ -13,6 +13,4 @@ export const useInventoryLocation = (): TreePath => {
 export const showCreateItemModal = () => useState<boolean>('showCreateItemModal', () => false)
 export const showCreateFolderModal = () => useState<boolean>('showCreateFolderModal', () => false)
 export const showInventoryCreateModal = () => useState<boolean>('showInventoryCreateModal', () => false)
-export const useIsInventorySpecified = () => computed<boolean>(() => {
-    return inventoryLocation().value !== null
-})
+export const useIsInventorySpecified = () => useState<boolean>('useIsInventorySpecified', () => inventoryLocation().value !== null)

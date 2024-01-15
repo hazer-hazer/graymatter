@@ -4,7 +4,6 @@ import * as path from 'path'
 import * as tsj from 'ts-json-schema-generator'
 import { FastifySchema } from 'fastify'
 import _ from 'lodash'
-import assert from 'assert'
 
 class BigIntParser implements tsj.SubNodeParser {
     supportsNode(node: tsj.ts.Node): boolean {

@@ -1,5 +1,5 @@
 import { Item, ItemCreateFields, ItemUpdateFields } from '@/apps/inventory/models/Item'
-import { UBigInt } from '@/models/common'
+import { ItemVariant } from '../../models/ItemVariant'
 
 export { default as schemas } from './schemas.json'
 
@@ -14,7 +14,7 @@ export interface ItemCreate {
 
 export interface ItemUpdate {
     Params: {
-        itemId: UBigInt
+        itemId: Item['id']
     }
     Body: {
         item: ItemUpdateFields
@@ -26,13 +26,9 @@ export interface ItemUpdate {
     }
 }
 
-export interface ItemSearch {
-    Params: void
-}
-
 export interface ItemGetById {
     Params: {
-        itemId: UBigInt
+        itemId: Item['id']
     }
     Reply: {
         200: {
@@ -43,11 +39,25 @@ export interface ItemGetById {
 
 export interface ItemMoveToTrash {
     Params: {
-        itemId: UBigInt
+        itemId: Item['id']
     }
     Reply: {
         200: {
             item: Item
+        }
+    }
+}
+
+export interface ItemSearch {
+    Querystring: {
+        q: string
+        limit?: number
+        excludeItems?: Item['id'][]
+        excludeItemVariants?: ItemVariant['id'][]
+    }
+    Reply: {
+        200: {
+            items: Item[]
         }
     }
 }

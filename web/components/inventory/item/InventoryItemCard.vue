@@ -46,9 +46,9 @@
         <!--  class="row q-pa-sm q-pt-xs justify-between shadow-1" -->
         <q-card-section>
             <div class="column col q-px-xs">
-                <nuxt-link :to="`/inventory/item/${item.id}`" tag="div" class="row text-body1 text-weight-bold q-pb-sm">
+                <q-btn :to="`/inventory/item/${item.id}`" tag="div" class="row text-body1 text-weight-bold q-pb-sm">
                     {{ item.name }}
-                </nuxt-link>
+                </q-btn>
                 <!-- <p class="row text-body2">{{ item.description }}</p> -->
                 <div class="row">
                     <!-- <q-icon name="inventory_2" /> -->

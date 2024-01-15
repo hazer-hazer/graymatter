@@ -3,8 +3,8 @@
         <q-card class="gm-modal">
             <q-card-section class="row q-pb-none">
                 <div class="col column">
-                    <InventoryAttrSelect v-model="attr" />
-                    <TextSeparator label="or" class="text-subtitle2 q-py-xs" />
+                    <InventoryAttrSelect v-model="attr" :filter="filterExisting" />
+                    <TextSeparator label="or" />
                     <q-btn
                         icon="new_label"
                         dense
@@ -15,9 +15,25 @@
                 </div>
 
                 <q-separator spaced vertical />
+                <!-- <TextSeparator vertical full>
+                    <q-icon name="keyboard_arrow_right" size="sm" color="grey" class="q-ml-xs" />
+                </TextSeparator> -->
 
-                <div class="col">
-                    <InventoryAttrValueInput v-model="attrValue" :attr="attr" />
+                <div class="col column">
+                    <InventoryAttrValueInput v-model="attrValue" class="col" :attr="attr" />
+
+                    <div class="col column justify-end">
+                        <q-btn
+                            to="/inventory/attr/my"
+                            target="_blank"
+                            class="text-caption"
+                            icon-right="open_in_new"
+                            dense
+                            flat
+                            color="orange-4"
+                            label="Open my attributes"
+                        />
+                    </div>
                 </div>
             </q-card-section>
 
@@ -36,6 +52,7 @@
                     flat
                     label="Add attribute"
                     color="primary"
+                    :disable="!canSubmit"
                     @click="submit"
                 />
             </q-card-actions>
@@ -49,7 +66,8 @@
 import type { AttrWithValue, Attribute } from '~/models/inventory/Attribute'
 
 const props = defineProps<{
-    modelValue: boolean
+    modelValue: boolean,
+    existing: Attribute['id'][]
 }>()
 
 const emit = defineEmits<{
@@ -58,6 +76,7 @@ const emit = defineEmits<{
     'save': [attr: AttrWithValue],
 }>()
 
+const canSubmit = computed<boolean>(() => !!attr.value && !!attrValue.value?.length)
 const showAttrCreateModal = ref<boolean>(false)
 
 const attr = ref<Attribute | null>(null)
@@ -90,4 +109,6 @@ const submit = () => {
         })
     }
 }
+
+const filterExisting = (attr: Attribute) => !props.existing.includes(attr.id)
 </script>

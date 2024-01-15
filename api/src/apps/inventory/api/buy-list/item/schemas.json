@@ -1,0 +1,178 @@
+{
+    "BuyListItemGet": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "buyListId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "buyListId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "buyListItems": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/BuyListItem"
+                        }
+                    }
+                },
+                "required": [
+                    "buyListItems"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "UBigInt": {},
+    "BuyListItem": {},
+    "Item": {},
+    "Inventory": {},
+    "Image": {},
+    "Currency": {},
+    "InventoryStats": {},
+    "TreePath": {},
+    "TreePathSegment": {},
+    "Folder": {},
+    "FolderKind": {},
+    "AmountUnit": {},
+    "AmountUnitPowerPrefix": {},
+    "ItemVariant": {},
+    "ItemVariantAttr": {},
+    "ItemAttr": {},
+    "Attribute": {},
+    "AttrType": {},
+    "AttrValue": {},
+    "RealPrice": {},
+    "BuyList": {},
+    "User": {},
+    "App": {},
+    "UriPath": {},
+    "FolderTree": {},
+    "Tree": {},
+    "TreeNodeKind": {},
+    "BuyListItemCreate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "buyListId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "buyListId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "buyListItem": {
+                    "$ref": "refSchema#/definitions/BuyListItemCreateFields"
+                }
+            },
+            "required": [
+                "buyListItem"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "buyListItem": {
+                        "$ref": "refSchema#/definitions/BuyListItem"
+                    }
+                },
+                "required": [
+                    "buyListItem"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "BuyListItemCreateFields": {},
+    "BuyListItemUpdate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "buyListId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "buyListItemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "buyListId",
+                "buyListItemId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "buyListItem": {
+                    "$ref": "refSchema#/definitions/BuyListItemUpdateFields"
+                }
+            },
+            "required": [
+                "buyListItem"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "buyListItem": {
+                        "$ref": "refSchema#/definitions/BuyListItem"
+                    }
+                },
+                "required": [
+                    "buyListItem"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "BuyListItemUpdateFields": {},
+    "BuyListItemDelete": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "buyListId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                },
+                "buyListItemId": {
+                    "$ref": "refSchema#/definitions/UBigInt"
+                }
+            },
+            "required": [
+                "buyListId",
+                "buyListItemId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "buyListItem": {
+                        "$ref": "refSchema#/definitions/BuyListItem"
+                    }
+                },
+                "required": [
+                    "buyListItem"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

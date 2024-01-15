@@ -39,24 +39,22 @@ const model = computed({
     },
 })
 
-const { $apiUseFetch } = useNuxtApp()
+const { $apiFetch } = useNuxtApp()
 
 const options = ref<AmountUnit[]>()
-const filter: QSelect['onFilter'] = (_val, update) => {
+const filter: QSelect['onFilter'] = async (_val, update) => {
     if (options.value) {
         update(() => {})
         return
     }
 
-    const { data } = $apiUseFetch<{
+    const { amountUnits } = await $apiFetch<{
         amountUnits: AmountUnit[]
     }>('inventory/amount')
 
-    if (data.value) {
-        update(() => {
-            options.value = data.value?.amountUnits
-        })
-    }
+    update(() => {
+        options.value = amountUnits
+    })
 }
 
 </script>

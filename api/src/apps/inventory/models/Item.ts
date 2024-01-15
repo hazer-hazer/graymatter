@@ -7,8 +7,10 @@ import { ItemVariant, ItemVariantCreateFields } from './ItemVariant'
 import { UBigInt } from '../../../models/common'
 import { Currency, RealPrice } from '@/models/Currency'
 import { AttrValue, Attribute } from './Attribute'
+import { BuyListItem } from './BuyList'
 
 export interface ItemAttr {
+    id: UBigInt
     attr: Attribute
     value: AttrValue
 }
@@ -33,6 +35,9 @@ export interface Item {
     itemLocationId?: number | null
     itemLocationNotes?: string | null
 
+    /**
+     * @format url
+     */
     buyLink: string | null
     // Note: Never accept from clients
     price: UBigInt | null
@@ -54,6 +59,8 @@ export interface Item {
     variants?: ItemVariant[]
 
     attributes?: ItemAttr[]
+
+    buyLists?: (Omit<BuyListItem, 'buyList'> & Required<Pick<BuyListItem, 'buyList'>>)[]
 
     // Extended //
     path?: TreePath

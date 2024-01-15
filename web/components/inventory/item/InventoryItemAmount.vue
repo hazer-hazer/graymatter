@@ -14,9 +14,11 @@ export interface IInventoryItemAmount {
     value: bigint,
 }
 
-const { amount } = defineProps<{
+const props = defineProps<{
     amount: IInventoryItemAmount
 }>()
+
+const amount = props.amount
 
 // const amount = {
 //     unit: {

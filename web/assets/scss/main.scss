@@ -1,1 +1,59 @@
 @import "./modal.scss";
+
+// https://css-tricks.com/books/greatest-css-tricks/scroll-shadows/
+.scroll-shadows {
+    background:
+      /* Shadow Cover TOP */
+        linear-gradient(white 30%, rgba(255, 255, 255, 0)) center top,
+        /* Shadow Cover BOTTOM */ linear-gradient(rgba(255, 255, 255, 0), white 70%) center bottom,
+        /* Shadow TOP */ radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) center top,
+        /* Shadow BOTTOM */ radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) center
+            bottom;
+
+    background-repeat: no-repeat;
+    background-size:
+        100% 40px,
+        100% 40px,
+        100% 14px,
+        100% 14px;
+    background-attachment: local, local, scroll, scroll;
+}
+
+.scroll-shadows-horizontal {
+    transition: background 0.5s ease-in;
+
+    background:
+        linear-gradient(90deg, white 0%, rgba(255, 255, 255, 0)),
+        linear-gradient(-90deg, white 0%, rgba(255, 255, 255, 0)) 100% 0,
+        radial-gradient(farthest-side at 0% 50%, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)),
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)) 100% 0%;
+
+    background-repeat: no-repeat;
+    background-color: #fff;
+    background-size:
+        100px 137px,
+        100px 137px,
+        14px 137px,
+        14px 137px;
+    background-attachment: local, local, scroll, scroll;
+}
+
+.neutral-tooltip {
+    background-color: white;
+    color: $dark;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    font-weight: 400;
+    box-shadow: 0 1px 3px #ccc;
+}
+
+// .column.masonry {
+//     flex-wrap: wrap;
+//     @for $i from 1 through 36 {
+//         div:nth-child(#{$i}) {
+//             $h: (random(400) + 100) + px;
+//             height: $h;
+//             line-height: $h;
+//         }
+//     }
+// }

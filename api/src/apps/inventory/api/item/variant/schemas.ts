@@ -1,5 +1,7 @@
 export { default as schemas } from './schemas.json'
-import { ItemVariant, ItemVariantCreateFields, ItemVariantUpdateFields } from '@/apps/inventory/models/ItemVariant'
+import { AttrValue } from '@/apps/inventory/models/Attribute'
+import { Item, ItemAttr } from '@/apps/inventory/models/Item'
+import { ItemVariant, ItemVariantAttr, ItemVariantCreateFields, ItemVariantUpdateFields } from '@/apps/inventory/models/ItemVariant'
 import { RealPrice } from '@/models/Currency'
 import { UBigInt } from '@/models/common'
 
@@ -14,7 +16,7 @@ export interface ItemVariantQuickAdd {
     }
     Reply: {
         200: {
-            variants: ItemVariant[]
+            itemVariants: ItemVariant[]
         }
     }
 }
@@ -24,34 +26,64 @@ export interface ItemVariantCreate {
         itemId: UBigInt
     }
     Body: {
-        variant: ItemVariantCreateFields
+        itemVariant: ItemVariantCreateFields
     }
     Reply: {
         200: {
-            variant: ItemVariant
+            itemVariant: ItemVariant
         }
     }
 }
 
 export interface ItemVariantUpdate {
     Params: {
-        variantId: UBigInt
+        itemVariantId: UBigInt
     }
     Body: {
-        variant: ItemVariantUpdateFields
+        itemVariant: ItemVariantUpdateFields
     }
     Reply: {
         200: {
-            variant: ItemVariant
+            itemVariant: ItemVariant
         }
     }
 }
 
 export interface ItemVariantDeleteBatch {
     Body: {
-        variants: ItemVariant['id'][]
+        itemVariantIds: ItemVariant['id'][]
     }
     Reply: {
         200: void
+    }
+}
+
+export interface ItemVariantAttrUpsert {
+    Params: {
+        itemVariantId: ItemVariant['id']
+        itemAttrId: ItemAttr['id']
+    }
+    Body: {
+        value: AttrValue
+    }
+    Reply: {
+        200: {
+            itemVariantAttr: ItemVariantAttr
+        }
+    }
+}
+
+export interface ItemVariantSearch {
+    Params: {
+        itemId: Item['id']
+    }
+    Querystring: {
+        q: string
+        limit?: number
+    }
+    Reply: {
+        200: {
+            itemVariants: ItemVariant[]
+        }
     }
 }

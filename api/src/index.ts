@@ -47,6 +47,16 @@ void (async () => {
         })
     })
 
+    fastify.addHook('onRoute', function (route) {
+        if (route.method === 'HEAD') {
+            return
+        }
+
+        if (!route.schema) {
+            this.log.warn(`No schema for route ${Array.isArray(route.method) ? route.method.join(', ') : route.method} ${route.url}`)
+        }
+    })
+
     await fastify.register(cors, {
         origin: true,
         credentials: true,

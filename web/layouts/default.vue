@@ -28,7 +28,7 @@
                     <q-avatar v-else icon="account_circle" />
 
                     <q-menu anchor="bottom start" self="top start">
-                        <q-list style="min-width: 100px">
+                        <q-list style="min-width: 100px" dense class="text-center">
                             <q-item v-close-popup clickable>
                                 <q-item-section>Profile</q-item-section>
                             </q-item>

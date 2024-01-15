@@ -1,6 +1,6 @@
 <template>
     <div>
-        <SelectUniqueChips
+        <InputSelectUniqueChips
             v-model="variants.names"
             label="Variants"
             style="min-width: 330px;"
@@ -18,6 +18,7 @@
             <inventory-price-input
                 v-model="variants.realPriceEach"
                 class="col"
+                :currency="currency"
                 dense
                 label="Price of each"
                 clearable
@@ -28,6 +29,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { Currency } from '~/models/Currency'
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
 import type { ItemVariant } from '~/models/inventory/ItemVariant'
 
@@ -40,6 +42,7 @@ export interface ItemVariantQuickAddList {
 const props = defineProps<{
     modelValue: ItemVariantQuickAddList,
     amountUnit: AmountUnit
+    currency: Currency
 }>()
 
 const amountUnit = toRef(props, 'amountUnit')

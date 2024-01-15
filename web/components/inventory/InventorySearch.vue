@@ -16,7 +16,7 @@
             @blur="focused = false"
             @update:model-value="search"
         >
-            <template #prepend>
+            <!-- <template #prepend>
                 <q-icon name="search" />
             </template>
 
@@ -25,9 +25,8 @@
                     <div v-if="!focused" class="row">
                         <kbd class="kbd self-center text-body2 rounded-borders">Ctrl+K</kbd>
                     </div>
-                    <!-- <q-icon v-else name="clear" class="cursor-pointer" @click="input = ''" /> -->
                 </div>
-            </template>
+            </template> -->
         </q-input>
 
         <q-list

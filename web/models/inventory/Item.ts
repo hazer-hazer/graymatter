@@ -2,11 +2,14 @@ import type { Currency } from '../Currency'
 import type { Image } from '../Image'
 import type { AmountUnit } from './AmountUnit'
 import type { AttrValue, Attribute } from './Attribute'
+import type { BuyListItem } from './BuyList'
 import type { Inventory } from './Inventory'
 import type { ItemVariant } from './ItemVariant'
 import type { TreePath } from './Tree'
+import type { Refine } from '~/utils/types'
 
 export interface ItemAttr {
+    id: string
     attr: Attribute
     value: AttrValue
 }
@@ -43,6 +46,7 @@ export interface Item {
     images?: { image: Image }[]
     variants?: ItemVariant[]
     attributes?: ItemAttr[]
+    buyLists?: Refine<BuyListItem, 'buyList'>[]
 
     // Extended //
     path?: TreePath

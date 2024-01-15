@@ -6,9 +6,11 @@ import { Item } from '@/apps/inventory/models/Item'
 import image from './image'
 import { Api } from '@/App'
 import variant from './variant'
-import { ItemVariant } from '../../models/ItemVariant'
 import { Currency, extendWithRealPrice, fromRealValue, RealPrice, WithPrice, WithRealPrice } from '@/models/Currency'
 import attr from './attr'
+import { Inventory } from '../../models/Inventory'
+import { ItemVariant } from '../../models/ItemVariant'
+import { Prisma } from '@prisma/client'
 
 const itemSelectSingleFields = {
     id: true,
@@ -52,81 +54,53 @@ const itemSelectSingleFields = {
                 },
             },
         },
+        orderBy: [{
+            updatedAt: 'desc',
+        }, {
+            createdAt: 'desc',
+        }],
+    },
+    buyLists: {
+        include: {
+            buyList: true,
+        },
     },
     attributes: {
         include: {
             attr: true,
         },
     },
-}
+} satisfies DB.ItemSelect
 
-type CalculateTotalPriceInput =
-    Required<Pick<Item, 'realPrice' | 'amountValue'>>
-    & {
-        variants?: Pick<ItemVariant, 'realPrice' | 'amountValue'>[]
-    }
+// type CalculateTotalPriceInput =
+//     Required<Pick<Item, 'realPrice' | 'amountValue'>>
+//     & {
+//         variants?: Pick<ItemVariant, 'realPrice' | 'amountValue'>[]
+//     }
 
-const calculateItemTotalPrice = ({
-    realPrice: itemRealPrice,
-    amountValue: itemAmountValue,
-    variants,
-}: CalculateTotalPriceInput): number | null => {
-    if (variants?.length) {
-        // TODO: Maybe if some variant's price is null then total price is null too?
-        return variants.reduce((total: number | null, { realPrice, amountValue }) => {
-            const useRealPrice = realPrice ?? itemRealPrice
-            if (typeof useRealPrice !== 'number') {
-                return total
-            }
+// const calculateItemTotalPrice = ({
+//     realPrice: itemRealPrice,
+//     amountValue: itemAmountValue,
+//     variants,
+// }: CalculateTotalPriceInput): RealPrice | null => {
+//     if (variants?.length) {
+//         // TODO: Maybe if some variant's price is null then total price is null too?
+//         return variants.reduce((total: RealPrice | null, { realPrice, amountValue }) => {
+//             const useRealPrice = realPrice ?? itemRealPrice
+//             if (typeof useRealPrice !== 'number') {
+//                 return total
+//             }
 
-            return (total ?? 0.0) + useRealPrice * amountValue
-        }, null)
-    } else if (itemRealPrice) {
-        return itemRealPrice * itemAmountValue
-    }
+//             return (total ?? 0.0) + useRealPrice * amountValue
+//         }, null)
+//     } else if (itemRealPrice) {
+//         return itemRealPrice * itemAmountValue
+//     }
 
-    return null
-}
+//     return null
+// }
 
 const db = baseDb.$extends({
-    // result: {
-    //     item: {
-    //         fallbackCurrency: {
-    //             needs: {
-    //                 id: true,
-    //                 currencyId: true,
-    //                 inventoryId: true,
-    //             },
-    //             compute(item) {
-    //                 return async (): Promise<Currency> => {
-    //                     if (item.currencyId === null) {
-    //                         const { currency, userId } = await db.inventory.findUniqueOrThrow({
-    //                             where: { id: item.inventoryId },
-    //                             select: { userId: true, currency: true },
-    //                         })
-
-    //                         if (!currency) {
-    //                             const { currency } = await db.user.findUniqueOrThrow({
-    //                                 where: { id: userId },
-    //                                 select: { currency: true },
-    //                             })
-
-    //                             return currency
-    //                         }
-
-    //                         return currency
-    //                     }
-
-    //                     // TODO: Fix when https://github.com/prisma/prisma/issues/15074 implemented
-    //                     const currency = await db.currency.findUniqueOrThrow({ where: { id: item.currencyId } })
-
-    //                     return currency
-    //                 }
-    //             },
-    //         },
-    //     },
-    // },
-}).$extends({
     model: {
         item: {
             async moveToTrash(where: DB.ItemWhereUniqueInput): Promise<Item> {
@@ -143,40 +117,15 @@ const db = baseDb.$extends({
                     },
                 })
             },
-            async totalPrice(where: DB.ItemWhereUniqueInput): Promise<number | null> {
-                const item = await db.item.findUniqueOrThrow({
-                    where,
-                    include: {
-                        currency: true,
-                        variants: {
-                            select: {
-                                price: true,
-                                amountValue: true,
-                            },
-                        },
-                    },
-                })
-
-                item.currency ??= await db.item.fallbackCurrency(where)
-
-                return calculateItemTotalPrice({
-                    ...extendWithRealPrice(item),
-                    variants: item.variants.map(v => extendWithRealPrice({
-                        ...v,
-                        currency: item.currency,
-                    })),
-                })
-            },
         },
     },
 })
 
 /// Determine `price` from `realPrice` for creation and update
 async function priceDetermined<T extends {
-    id?: Item['id']
     realPrice?: RealPrice | null
     currencyId?: Currency['id']
-}>(input: T): Promise<T & WithPrice> {
+}>(input: T, where: { id: Item['id'] } | { inventoryId: Inventory['id'] }): Promise<Omit<T, 'realPrice'> & WithPrice> {
     if (typeof input.realPrice !== 'number') {
         return {
             ...input,
@@ -184,28 +133,23 @@ async function priceDetermined<T extends {
         }
     }
 
-    let currency: Currency | null = null
-    if (input.currencyId) {
+    let currency: Currency
+    if (typeof input.currencyId === 'number') {
         currency = await db.currency.findUniqueOrThrow({ where: { id: input.currencyId } })
-    } else if (input.id) {
-        const result = await db.item.findUniqueOrThrow({
-            where: { id: input.id },
-            select: { currency: true },
-        })
-        currency = result.currency
+    } else if ('id' in where) {
+        currency = await db.item.fallbackCurrency(where)
+    } else {
+        currency = await db.inventory.fallbackCurrency({ id: where.inventoryId })
     }
 
     return {
         ...input,
-        price: currency ? fromRealValue(input.realPrice, currency) : null,
+        realPrice: undefined,
+        price: fromRealValue(input.realPrice, currency),
     }
 }
 
 const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
-    fastify.get<ItemSearch>('/', { schema: schemas.ItemSearch }, async () => {
-        return db.item.findMany({})
-    })
-
     fastify.get<ItemGetById>('/:itemId', { schema: schemas.ItemGetById }, async (req, res) => {
         const data = await db.item.findUniqueOrThrow({
             select: itemSelectSingleFields,
@@ -223,7 +167,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             //         },
             //     },
             // },
-            where: { id: req.params.itemId },
+            where: { id: req.params.itemId, userId: req.user.userId },
         })
 
         const item: WithRealPrice<Item> = extendWithRealPrice(data)
@@ -260,7 +204,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             amountUnitId,
             amountValue,
             price,
-        } = await priceDetermined(req.body)
+        } = await priceDetermined(req.body, { inventoryId: req.body.inventoryId })
 
         const item = await db.item.create({
             data: {
@@ -291,10 +235,12 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
 
     fastify.put<ItemUpdate>('/:itemId', { schema: schemas.ItemUpdate }, async (req, res) => {
         const { itemId } = req.params
-        const updateParams = await priceDetermined(req.body.item)
+        const updateParams = await priceDetermined(req.body.item, { id: itemId })
+
+        fastify.log.info({ updateParams }, 'update item')
 
         const item: Item = await db.item.update({
-            where: { id: itemId },
+            where: { id: itemId, userId: req.user.userId },
             select: itemSelectSingleFields,
             data: updateParams,
         })
@@ -305,10 +251,85 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
     })
 
     fastify.delete<ItemMoveToTrash>('/:itemId', { schema: schemas.ItemMoveToTrash }, async (req, res) => {
-        const item = await db.item.moveToTrash({ id: req.params.itemId })
+        const item = await db.item.moveToTrash({ id: req.params.itemId, userId: req.user.userId })
 
         return res.code(200).send({
             item,
+        })
+    })
+
+    fastify.get<ItemSearch>('/search', { schema: schemas.ItemSearch }, async (req, res) => {
+        const { q, limit, excludeItems, excludeItemVariants } = req.query
+
+        // const search = q.split(/\W+/).map(w => w.trim()).filter(w => !!w.length).join(' | ')
+
+        const foundItems = await db.$queryRaw<{
+            itemId: Item['id']
+            itemVariantId: ItemVariant['id']
+            similarity: number
+        }[]>`
+            SELECT
+                COALESCE(v_sim, sim) AS similarity
+                ,i.id AS "itemId"
+                ,iv.id AS "itemVariantId"
+            FROM
+                public.items AS i
+                LEFT JOIN public.item_variants AS iv ON i.id = iv.item_id
+                ,similarity(i.name, ${q}) AS sim
+                ,similarity(iv.name, ${q}) AS v_sim
+            WHERE
+                (sim >= 0.1 OR v_sim >= 0.1)
+                ${excludeItems ? Prisma.sql`AND i.id NOT IN (${Prisma.join(excludeItems.map(BigInt))})` : Prisma.empty}
+                ${excludeItemVariants ? Prisma.sql`AND iv.id NOT IN (${Prisma.join(excludeItemVariants.map(BigInt))})` : Prisma.empty}
+            ORDER BY
+                v_sim DESC
+                ,sim DESC
+                ,i.updated_at DESC
+                ,iv.updated_at DESC
+            LIMIT ${limit ?? 10}
+        `
+
+        if (!foundItems) {
+            return res.code(200).send({ items: [] })
+        }
+
+        const items = await db.item.findMany({
+            where: {
+                id: { 
+                    in: foundItems.map(({ itemId }) => itemId), 
+                },
+            },
+            include: {
+                amountUnit: true,
+                images: {
+                    include: {
+                        image: true,
+                    },
+                },
+                variants: {
+                    include: {
+                        avatar: true,
+                        item: {
+                            include: {
+                                images: {
+                                    include: {
+                                        image: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    where: {
+                        id: {
+                            in: foundItems.filter(({ itemVariantId }) => itemVariantId !== null).map(({ itemVariantId }) => itemVariantId),
+                        },
+                    },
+                },
+            },
+        })
+
+        return res.code(200).send({
+            items,
         })
     })
 }

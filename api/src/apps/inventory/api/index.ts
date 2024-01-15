@@ -4,6 +4,7 @@ import tag from './tag'
 import tree from './tree'
 import inventory from './inventory'
 import attr from './attr'
+import buyList from './buy-list'
 
 export default [
     amount,
@@ -12,4 +13,5 @@ export default [
     tree,
     inventory,
     attr,
+    buyList,
 ]

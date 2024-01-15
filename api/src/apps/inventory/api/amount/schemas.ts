@@ -26,7 +26,15 @@ export interface AmountUnitGetById {
     }
     Reply: {
         200: {
-            unit: AmountUnit
+            amountUnit: AmountUnit
+        }
+    }
+}
+
+export interface AmountUnitGetDefault {
+    Reply: {
+        200: {
+            amountUnit: AmountUnit
         }
     }
 }

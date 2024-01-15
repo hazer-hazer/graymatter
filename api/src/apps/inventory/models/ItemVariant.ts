@@ -1,7 +1,7 @@
 import { Image } from '@/models/Image'
 import { UBigInt } from '../../../models/common'
 import { RealPrice } from '@/models/Currency'
-import { ItemAttr } from './Item'
+import { Item, ItemAttr } from './Item'
 import { AttrValue } from './Attribute'
 
 export interface ItemVariantAttr {
@@ -16,7 +16,7 @@ export interface ItemVariant {
     description: string | null
     avatar?: Image | null
     avatarImageId: Image['id'] | null
-    itemId: UBigInt
+    itemId: Item['id']
     amountValue: number
 
     price: UBigInt | null

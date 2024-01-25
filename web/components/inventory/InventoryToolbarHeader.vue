@@ -10,10 +10,9 @@
 
     <q-space />
 
-    <InventorySearch v-if="isInventorySpecified" ref="inventorySearch" class="q-pr-sm" />
+    <InventorySearch class="q-pr-sm" />
 
     <q-btn
-        v-if="isInventorySpecified"
         flat
         icon="add"
         padding="sm"
@@ -28,6 +27,13 @@
 </template>
 
 <script lang="ts" setup>
-const inventorySearch = ref()
-const isInventorySpecified = useIsInventorySpecified()
+const $q = useQuasar()
+try {
+    useInventoryLocation()
+} catch (err) {
+    $q.notify({
+        type: 'negative',
+        message: err instanceof Error ? err.message : 'WTF',
+    })
+}
 </script>

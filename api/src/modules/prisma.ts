@@ -2,6 +2,7 @@ import { Folder } from '@/apps/inventory/models/Folder'
 import { Inventory } from '@/apps/inventory/models/Inventory'
 import { Item } from '@/apps/inventory/models/Item'
 import { Currency, RealPrice, toRealValue } from '@/models/Currency'
+import { Image } from '@/models/Image'
 import { UBigInt } from '@/models/common'
 import { PrismaClient } from '@prisma/client'
 import { Prisma as DB } from '@prisma/client'
@@ -17,6 +18,7 @@ export interface Tree {
     kind: TreeNodeKind
     name: string
     path: TreePath
+    avatar: Image | null
 }
 
 export interface FolderTree extends Tree {
@@ -181,6 +183,7 @@ const db = new PrismaClient({
                         name,
                         path,
                         children: rootFolder.children,
+                        avatar: null,
                     }
                 },
             },
@@ -191,12 +194,17 @@ const db = new PrismaClient({
             folder: {
                 async tree(where: DB.FolderWhereUniqueInput): Promise<FolderTree> {
                     const path = await db.folder.path(where)
-                    const { id, uri, items: childrenItems, children: childrenFolders, name } = await db.folder.findUniqueOrThrow({
+                    const { id, uri, images, items: childrenItems, children: childrenFolders, name } = await db.folder.findUniqueOrThrow({
                         where,
                         select: {
                             id: true,
                             uri: true,
                             name: true,
+                            images: {
+                                include: {
+                                    image: true,
+                                },
+                            },
                             items: {
                                 select: {
                                     id: true,
@@ -222,6 +230,7 @@ const db = new PrismaClient({
                         path,
                         name,
                         children,
+                        avatar: images[0]?.image ?? null,
                     }
                 },
             },
@@ -232,11 +241,13 @@ const db = new PrismaClient({
             item: {
                 async tree(where: DB.ItemWhereUniqueInput): Promise<Tree> {
                     const path = await db.item.path(where)
+                    const { images } = await db.item.findUniqueOrThrow({ where, include: { images: { include: { image: true } } } })
 
                     return {
                         ...path.target(),
                         kind: 'item',
                         path,
+                        avatar: images[0]?.image ?? null,
                     }
                 },
                 async fallbackCurrency(where: DB.ItemWhereUniqueInput): Promise<Currency> {
@@ -278,6 +289,7 @@ const db = new PrismaClient({
     .$extends({
         model: {
             item: {
+                /// Returns null only in case when `item.price`, `item.amountValue` and all variants `amountValue` is null
                 async totalPrice(where: DB.ItemWhereUniqueInput): Promise<RealPrice | null> {
                     const item = await db.item.findUniqueOrThrow({
                         where,

@@ -59,7 +59,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             attr,
         })
     })
-
+ 
     fastify.get<AttrGetMy>('/my', { schema: schemas.AttrGetMy }, async (req, res) => {
         const attrs: Attribute[] = await db.attribute.findMany({
             where: { userId: req.user.userId },

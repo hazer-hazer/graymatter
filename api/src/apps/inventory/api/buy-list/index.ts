@@ -1,6 +1,6 @@
 import { Api } from '@/App'
 import { FastifyPluginAsync } from 'fastify'
-import { BuyListCheckAll, BuyListCreate, BuyListDelete, BuyListGetById, BuyListGetMy, BuyListUpdate, schemas } from './schemas'
+import { BuyListCheckAll, BuyListClear, BuyListCreate, BuyListDelete, BuyListGetById, BuyListGetMy, BuyListUpdate, schemas } from './schemas'
 import db, { DB } from '@/modules/prisma'
 import item, { buyListItemClientResInclude } from './item'
 import { nameToUri } from '@/utils/names-format'
@@ -82,7 +82,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         })
     })
 
-    fastify.post<BuyListCheckAll>('/:id/check-all', {}, async (req, res) => {
+    fastify.post<BuyListCheckAll>('/:id/check-all', { schema: schemas.BuyListCheckAll }, async (req, res) => {
         await db.buyListItem.updateMany({
             where: {
                 buyListId: req.params.id,
@@ -103,7 +103,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         })
     })
 
-    fastify.post<BuyListCheckAll>('/:id/clear', {}, async (req, res) => {
+    fastify.post<BuyListClear>('/:id/clear', { schema: schemas.BuyListClear }, async (req, res) => {
         await db.buyListItem.deleteMany({
             where: {
                 buyListId: req.params.id,

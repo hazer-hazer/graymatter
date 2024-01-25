@@ -296,6 +296,9 @@
     "UBigInt": {},
     "Image": {},
     "Currency": {},
+    "InventoryStar": {},
+    "User": {},
+    "App": {},
     "InventoryStats": {},
     "TreePath": {},
     "TreePathSegment": {},
@@ -315,8 +318,6 @@
     "ItemVariantAttr": {},
     "RealPrice": {},
     "BuyList": {},
-    "User": {},
-    "App": {},
     "BuyListItem": {},
     "TreeItemGet": {
         "params": {

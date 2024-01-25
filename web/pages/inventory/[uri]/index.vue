@@ -1,15 +1,23 @@
 <template>
     <DefaultPage>
-        <span class="text-h4 row">
-            <span class="text-weight-medium q-pr-xs">
-                {{ data?.inventory.name }}
-            </span>
-            <span class="text-caption text-uppercase">dashboard</span>
-        </span>
+        <div class="row items-center justify-between">
+            <div class="col row items-center">
+                <div class="text-h5 text-weight-medium q-pr-xs">
+                    {{ data?.inventory.name }}
+                </div>
+                <div class="text-overline text-grey-7 text-uppercase self-start">
+                    dashboard
+                </div>
+            </div>
+
+            <div class="col-auto self-end q-px-xs">
+                <StarFavorite v-model="starred" />
+            </div>
+        </div>
 
         <q-separator spaced />
 
-        <div class="row q-gutter-md justify-center text-h6 vertical-middle">
+        <div class="row q-gutter-sm justify-center text-h6 vertical-middle">
             <q-card
                 v-for="(card, index) in statsCards"
                 :key="index"
@@ -36,30 +44,28 @@
 
         <q-separator spaced />
 
-        <div v-if="data?.inventory.tree" class="q-pa-md">
-            <div class="row">
-                <span class="col text-h6">Lookup for item/folder</span>
-            </div>
-            <div class="row">
-                <inventory-tree :tree="data?.inventory.tree" />
-                <!-- <q-splitter
-                    v-model="lookupTreeSplitter"
-                    class="col"
-                    style="height: 400px"
-                >
-                    <template #before>
-                        <inventory-tree :tree="data?.inventory.tree" />
-                    </template>
+        <div v-if="data?.inventory.tree">
+            <q-card class="my-card" flat bordered>
+                <q-card-section class="row justify-between items-center q-pb-none">
+                    <div class="col-auto text-h6">
+                        Inventory structure
+                    </div>
 
-                    <template #separator>
-                        <q-avatar color="primary" text-color="white" size="40px" icon="drag_indicator" />
-                    </template>
-
-                    <template #after>
-                        Item here
-                    </template>
-                </q-splitter> -->
-            </div>
+                    <div class="col-4">
+                        <q-input
+                            v-model="treeFilter"
+                            type="text"
+                            :label="`Search in ${data.inventory.name} tree`"
+                            dense
+                            outlined
+                        />
+                    </div>
+                </q-card-section>
+                <q-card-section>
+                    <q-separator />
+                    <inventory-tree :tree="data?.inventory.tree" :filter="treeFilter" />
+                </q-card-section>
+            </q-card>
         </div>
     </DefaultPage>
 </template>
@@ -67,7 +73,11 @@
 <script lang="ts" setup>
 import type { Inventory } from '~/models/inventory/Inventory'
 
-const { $apiUseFetch } = useNuxtApp()
+definePageMeta({
+    middleware: ['auth'],
+})
+
+const { $apiUseFetch, $apiFetch } = useNuxtApp()
 const route = useRoute('inventory-uri')
 const { data } = await $apiUseFetch<{
     inventory: Inventory & Required<Pick<Inventory, 'stats' | 'currency'>>
@@ -82,8 +92,12 @@ if (!data.value?.inventory) {
 
 const inventory = reactive(data.value.inventory)
 
-if (data.value?.inventory.path) {
-    inventoryLocation().value = data.value?.inventory.path.segments
+useHead({
+    title: `${inventory.name} dashboard`,
+})
+
+if (inventory.path) {
+    inventoryLocation().value = inventory.path.segments
 }
 
 const statsCards: ComputedRef<{
@@ -113,11 +127,23 @@ const statsCards: ComputedRef<{
 
 // const lookupTreeSplitter = ref(50)
 
-useHead({
-    title: `${data.value?.inventory.name} dashboard`,
-})
+const treeFilter = ref<string>('')
 
-definePageMeta({
-    middleware: ['auth'],
+const starred = computed({
+    get () {
+        return inventory.starred ?? false
+    },
+    async set (val: boolean) {
+        const { star } = await $apiFetch<{
+            star: boolean
+        }>(`/inventory/${inventory.id}/star`, {
+            method: 'POST',
+            body: {
+                star: val,
+            },
+        })
+
+        inventory.starred = star
+    },
 })
 </script>

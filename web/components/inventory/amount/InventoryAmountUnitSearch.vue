@@ -5,6 +5,7 @@
         :options="options"
         :option-value="(amountUnit: AmountUnit) => amountUnit"
         :option-label="(amountUnit: AmountUnit) => `${amountUnit.name} (${amountUnit.symbol})`"
+        outlined
         use-input
         @filter="filter"
     >

@@ -29,6 +29,7 @@ export default defineNuxtPlugin(() => {
                     ...getAuthHeaderAppendix(),
                 },
                 onRequestError ({ error }) {
+                    console.error('kek', error)
                     if (error instanceof Error) {
                         $q.notify({
                             type: 'negative',

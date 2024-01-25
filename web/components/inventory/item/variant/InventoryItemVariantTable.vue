@@ -11,8 +11,11 @@
         :loading="variantsTableLoading"
         style="max-height: 500px;"
         table-class="scroll-shadows-horizontal"
+        class="variants-table"
         :pagination="{rowsPerPage: 0}"
+        :filter="variantsTableFilter"
         hide-pagination
+        wrap-cells
     >
         <template #top-right>
             <div v-if="variantsSelected.length > 0" class="row q-gutter-sm">
@@ -23,12 +26,23 @@
                     @click="deleteSelectedVariants"
                 />
             </div>
-            <div v-else class="row q-gutter-sm">
+            <div v-else class="row q-gutter-xs">
+                <q-input
+                    v-model="variantsTableFilter"
+                    type="text"
+                    label="Search"
+                    dense
+                    outlined
+                    class="col"
+                />
+
                 <q-btn
                     color="dark"
                     icon="auto_awesome"
                     label="Quickly add variants"
                     outline
+                    dense
+                    class="q-px-md"
                     :loading="quickVariantAddLoading"
                 >
                     <q-popup-edit
@@ -41,7 +55,7 @@
                         :validate="quickAdd => !!quickAdd?.names?.length"
                         @save="saveQuickVariantAdd"
                     >
-                        <InventoryVariantQuickAddList v-model="scope.value" :amount-unit="item.amountUnit" :currency="item.currency" />
+                        <InventoryItemVariantQuickAddList v-model="scope.value" :amount-unit="item.amountUnit" :currency="item.currency" />
                     </q-popup-edit>
                 </q-btn>
                 <q-btn
@@ -50,9 +64,9 @@
                     icon="add_box"
                     label="Add variant"
                     dense
-                    @click="{showVariantCreateModal = true; console.log('kek', showVariantCreateModal)}"
+                    @click="showVariantCreateModal = true"
                 />
-                <InventoryVariantCreateModal v-model="showVariantCreateModal" :item="item" @save="upsertVariants" />
+                <InventoryItemVariantCreateModal v-model="showVariantCreateModal" :item="item" @save="upsertVariants" />
             </div>
         </template>
 
@@ -237,7 +251,7 @@
 
 <script setup lang="ts">
 import type { QTableColumn } from 'quasar'
-import type { ItemVariantQuickAddList } from '../../variant/InventoryVariantQuickAddList.vue'
+import type { ItemVariantQuickAddList } from './InventoryItemVariantQuickAddList.vue'
 import type { UploadResult } from '~/components/ImageUploader.vue'
 import type { Attribute, AttrValue } from '~/models/inventory/Attribute'
 import type { Item } from '~/models/inventory/Item'
@@ -315,8 +329,6 @@ const updateItemVariant = async (variantId: ItemVariant['id'], updated: Partial<
 /// Must be called every time new variant added
 const upsertVariants = (...add: ItemVariant[]) => {
     add.forEach((variant) => {
-        console.log('add variant', variant)
-
         variants[variant.id] = variantToDynamic(variant)
     })
 }
@@ -325,6 +337,7 @@ type TableColumn = QTableColumn<ItemVariantDynamic, keyof ItemVariantDynamic>
 
 const variantsSelected = ref<ItemVariantDynamic[]>([])
 const variantsTableLoading = ref<boolean>(false)
+const variantsTableFilter = ref<string>('')
 
 const attrKey = (attr: Attribute) => `attr_${attr.id}`
 const baseVariantsTableColumns: TableColumn[] = [
@@ -419,8 +432,6 @@ const updateVariantAttr = async (variantId: ItemVariant['id'], attrId: Attribute
 const quickVariantAdd = ref<ItemVariantQuickAddList>({})
 const quickVariantAddLoading = ref<boolean>(false)
 const saveQuickVariantAdd = async (add: ItemVariantQuickAddList) => {
-    console.log('save quick variant add', add)
-
     quickVariantAddLoading.value = true
 
     try {
@@ -470,6 +481,9 @@ const variantImageChanged = async (variantId: ItemVariantDynamic['id'], res: Upl
 </script>
 
 <style lang="scss">
+.q-table__top {
+    padding-right: 10px;
+}
 
 .editable-cell {
     transition: all .2s;

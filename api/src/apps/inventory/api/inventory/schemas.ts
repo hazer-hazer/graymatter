@@ -55,6 +55,13 @@ export interface InventoryGetTrash {
 }
 
 export interface InventoryGetMy {
+    Querystring: {
+        /**
+         * @type integer
+         * @default 10
+         */
+        limit?: number
+    }
     Reply: {
         200: {
             inventories: Inventory[]
@@ -68,6 +75,28 @@ export interface InventoryCreate {
     Reply: {
         200: {
             inventory: Inventory
+        }
+    }
+}
+
+export interface InventoryStarUpdate {
+    Params: {
+        inventoryId: Inventory['id']
+    }
+    Body: {
+        star: boolean
+    }
+    Reply: {
+        200: {
+            star: boolean
+        }
+    }
+}
+
+export interface InventoryGetStarred {
+    Reply: {
+        200: {
+            inventories: Inventory[]
         }
     }
 }

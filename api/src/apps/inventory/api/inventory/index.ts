@@ -1,5 +1,5 @@
-import { FastifyPluginAsync } from 'fastify'
-import { InventoryCreate, InventoryGetByUri, InventoryGetMy, InventoryGetTrash, InventorySearch, schemas } from './schemas'
+import { FastifyPluginAsync, FastifyRequest } from 'fastify'
+import { InventoryCreate, InventoryGetByUri, InventoryGetMy, InventoryGetStarred, InventoryGetTrash, InventorySearch, InventoryStarUpdate, schemas } from './schemas'
 import { default as baseDb } from '@/modules/prisma'
 import { Api } from '@/App'
 import { nameToUri } from '@/utils/names-format'
@@ -36,10 +36,19 @@ const db = baseDb.$extends({
     },
 })
 
+const isStarred = (req: FastifyRequest, inventory: Inventory): boolean => {
+    if (inventory.stars?.length) {
+        return inventory.stars.some(star => star.userId === req.user.userId)
+    }
+
+    return false
+}
+
 const dashboard: FastifyPluginAsync = async function (fastify) {
     /// Dashboard
     fastify.get<InventoryGetByUri>('/:inventoryUri', { schema: schemas.InventoryGetByUri }, async (req, res) => {
         const { inventoryUri } = req.params
+        const { userId } = req.user
 
         const { _count: { items: itemsCount, folders: foldersCount }, ...inventory } = await db.inventory.findUniqueOrThrow({
             include: {
@@ -49,8 +58,9 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
                         folders: true,
                     },
                 },
+                stars: true,
             },
-            where: { userId_uri: { uri: inventoryUri, userId: req.user.userId } },
+            where: { userId_uri: { uri: inventoryUri, userId } },
         })
 
         const where = { id: inventory.id }
@@ -87,6 +97,7 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
                 itemsInTrashFolderCount: itemsInTrashFolderCount ?? 0n,
             },
             tree,
+            starred: isStarred(req, inventory),
         }
 
         return res.code(200).send({ inventory: resultInventory })
@@ -161,7 +172,28 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
     })
 
     fastify.get<InventoryGetMy>('/', { schema: schemas.InventoryGetMy }, async (req, res) => {
-        const inventories = await db.inventory.findMany({ where: { userId: req.user.userId } })
+        const { limit = 10 } = req.query
+        const { userId } = req.user
+
+        let inventories: Inventory[] = await db.inventory.findMany({
+            where: {
+                userId,
+            },
+            include: {
+                stars: true,
+            },
+            orderBy: [{
+                updatedAt: 'desc',
+            }, {
+                createdAt: 'desc',
+            }],
+            take: limit,
+        })
+
+        inventories = inventories.map(inventory => ({
+            ...inventory,
+            starred: isStarred(req, inventory),
+        }))
 
         return res.code(200).send({ inventories })
     })
@@ -199,6 +231,49 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
         inventory.trashFolderId = trashFolder.id
 
         return res.code(200).send({ inventory })
+    })
+
+    fastify.post<InventoryStarUpdate>('/:inventoryId/star', async (req, res) => {
+        const inventoryId = Number(req.params.inventoryId)
+        const { star } = req.body
+        const { userId } = req.user
+
+        if (star) {
+            await db.inventoryStar.upsert({
+                where: { userId_inventoryId: { userId, inventoryId } },
+                create: {
+                    inventoryId,
+                    userId,
+                },
+                update: {},
+            })
+        } else {
+            await db.inventoryStar.delete({
+                where: { userId_inventoryId: { userId, inventoryId } },
+            })
+        }
+
+        return res.code(200).send({
+            star,
+        })
+    })
+
+    fastify.get<InventoryGetStarred>('/starred', async (req, res) => {
+        const { userId } = req.user
+
+        const inventories = await db.inventory.findMany({
+            where: {
+                stars: {
+                    some: {
+                        userId,
+                    },
+                },
+            },
+        })
+
+        return res.code(200).send({
+            inventories,
+        })
     })
 }
 

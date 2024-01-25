@@ -5,17 +5,12 @@
                 <span class="text-h6">
                     Create new attribute
                 </span>
-                <div class="row col q-gutter-sm">
-                    <q-select
-                        v-model="type"
-                        class="col"
-                        :options="ATTR_TYPES"
-                        label="Type"
-                        hide-bottom-space
-                    />
+                <div class="row">
+                    <InventoryAttrTypeSelect v-model="type" class="col" />
+                    <q-separator spaced inset vertical />
                     <q-input
                         v-model="name"
-                        class="col"
+                        class="col-6"
                         type="text"
                         label="Attribute name"
                         hide-bottom-space
@@ -60,7 +55,6 @@
 
 <script setup lang="ts">
 import type { AttrType, Attribute } from '~/models/inventory/Attribute'
-import { ATTR_TYPES } from '~/models/inventory/Attribute'
 
 const $q = useQuasar()
 const { $apiFetch } = useNuxtApp()
@@ -89,8 +83,8 @@ const showAllowedValues = computed<boolean>(() => {
     return type.value === 'Enum'
 })
 
-const type = ref<AttrType>()
-const name = ref<string>()
+const type = ref<AttrType | null>(null)
+const name = ref<string | null>(null)
 const description = ref<string | null>(null)
 const allowedValues = ref<string[]>([])
 
@@ -112,6 +106,12 @@ const submit = async () => {
         })
 
         emit('save', result.attr)
+        emit('update:modelValue', false)
+
+        type.value = null
+        name.value = null
+        description.value = null
+        allowedValues.value = []
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error'
         $q.notify({

@@ -843,6 +843,9 @@
                 "name": {
                     "type": "string"
                 },
+                "type": {
+                    "$ref": "#/definitions/AttrType"
+                },
                 "description": {
                     "type": [
                         "string",
@@ -1325,6 +1328,12 @@
                 "currency": {
                     "$ref": "#/definitions/Currency"
                 },
+                "stars": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InventoryStar"
+                    }
+                },
                 "stats": {
                     "$ref": "#/definitions/InventoryStats"
                 },
@@ -1339,6 +1348,9 @@
                 },
                 "trashFolderId": {
                     "$ref": "#/definitions/UBigInt"
+                },
+                "starred": {
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -1348,6 +1360,33 @@
                 "name",
                 "description",
                 "currencyId"
+            ],
+            "additionalProperties": false
+        },
+        "InventoryStar": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "user": {
+                    "$ref": "#/definitions/User"
+                },
+                "inventoryId": {
+                    "$ref": "#/definitions/Inventory"
+                },
+                "inventory": {
+                    "$ref": "#/definitions/Inventory"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": [
+                "userId",
+                "inventoryId",
+                "createdAt"
             ],
             "additionalProperties": false
         },
@@ -2681,6 +2720,16 @@
         "InventoryGetMy": {
             "type": "object",
             "properties": {
+                "Querystring": {
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "number",
+                            "default": 10
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "Reply": {
                     "type": "object",
                     "properties": {
@@ -2707,6 +2756,7 @@
                 }
             },
             "required": [
+                "Querystring",
                 "Reply"
             ],
             "additionalProperties": false
@@ -2766,6 +2816,95 @@
                     ]
                 }
             }
+        },
+        "InventoryStarUpdate": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "inventoryId": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "inventoryId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "star": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "star"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "star": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "star"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "InventoryGetStarred": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "inventories": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Inventory"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "inventories"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Reply"
+            ],
+            "additionalProperties": false
         },
         "ItemAttrCreate": {
             "type": "object",

@@ -171,6 +171,7 @@
                         >
                             <div class="column">
                                 <InventoryAmountUnitSearch v-model="scope.value.unit" class="col" />
+                                <q-separator spaced inset />
                                 <InventoryAmountInput
                                     v-model="scope.value.value"
                                     :disable="useVariantsAmount"
@@ -645,7 +646,7 @@ interface DisplayPrice {
 const price = computed<DisplayPrice>(() => {
     const formatter = itemPriceFormatter()
     const itemDisplayPrice = item.realPrice ? formatter.format(item.realPrice) : null
-    const total = item.totalPrice ? formatter.format(item.totalPrice) : null
+    const total = typeof item.totalPrice === 'number' ? formatter.format(item.totalPrice) : null
 
     let perUnit: DisplayPrice['perUnit'] = null
     if (item.variants?.length) {

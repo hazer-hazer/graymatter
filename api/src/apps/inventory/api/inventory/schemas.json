@@ -31,6 +31,10 @@
     "UBigInt": {},
     "Image": {},
     "Currency": {},
+    "InventoryStar": {},
+    "User": {},
+    "App": {},
+    "UriPath": {},
     "InventoryStats": {},
     "TreePath": {},
     "TreePathSegment": {},
@@ -51,9 +55,6 @@
     "ItemVariantAttr": {},
     "RealPrice": {},
     "BuyList": {},
-    "User": {},
-    "App": {},
-    "UriPath": {},
     "BuyListItem": {},
     "InventorySearch": {
         "params": {
@@ -146,6 +147,16 @@
         }
     },
     "InventoryGetMy": {
+        "querystring": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "number",
+                    "default": 10
+                }
+            },
+            "additionalProperties": false
+        },
         "response": {
             "200": {
                 "type": "object",
@@ -186,5 +197,64 @@
             }
         }
     },
-    "InventoryCreateFields": {}
+    "InventoryCreateFields": {},
+    "InventoryStarUpdate": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "inventoryId": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "inventoryId"
+            ],
+            "additionalProperties": false
+        },
+        "body": {
+            "type": "object",
+            "properties": {
+                "star": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "star"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "star": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "star"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "InventoryGetStarred": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "inventories": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Inventory"
+                        }
+                    }
+                },
+                "required": [
+                    "inventories"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
 }

@@ -1,7 +1,10 @@
 <template>
-    <q-layout view="hHh lpR fff">
+    <q-layout
+        view="hHh LpR fff"
+        @keyup.self="onKeyupLeftDrawer"
+    >
         <NuxtLoadingIndicator />
-        <q-header class="header text-dark">
+        <q-header class="header text-dark" bordered :elevated="false">
             <q-toolbar>
                 <q-btn
                     dense
@@ -62,45 +65,54 @@
         </q-header>
 
         <q-drawer
-            v-model="leftDrawerOpen"
-            show-if-above
+            v-model="showLeftDrawer"
             side="left"
             bordered
-            overlay
-            :breakpoint="1200"
-            :width="250"
-            class="column full-height"
+            :mini="leftDrawerMini"
+            :breakpoint="1000"
+            :width="220"
+            class="column"
+            @click="leftDrawerClick"
         >
-            <div class="col">
-                <q-list>
-                    <q-item v-ripple clickable>
-                        <q-item-section avatar>
-                            <q-icon color="primary" name="bluetooth" />
-                        </q-item-section>
-                        <q-item-section>Icon as avatar</q-item-section>
-                    </q-item>
-                </q-list>
+            <q-scroll-area class="fit column">
+                <div class="col">
+                    <InventoryLeftDrawerMenu v-if="app.uri === 'inventory'" />
+                </div>
+
+                <q-btn
+                    padding="sm 0"
+                    flat
+                    no-caps
+                    size="md"
+                    icon="water_drop"
+                    text-color="grey-6"
+                    dense
+                    :ripple="{
+                        color: 'grey-8',
+                    }"
+                    stack
+                    square
+                    class="absolute-bottom full-width shadow-1"
+                >
+                    <span v-show="!leftDrawerMini" class="text-caption">GrayMatter</span>
+                </q-btn>
+            </q-scroll-area>
+
+            <div class="mini-drawer-toggle absolute" style="top: 20px; right: -12px;">
+                <q-btn
+                    color="primary"
+                    style="opacity: 0.8"
+                    :icon="leftDrawerMini ? 'chevron_right' : 'chevron_left'"
+                    round
+                    dense
+                    size="sm"
+                    @click.stop="() => leftDrawerMini = !leftDrawerMini"
+                />
             </div>
-
-            <q-separator />
-
-            <q-btn
-                padding="md 0"
-                flat
-                no-caps
-                size="sm"
-                label="GrayMatter"
-                icon="water_drop"
-                text-color="grey-6"
-                dense
-                :ripple="{
-                    color: 'grey-8',
-                }"
-            />
         </q-drawer>
 
         <!-- TODO: Page scroller -->
-        <q-page-container class="row justify-center">
+        <q-page-container>
             <NuxtPage />
         </q-page-container>
 
@@ -112,14 +124,57 @@
 </template>
 
 <script lang="ts" setup>
-const leftDrawerOpen = ref(false)
+import { useCommonStore } from '~/stores/common'
+
+const $q = useQuasar()
 
 const isLoggedIn = useIsLoggedIn()
 const app = useApp()
 const { data: user } = await useAuthStore().refreshed()
 const me = user.value?.user
 
-const toggleLeftDrawer = () => { leftDrawerOpen.value = !leftDrawerOpen.value }
+const { showLeftDrawer, leftDrawerMiniMode } = storeToRefs(useCommonStore())
+const { toggleLeftDrawer, toggleLeftDrawerMini } = useCommonStore()
+
+const leftDrawerMini = computed({
+    get () {
+        if (showLeftDrawer.value && $q.screen.width <= 1200) {
+            return true
+        }
+        return leftDrawerMiniMode.value
+    },
+    set (val: boolean) {
+        if (showLeftDrawer.value) {
+            leftDrawerMiniMode.value = val
+        }
+    },
+})
+
+const leftDrawerClick = () => {
+    // TODO: I don't like this logic, actually
+    leftDrawerMini.value = false
+}
+
+const onKeyupLeftDrawer = (e: KeyboardEvent) => {
+    if (showLeftDrawer.value && e.key === '[') {
+        toggleLeftDrawerMini()
+    }
+}
+
+// const onDrawerKeyup = (e: KeyboardEvent) => {
+//     if (!e) {
+//         return
+//     }
+
+//     console.log(e.target, e.currentTarget)
+
+//     if (!e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && e.key === '[') {
+//         leftDrawerMini.value = !leftDrawerMini.value
+//     }
+// }
+
+// onMounted(() => document.addEventListener('keyup', onDrawerKeyup, true))
+// onUnmounted(() => document.removeEventListener('keyup', onDrawerKeyup, true))
 
 // onMounted(() => {
 //     document.addEventListener('keydown', (e) => {
@@ -140,10 +195,27 @@ const toggleLeftDrawer = () => { leftDrawerOpen.value = !leftDrawerOpen.value }
 @use 'sass:color';
 
 .header {
-    box-shadow: 0 1px 5px #dfdfdf;
+    // box-shadow: 0 1px 5px #dfdfdf;
     background-color: #fff9;
     // background-color: color.adjust($primary, $alpha: -0.4);
     backdrop-filter: blur(6px);
 }
 
+.q-drawer {
+    .mini-drawer-toggle {
+        opacity: 0;
+        transition: opacity 0.25s ease-out;
+        transition-delay: .25s;
+    }
+
+    &.q-drawer--mobile {
+        .mini-drawer-toggle {
+            display: none;
+        }
+    }
+
+    &:hover .mini-drawer-toggle {
+        opacity: 1;
+    }
+}
 </style>

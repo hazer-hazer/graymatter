@@ -63,6 +63,10 @@ export interface Item {
     buyLists?: (Omit<BuyListItem, 'buyList'> & Required<Pick<BuyListItem, 'buyList'>>)[]
 
     // Extended //
+
+    /// Image picked from `images` by some logic (e.g. first image)
+    avatar?: Image | null
+    
     path?: TreePath
 
     variantsAmountSum?: number | null
@@ -102,3 +106,18 @@ export type ItemUpdateFields =
         | 'amountUnitId'
         | 'amountValue'
     >>
+
+export const extendWithAvatar = (item: Item): Item => {
+    return {
+        ...item,
+        avatar: getAvatar(item),
+    }
+}
+
+export const getAvatar = (item: Item): Image | null  => {
+    if (item.images?.length) {
+        return item.images[0].image
+    }
+
+    return null
+}

@@ -3,11 +3,12 @@ import { Folder } from './Folder'
 import { UBigInt } from '../../../models/common'
 import { Image } from '@/models/Image'
 import { Currency } from '@/models/Currency'
+import { User } from '@/models/User'
 
 export interface Inventory {
     id: number
     uri: string
-    userId: UBigInt
+    userId: User['id']
     name: string
     description: string | null
 
@@ -17,12 +18,15 @@ export interface Inventory {
     currencyId: Currency['id'] | null
     currency?: Currency
 
+    stars?: InventoryStar[]
+
     // Extended //
     stats?: InventoryStats
     path?: TreePath
     tree?: FolderTree
     rootFolderId?: Folder['id']
     trashFolderId?: Folder['id']
+    starred?: boolean
 }
 
 export interface InventoryStats {
@@ -41,3 +45,12 @@ export type InventoryCreateFields =
     & Partial<Pick<Inventory,
         | 'uri'
     >>
+
+export interface InventoryStar {
+    userId: User['id']
+    user?: User
+    inventoryId: Inventory['id']
+    inventory?: Inventory
+
+    createdAt: Date
+}

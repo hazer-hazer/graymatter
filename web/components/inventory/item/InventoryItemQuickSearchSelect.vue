@@ -1,6 +1,6 @@
 <template>
     <q-select
-        v-model="selected"
+        v-model="selectedItem"
         label="Search for items..."
         :options="foundItems"
         :option-label="item => item.name"
@@ -94,7 +94,7 @@ const emit = defineEmits<{
     'update:modelValue': [selected: ItemQuickSearchOption | null]
 }>()
 
-const selected = computed({
+const selectedItem = computed({
     get () {
         return props.modelValue
     },
@@ -119,8 +119,6 @@ const search: QSelect['onFilter'] = async (val, update) => {
 
     loading.value = true
     try {
-        console.log('exclude', props.excludeItems, props.excludeItemVariants)
-
         const { items } = await $apiFetch<{
             items: Item[]
         }>('inventory/item/search', {
@@ -158,8 +156,6 @@ const search: QSelect['onFilter'] = async (val, update) => {
                 }
                 return options
             }, [])
-
-            console.log('options', foundItems)
         })
     } catch (err) {
         console.error(err)

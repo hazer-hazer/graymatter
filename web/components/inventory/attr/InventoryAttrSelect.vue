@@ -8,7 +8,17 @@
         outlined
         use-input
         :input-debounce="500"
-    />
+    >
+        <template #no-option>
+            <q-item dense>
+                <q-item-section>
+                    <q-item-label caption>
+                        No attributes found
+                    </q-item-label>
+                </q-item-section>
+            </q-item>
+        </template>
+    </q-select>
 </template>
 
 <script setup lang="ts">

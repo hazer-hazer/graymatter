@@ -2,7 +2,6 @@ import { Api } from '@/App'
 import db, { DB } from '@/modules/prisma'
 import { FastifyPluginAsync } from 'fastify'
 import { BuyListItemCreate, BuyListItemDelete, BuyListItemGet, BuyListItemUpdate, schemas } from './schemas'
-import { BuyListItem } from '@/apps/inventory/models/BuyList'
 
 export const buyListItemClientResInclude = {
     buyList: true,
@@ -24,27 +23,27 @@ export const buyListItemClientResInclude = {
     },
 } satisfies DB.BuyListItemInclude
 
-const applyWatching = async (item: BuyListItem & Required<Pick<BuyListItem, 'item'>>): Promise<boolean> => {
-    if (item.checked) {
-        return true
-    }
+// const applyWatching = async (item: BuyListItem & Required<Pick<BuyListItem, 'item'>>): Promise<boolean> => {
+//     if (item.checked) {
+//         return true
+//     }
 
-    const stockAmount = item.itemVariant?.amountValue ?? item.item?.amountValue ?? -1
+//     const stockAmount = item.itemVariant?.amountValue ?? item.item?.amountValue ?? -1
 
-    if (stockAmount >= item.amountValue) {
-        await db.buyListItem.update({
-            where: { id: item.id },
-            data: {
-                checked: true,
-            },
-            include: buyListItemClientResInclude,
-        })
+//     if (stockAmount >= item.amountValue) {
+//         await db.buyListItem.update({
+//             where: { id: item.id },
+//             data: {
+//                 checked: true,
+//             },
+//             include: buyListItemClientResInclude,
+//         })
 
-        return true
-    }
+//         return true
+//     }
 
-    return false
-}
+//     return false
+// }
 
 const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
     fastify.get<BuyListItemGet>('/', { schema: schemas.BuyListItemGet }, async (req, res) => {
@@ -83,9 +82,9 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             include: buyListItemClientResInclude,
         })
 
-        if (buyListItem.buyList.watch) {
-            buyListItem.checked = await applyWatching(buyListItem)
-        }
+        // if (buyListItem.buyList.watch) {
+        //     buyListItem.checked = await applyWatching(buyListItem)
+        // }
 
         return res.code(200).send({
             buyListItem,

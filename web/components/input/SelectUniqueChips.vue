@@ -7,11 +7,19 @@
         multiple
         hide-dropdown-icon
         class="col"
-        :hint="`To add multiple values at once, separate them by \`${delimiters}\``"
         autofocus
         outlined
+        :bottom-slots="true"
         @new-value="newValue"
-    />
+    >
+        <template #hint>
+            <div>
+                To add multiple values at once, separate them by `<span style="font-family: monospace;">
+                    {{ delimiters }}
+                </span>`
+            </div>
+        </template>
+    </q-select>
 </template>
 
 <script setup lang="ts">

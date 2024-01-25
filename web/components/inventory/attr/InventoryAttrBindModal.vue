@@ -92,7 +92,6 @@ const confirm = computed({
 })
 
 const userDefinedAttrSaved = (customAttr: Attribute) => {
-    console.log('set attr to user defined', customAttr)
     attr.value = customAttr
     showAttrCreateModal.value = false
 }

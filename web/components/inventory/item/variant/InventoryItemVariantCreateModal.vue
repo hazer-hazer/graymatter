@@ -1,31 +1,41 @@
 <template>
     <q-dialog v-model="show">
-        <q-card class="variant-create-modal">
-            <q-card-section>
+        <q-card class="gm-modal">
+            <q-card-section class="q-gutter-sm">
                 <span class="text-h6">Create new variant</span>
                 <q-space />
                 <span class="text-caption text-italic">in {{ path }}</span>
-                <q-form
-                    ref="form"
-                    class="q-gutter-md"
+                <q-input
+                    v-model="name"
+                    type="text"
+                    label="Name"
+                    outlined
                     autofocus
-                    @submit="onSubmit"
-                >
-                    <q-input v-model="name" type="text" label="Name" />
-                    <q-input v-model="description" type="textarea" label="Description" />
-                    <input-uri v-model="uri" :name-value="name" />
-
-                    <div>
-                        <q-btn label="Submit" type="submit" color="primary" :loading="loading" />
-                    </div>
-                </q-form>
+                />
+                <q-input
+                    v-model="description"
+                    type="textarea"
+                    autogrow
+                    label="Description"
+                    outlined
+                />
+                <input-uri v-model="uri" :name-value="name" outlined dense />
             </q-card-section>
+            <q-card-actions align="right">
+                <q-btn
+                    flat
+                    label="Submit"
+                    type="Submit"
+                    color="primary"
+                    :loading="loading"
+                    @click="onSubmit"
+                />
+            </q-card-actions>
         </q-card>
     </q-dialog>
 </template>
 
 <script lang="ts" setup>
-import type { QForm } from 'quasar'
 import type { Item } from '~/models/inventory/Item'
 import type { ItemVariant } from '~/models/inventory/ItemVariant'
 
@@ -51,16 +61,12 @@ const show = computed({
 
 const { $apiFetch } = useNuxtApp()
 
-const form = ref<QForm>()
+const path = computed(() => useInventoryLocation().toUserPath())
+const loading = ref<boolean>(false)
 
 const name = ref<string>()
 const description = ref<string>()
 const uri = ref<string>()
-
-const path = computed(() => useInventoryLocation().toUserPath())
-
-const loading = ref<boolean>(false)
-const $q = useQuasar()
 
 const onSubmit = async () => {
     loading.value = true
@@ -77,30 +83,18 @@ const onSubmit = async () => {
                 },
             },
         })
+
         emit('save', result.variant)
-        form.value?.reset()
+
+        name.value = ''
+        description.value = ''
+        uri.value = ''
+
         show.value = false
     } catch (err) {
-        if (err instanceof Error) {
-            $q.notify({
-                type: 'negative',
-                message: err.message,
-            })
-        } else {
-            $q.notify({
-                type: 'negative',
-                message: 'Something went wrong',
-            })
-        }
+        console.error(err)
     } finally {
         loading.value = false
     }
 }
 </script>
-
-<style lang="scss">
-.variant-create-modal {
-    width: 700px;
-    max-width: 60vw;
-}
-</style>

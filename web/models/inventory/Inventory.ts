@@ -1,7 +1,7 @@
 import type { Currency } from '../Currency'
 import type { Image } from '../Image'
 import type { Folder } from './Folder'
-import type { Tree, TreePath } from './Tree'
+import type { InventoryNode, TreePath } from './Tree'
 
 export interface Inventory {
     id: number
@@ -23,6 +23,7 @@ export interface Inventory {
         itemsInTrashFolderCount: number
     }
 
-    tree?: Tree & {kind: 'inventory'}
+    tree?: InventoryNode
     path?: TreePath
+    starred?: boolean
 }

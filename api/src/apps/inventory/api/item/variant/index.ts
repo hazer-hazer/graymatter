@@ -194,7 +194,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
                 ,iv.updated_at DESC
                 ,iv.created_at DESC
             LIMIT ${limit ?? 10}`
-        
+
         const itemVariants = await db.itemVariant.findMany({
             where: {
                 id: {

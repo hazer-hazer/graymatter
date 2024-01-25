@@ -6,12 +6,12 @@
             type="search"
             outlined
             dense
-            input-class="text-right"
-            class="q-pa-none"
+            class="text-right q-pa-none"
             clearable
             style="width: 250px"
             :loading="loading"
             debounce="500"
+            label="Search"
             @focus="focused = true"
             @blur="focused = false"
             @update:model-value="search"
@@ -36,7 +36,6 @@
             padding
             class="absolute q-mt-xl bg-white shadow-1 scroll overflow-auto rounded-borders"
             style="max-height: 450px; width: 250px;"
-            @click="console.log('kek')"
         >
             <q-item-label header class="sticky">
                 Search results
@@ -68,7 +67,7 @@ import type { Inventory } from '~/models/inventory/Inventory'
 import type { Item } from '~/models/inventory/Item'
 
 type SearchResult = {
-    kind: 'item',
+    kind: 'item'
     item: Item
     url?: string
 }
@@ -108,7 +107,6 @@ const search: QInput['onUpdate:modelValue'] = async (value) => {
         }
         throw new Error(`Unknown search result kind ${result.kind}`)
     })
-    console.log(searchResults.value)
 
     loading.value = false
 }

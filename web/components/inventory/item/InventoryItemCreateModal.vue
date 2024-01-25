@@ -60,7 +60,7 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div v-if="amountUnit" class="row">
                     <q-btn
                         label="Add variants?"
                         flat
@@ -69,7 +69,8 @@
                         @click="showVariants = !showVariants"
                     />
                     <div v-show="showVariants" class="row full-width">
-                        <InventoryVariantQuickAddList v-model="variants" class="col" />
+                        <!-- TODO: Currency -->
+                        <!-- <InventoryItemVariantQuickAddList v-model="variants" class="col" :amount-unit="amountUnit" /> -->
                     </div>
                 </div>
 
@@ -107,7 +108,7 @@
 
 <script lang="ts" setup>
 import type { QForm, QInput } from 'quasar'
-import type { ItemVariantQuickAddList } from '../variant/InventoryVariantQuickAddList.vue'
+import type { ItemVariantQuickAddList } from './variant/InventoryItemVariantQuickAddList.vue'
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
 import type { Item } from '~/models/inventory/Item'
 

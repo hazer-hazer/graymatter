@@ -25,4 +25,4 @@ export type AttributeCreateFields =
     } & Required<Pick<Attribute, 'allowedValues'>>)
 
 export type AttributeUpdateFields =
-    Partial<Pick<Attribute, 'name' | 'description' | 'allowedValues'>>
+    Partial<Pick<Attribute, 'name' | 'type' | 'description' | 'allowedValues'>>

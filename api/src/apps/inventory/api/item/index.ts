@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from 'fastify'
 import { default as baseDb, DB } from '@/modules/prisma'
 import { ItemCreate, ItemGetById, ItemMoveToTrash, ItemSearch, ItemUpdate, schemas  } from './schemas'
 import { nameToUri } from '@/utils/names-format'
-import { Item } from '@/apps/inventory/models/Item'
+import { getAvatar, Item } from '@/apps/inventory/models/Item'
 import image from './image'
 import { Api } from '@/App'
 import variant from './variant'
@@ -100,6 +100,24 @@ const itemSelectSingleFields = {
 //     return null
 // }
 
+const watchBuyLists = async (itemId: Item['id'], updatedAmountValue?: number) => {
+    const stockAmount = updatedAmountValue ?? ((await db.item.findUniqueOrThrow({ where: { id: itemId }, select: { amountValue: true } })).amountValue)
+    await db.buyListItem.updateMany({
+        where: {
+            itemId,
+            amountValue: {
+                lte: stockAmount,
+            },
+            buyList: {
+                watch: true,
+            },
+        },
+        data: {
+            checked: true,
+        },
+    })
+}
+
 const db = baseDb.$extends({
     model: {
         item: {
@@ -177,7 +195,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         }))
 
         const { _sum: { amountValue: variantsAmountSum } } = await db.itemVariant.aggregate({
-            _sum: {
+            _sum: { 
                 amountValue: true,
             },
             where: { itemId: item.id },
@@ -187,6 +205,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         item.path = await db.item.path({ id: item.id })
         item.variantsAmountSum = variantsAmountSum
         item.totalPrice = await db.item.totalPrice({ id: item.id })
+        item.avatar = getAvatar(item)
 
         return res.code(200).send({
             item,
@@ -237,8 +256,6 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         const { itemId } = req.params
         const updateParams = await priceDetermined(req.body.item, { id: itemId })
 
-        fastify.log.info({ updateParams }, 'update item')
-
         const item: Item = await db.item.update({
             where: { id: itemId, userId: req.user.userId },
             select: itemSelectSingleFields,
@@ -246,6 +263,10 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
         })
 
         item.totalPrice = await db.item.totalPrice({ id: item.id })
+
+        if (typeof updateParams.amountValue === 'number') {
+            await watchBuyLists(itemId, updateParams.amountValue)
+        }
 
         return res.code(200).send({ item })
     })

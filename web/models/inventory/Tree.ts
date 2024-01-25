@@ -7,15 +7,25 @@ export type TreeNodeKind = 'inventory' | 'item' | 'folder'
 export interface Tree {
     id: string | bigint | number
     uri: string
-    kind: TreeNodeKind
     name: string
     path: TreePath
 }
 
-export interface FolderTree extends Tree {
-    kind: 'inventory' | 'folder'
-    children: Tree[]
+export interface ItemNode extends Tree {
+    kind: 'item'
 }
+
+export interface FolderNode extends Tree {
+    kind: 'folder'
+    children: TreeNode[]
+}
+
+export interface InventoryNode extends Tree {
+    kind: 'inventory'
+    children: TreeNode[]
+}
+
+export type TreeNode = ItemNode | FolderNode | InventoryNode
 
 interface TreePathInventorySegment {
     kind: Extract<TreeNodeKind, 'inventory'>

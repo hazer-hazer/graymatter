@@ -40,7 +40,7 @@ export interface ItemVariantQuickAddList {
 }
 
 const props = defineProps<{
-    modelValue: ItemVariantQuickAddList,
+    modelValue: ItemVariantQuickAddList
     amountUnit: AmountUnit
     currency: Currency
 }>()

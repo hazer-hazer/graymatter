@@ -63,12 +63,13 @@ model User {
     images     Image[]          @relation("UserImages")
 
     // Inventory App //
-    inventories  Inventory[]
-    items        Item[]
-    amountUnits  AmountUnit[]
-    attributes   Attribute[]
-    buyLists     BuyList[]
-    buyListItems BuyListItem[]
+    inventories      Inventory[]
+    items            Item[]
+    amountUnits      AmountUnit[]
+    attributes       Attribute[]
+    buyLists         BuyList[]
+    buyListItems     BuyListItem[]
+    inventoriesStars InventoryStar[]
 
     @@map("users")
 }
@@ -124,11 +125,27 @@ model Inventory {
     currency   Currency? @relation(fields: [currencyId], references: [id])
     currencyId Int?      @map("currency_id") @db.SmallInt
 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
     items   Item[]
     folders Folder[]
+    stars   InventoryStar[]
 
     @@unique([userId, uri])
     @@map("inventories")
+}
+
+model InventoryStar {
+    user        User      @relation(fields: [userId], references: [id])
+    userId      BigInt    @map("user_id")
+    inventory   Inventory @relation(fields: [inventoryId], references: [id])
+    inventoryId Int       @map("inventory_id")
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    @@id([userId, inventoryId])
+    @@map("inventories_stars")
 }
 
 model AmountUnit {
@@ -171,7 +188,7 @@ model Image {
     folders            FolderImages[]
     inventoriesAvatars Inventory[]
     usersAvatars       User[]
-    ItemVariant        ItemVariant[]
+    itemVariants        ItemVariant[]
 
     @@map("images")
 }
@@ -468,17 +485,20 @@ model BuyListItem {
     user   User   @relation(fields: [userId], references: [id])
     userId BigInt @map("user_id")
 
-    buyList       BuyList      @relation(fields: [buyListId], references: [id])
-    buyListId     BigInt       @map("buy_list_id")
-    item          Item?        @relation(fields: [itemId], references: [id])
+    buyList   BuyList @relation(fields: [buyListId], references: [id])
+    buyListId BigInt  @map("buy_list_id")
+
+    item   Item?   @relation(fields: [itemId], references: [id])
+    itemId BigInt? @map("item_id")
+
     itemVariant   ItemVariant? @relation(fields: [itemVariantId], references: [id])
-    itemId        BigInt?      @map("item_id")
     itemVariantId BigInt?      @map("item_variant_id")
 
     amountValue Float @map("amount_value")
 
     checked Boolean @default(false)
 
+    // NULLS NOT DISTINCT unique index in sql file
     @@unique([buyListId, itemId, itemVariantId])
     @@map("buy_list_items")
 }

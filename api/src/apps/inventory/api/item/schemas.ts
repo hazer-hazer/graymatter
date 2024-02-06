@@ -3,11 +3,30 @@ import { ItemVariant } from '../../models/ItemVariant'
 
 export { default as schemas } from './schemas.json'
 
+export type ExtendedItemClientRes =
+    Item
+    & Required<Pick<Item,
+        | 'amountUnit'
+        | 'currency'
+        | 'images'
+        | 'attributes'
+        | 'variants'
+        | 'buyLists'
+        | 'avatar'
+        | 'path'
+        | 'variantsAmountSum'
+        | 'totalPrice'
+        | 'realPrice'
+    >>
+
+
 export interface ItemCreate {
-    Body: ItemCreateFields
+    Body: {
+        item: ItemCreateFields
+    }
     Reply: {
         200: {
-            item: Item
+            item: ExtendedItemClientRes
         }
     }
 }
@@ -21,7 +40,7 @@ export interface ItemUpdate {
     }
     Reply: {
         200: {
-            item: Item
+            item: ExtendedItemClientRes
         }
     }
 }
@@ -32,7 +51,7 @@ export interface ItemGetById {
     }
     Reply: {
         200: {
-            item: Item
+            item: ExtendedItemClientRes
         }
     }
 }

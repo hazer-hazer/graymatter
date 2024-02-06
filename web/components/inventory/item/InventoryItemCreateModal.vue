@@ -1,159 +1,176 @@
 <template>
-    <q-dialog v-model="confirm" transition-hide="slide-down" transition-show="slide-down">
-        <div class="bg-white q-pa-md inventory-item-create-modal">
-            <span class="text-h5">Add item</span>
-            <q-space />
-            <span class="text-caption text-italic">in {{ path }}</span>
+    <g-modal v-model="confirm" title="Add item" :caption="caption" @submit="onSubmit">
+        <template #default>
+            <q-input
+                v-model="name"
+                class="text-h6"
+                autofocus
+                type="text"
+                label="Name"
+                maxlength="255"
+                lazy-rules
+                :rules="[
+                    val => val !== null && val !== '' || 'Name is required',
+                    val => val?.length > 0 && val?.length < 255 || 'Name must be <255 characters long'
+                ]"
+            />
+
+            <q-input
+                v-model="description"
+                type="textarea"
+                autogrow
+                label="Description"
+                maxlength="1023"
+            />
+
             <q-separator spaced />
-            <q-form
-                ref="form"
-                class="q-gutter-md col"
-                @submit="onSubmit"
-            >
-                <div class="row">
-                    <div class="col">
-                        <q-input
-                            v-model="name"
-                            class="row text-h6"
-                            autofocus
-                            type="text"
-                            label="Name"
-                            maxlength="255"
-                            lazy-rules
-                            :rules="[
-                                val => val !== null && val !== '' || 'Name is required',
-                                val => val?.length > 0 && val?.length < 255 || 'Name must be <255 characters long'
-                            ]"
-                        />
 
-                        <q-input
-                            v-model="description"
-                            class="row"
-                            type="textarea"
-                            autogrow
-                            label="Description"
-                            maxlength="1023"
-                        />
-
-                        <q-input v-model="buyLink" type="url" label="Buy link" />
-                        <!-- TODO: Price -->
-
-                        <!-- TODO: Use InventoryAmountInput -->
-                        <div class="row">
-                            <div class="col">
-                                <inventory-amount-unit-search v-model="amountUnit" />
-                            </div>
-                            <div class="col">
-                                <q-input
-                                    v-model="rawAmountValue"
-                                    :readonly="!amountUnit"
-                                    type="number"
-                                    label="Amount"
-                                    :suffix="amountUnit?.symbol"
-                                    lazy-rules
-                                    :rules="[
-                                        val => !!val || 'Amount unit is required'
-                                    ]"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="amountUnit" class="row">
-                    <q-btn
-                        label="Add variants?"
-                        flat
-                        dense
-                        class="full-width row"
-                        @click="showVariants = !showVariants"
-                    />
-                    <div v-show="showVariants" class="row full-width">
-                        <!-- TODO: Currency -->
-                        <!-- <InventoryItemVariantQuickAddList v-model="variants" class="col" :amount-unit="amountUnit" /> -->
-                    </div>
-                </div>
-
-                <div class="row justify-end q-gutter-sm">
-                    <q-btn label="Create item" type="submit" color="primary" :loading="loading" />
-                </div>
-            </q-form>
-
-            <div v-if="createdItems?.length" class="row column q-pa-sm">
-                <div class="text-h6">
-                    <span>Added items:</span>
-                </div>
-                <q-list bordered dense>
-                    <q-item
-                        v-for="(item, index) in createdItems"
-                        :key="index"
-                        v-ripple
-                        clickable
-                        dense
-                        class="q-pa-md"
-                        :to="`/inventory/item/${item.id}`"
-                    >
-                        <q-item-section class="text-body1">
-                            <div class="text-grey-4 text-caption">
-                                <span>open</span>
-                            </div>
-                            {{ item.name }}
-                        </q-item-section>
-                    </q-item>
-                </q-list>
+            <div class="row q-col-gutter-xs">
+                <span class="full-width text-subtitle2">Amount</span>
+                <inventory-amount-unit-search v-model="amountUnit" dense class="col-6" />
+                <inventory-amount-input v-model="amountValue" dense class="col-6" :amount-unit="amountUnit" />
             </div>
-        </div>
-    </q-dialog>
+
+            <q-separator spaced />
+
+            <div class="row q-col-gutter-xs">
+                <span class="full-width text-subtitle2">Purchase</span>
+                <currency-select v-model="currency" dense class="col-4" />
+                <inventory-price-input v-model="realPrice" dense class="col-4" :currency="currency" />
+                <q-input
+                    v-model="buyLink"
+                    dense
+                    outlined
+                    type="url"
+                    class="col-4"
+                    label="Buy link"
+                />
+            </div>
+
+            <div v-if="amountUnit && currency" class="column">
+                <q-separator spaced />
+                <q-btn
+                    label="Add variants?"
+                    flat
+                    dense
+                    class="col q-mb-sm"
+                    @click="showVariants = !showVariants"
+                />
+                <div v-show="showVariants" class="col">
+                    <inventory-item-variant-quick-add-list v-model="variants" dense :amount-unit="amountUnit" :currency="currency" />
+                </div>
+            </div>
+        </template>
+
+        <template v-if="createdItems?.length" #bottom>
+            <q-separator spaced />
+            <div class="text-h6">
+                <span>Added items:</span>
+            </div>
+            <q-list bordered dense>
+                <q-item
+                    v-for="(item, index) in createdItems"
+                    :key="index"
+                    v-ripple
+                    clickable
+                    dense
+                    class="q-pa-md"
+                    :to="`/inventory/item/${item.id}`"
+                >
+                    <q-item-section class="text-body1">
+                        <div class="text-grey-4 text-caption">
+                            <span>open</span>
+                        </div>
+                        {{ item.name }}
+                    </q-item-section>
+                </q-item>
+            </q-list>
+        </template>
+    </g-modal>
 </template>
 
 <script lang="ts" setup>
-import type { QForm, QInput } from 'quasar'
+import type { QInput } from 'quasar'
 import type { ItemVariantQuickAddList } from './variant/InventoryItemVariantQuickAddList.vue'
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
 import type { Item } from '~/models/inventory/Item'
+import { TreePath, type TreePathSegment } from '~/models/inventory/Tree'
+import type { Currency } from '~/models/Currency'
 
-const confirm = showCreateItemModal()
-const form = ref<QForm>()
+const props = defineProps<{
+    modelValue: boolean
+    path: TreePathSegment[]
+}>()
+
+const path = new TreePath(props.path)
+
+const caption = computed(() => `in ${path.targetFolderPath().toUserPath()}`)
+
+const emit = defineEmits<{
+    'update:modelValue': [val: boolean]
+}>()
+
+const confirm = computed({
+    get () {
+        return props.modelValue
+    },
+    set (val) {
+        emit('update:modelValue', val)
+    },
+})
+
+const { $apiFetch, $apiUseFetch } = useNuxtApp()
+
 const showVariants = ref(false)
-const path = computed(() => useInventoryLocation().targetFolderPath().toUserPath())
 
 const name = ref<string>()
 const description = ref<string>()
+const realPrice = ref<number | null>(null)
 const buyLink = ref<string>()
 const amountUnit = ref<AmountUnit | null>(null)
-const rawAmountValue = ref<string>()
+const amountValue = ref<number>()
 const variants = ref<ItemVariantQuickAddList>({})
+const { data: inventoryCurrency } = await $apiUseFetch<{currency: Currency}>(`/inventory/${path.inventoryId()}/currency`)
+const currency = ref<Currency | null>(null)
+watchEffect(() => { currency.value = inventoryCurrency.value?.currency ?? null })
 
 const $q = useQuasar()
-
-const { $apiFetch } = useNuxtApp()
 
 const loading = ref(false)
 const createdItems: Ref<Item[]> = ref([])
 const onSubmit = async () => {
     loading.value = true
-    const inventoryLocation = useInventoryLocation()
-    const targetFolderId = inventoryLocation.targetFolderId()
-    const inventoryId = inventoryLocation.inventoryId()
+
+    const folderId = path.targetFolderId()
+    const inventoryId = path.inventoryId()
+
     try {
-        if (!targetFolderId || !inventoryId) {
+        if (!folderId || !inventoryId) {
             throw new Error('Cannot determine folder and inventory to save item to')
         }
 
         const { item } = await $apiFetch<{item: Item}>('inventory/item', {
             method: 'POST',
             body: {
-                name: name.value,
-                description: description.value ?? null,
-                inventoryId,
-                folderId: targetFolderId,
-                amountUnitId: amountUnit.value?.id,
-                rawAmountValue: rawAmountValue.value,
-                variants: variants.value?.names?.map(name => ({
-                    name,
-                    amountValue: variants.value?.amountValueEach,
-                    realPrice: variants.value?.realPriceEach,
-                })),
+                item: {
+                    name: name.value,
+                    description: description.value,
+                    inventoryId,
+                    folderId,
+                    amountUnitId: amountUnit.value?.id,
+                    rawAmountValue: amountValue.value,
+                    realPrice: realPrice.value,
+                    currencyId: currency.value?.id,
+                },
+            },
+        })
+
+        await $apiFetch(`/inventory/item/${item.id}/variant/quick`, {
+            method: 'POST',
+            body: {
+                names: variants.value.names,
+                realPriceEach: variants.value.realPriceEach,
+                amountValueEach: variants.value.amountValueEach,
             },
         })
 
@@ -182,8 +199,6 @@ const onSubmit = async () => {
                 },
             ],
         })
-
-        form.value?.reset()
     } catch (err) {
         if (err instanceof Error) {
             $q.notify({

@@ -97,7 +97,7 @@ useHead({
 })
 
 if (inventory.path) {
-    inventoryLocation().value = inventory.path.segments
+    useInventoryStore().relocate(inventory.path.segments)
 }
 
 const statsCards: ComputedRef<{

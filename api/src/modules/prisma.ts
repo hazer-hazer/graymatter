@@ -285,6 +285,16 @@ const db = new PrismaClient({
             },
         },
     })
+    .$extends({
+        result: {
+            amountUnit: {
+                default: {
+                    needs: { default: true },
+                    compute(d) { return !!d},
+                },
+            },
+        },
+    })
     // Price //
     .$extends({
         model: {

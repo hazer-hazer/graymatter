@@ -1,5 +1,9 @@
 .gm-modal {
-    width: max-content;
-    min-width: 500px;
+    width: 600px;
     max-width: 60vw;
+
+    .q-card__section,
+    .q-card__actions {
+        padding: map-get($map: $space-sm, $key: x) map-get($map: $space-md, $key: x);
+    }
 }

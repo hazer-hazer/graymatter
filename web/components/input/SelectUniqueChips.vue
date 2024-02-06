@@ -60,6 +60,7 @@ const newValue: QSelect['onNewValue'] = (newVal: string, done) => {
     newVal
         .split(delimRegex)
         .map(val => val.trim())
+        .filter(val => !!val.length)
         .forEach(val => updated.add(val))
 
     values.value = Array.from(updated)

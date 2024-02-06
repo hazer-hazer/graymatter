@@ -24,7 +24,7 @@
                                         label="Watch"
                                         icon="visibility"
                                         dense
-                                        @update:model-value="watch => updateBuyList(buyList.id, {watch})"
+                                        @update:model-value="watch => updateBuyList({watch})"
                                     />
                                     <q-tooltip :delay="400" class="neutral-tooltip" max-width="20rem">
                                         {{ whatIsWatchOptionText }}
@@ -76,11 +76,47 @@
                 </q-btn>
             </div>
 
-            <div class="text-h6">
+            <div class="text-h6 cursor-pointer">
+                <BadgeTooltip position="before" />
                 {{ buyList.name }}
+
+                <q-popup-edit
+                    v-slot="scope"
+                    v-model="buyList.name"
+                    class="q-pa-none"
+                    @save="name => updateBuyList({name})"
+                >
+                    <q-input
+                        v-model="scope.value"
+                        dense
+                        outlined
+                        autofocus
+                        label="Name"
+                        @keyup.enter="scope.set"
+                    />
+                </q-popup-edit>
             </div>
-            <div class="text-body2">
+            <div class="text-body2 cursor-pointer">
+                <BadgeTooltip position="before" />
                 {{ buyList.description }}
+
+                <q-popup-edit
+                    v-slot="scope"
+                    v-model="buyList.description"
+                    class="q-pa-none"
+                    buttons
+                    @save="description => updateBuyList({description})"
+                >
+                    <q-input
+                        v-model="scope.value"
+                        type="textarea"
+                        autogrow
+                        dense
+                        outlined
+                        autofocus
+                        label="Description"
+                    />
+                </q-popup-edit>
             </div>
         </q-card-section>
         <q-separator />
@@ -242,39 +278,6 @@ type BuyListDynamic = Omit<BuyList, 'items'> & {
     }
 }
 
-function buyListItemToDynamic (item: BuyListItem): BuyListItemDynamic {
-    const amountValueInStock = item.itemVariant?.amountValue ?? item.item?.amountValue ?? null
-
-    return {
-        ...item,
-        displayName: item.itemVariant?.name ?? item.item?.name ?? item.name ?? 'Unknown',
-        caption: item.itemVariant?.name ?? item.item?.name ?? null,
-        url: `/inventory/item/${item.itemId}`,
-        ...amountValueInStock !== null && item.item
-            ? {
-                amount: {
-                    stockValue: item.itemVariant?.amountValue ?? item.item.amountValue,
-                    amountUnit: item.item.amountUnit,
-                },
-            }
-            : { amount: null },
-    }
-}
-
-type BuyListItemDynamic = Pick<BuyListItem,
-    | 'amountValue'
-    | 'checked'
-    | 'id'
-> & {
-    displayName: string
-    caption: string | null
-    url: string | null
-    amount: {
-        stockValue: number
-        amountUnit: AmountUnit
-    } | null
-}
-
 function buyListToDynamic (buyList: BuyList): BuyListDynamic {
     const excludeItemSearch = [...new Set(buyList.items.reduce((itemsWoVariants: Item['id'][], { itemVariantId, id }) => {
         if (!itemVariantId && id !== null) {
@@ -300,6 +303,42 @@ function buyListToDynamic (buyList: BuyList): BuyListDynamic {
             item: null,
             amountValue: null,
         },
+    }
+}
+
+type BuyListItemDynamic = Pick<BuyListItem,
+    | 'amountValue'
+    | 'checked'
+    | 'id'
+> & {
+    displayName: string
+    caption: string | null
+    url: string | null
+    amount: {
+        stockValue: number
+        amountUnit: AmountUnit
+    } | null
+}
+
+function buyListItemToDynamic (item: BuyListItem): BuyListItemDynamic {
+    const amountValueInStock = item.itemVariant?.amountValue ?? item.item?.amountValue ?? null
+
+    const displayName = item.itemVariant?.name ?? item.item?.name ?? item.name ?? 'Unknown'
+    const caption = item.itemVariant ? item.item?.name ?? null : null
+
+    return {
+        ...item,
+        displayName,
+        caption,
+        url: `/inventory/item/${item.itemId}`,
+        ...amountValueInStock !== null && item.item
+            ? {
+                amount: {
+                    stockValue: item.itemVariant?.amountValue ?? item.item.amountValue,
+                    amountUnit: item.item.amountUnit,
+                },
+            }
+            : { amount: null },
     }
 }
 
@@ -367,11 +406,11 @@ const clearBuyList = async (id: BuyList['id']) => {
     }
 }
 
-const updateBuyList = async (buyListId: BuyList['id'], updated: Partial<BuyListDynamic>) => {
+const updateBuyList = async (updated: Partial<BuyListDynamic>) => {
     try {
         const result = await $apiFetch<{
             buyList: BuyList
-        }>(`/inventory/buy-list/${buyListId}`, {
+        }>(`/inventory/buy-list/${buyList.id}`, {
             method: 'PUT',
             body: {
                 buyList: updated,

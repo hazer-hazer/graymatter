@@ -8,7 +8,7 @@
 
         <q-separator spaced />
 
-        <div v-if="data" class="row q-col-gutter-sm">
+        <div v-if="buyLists" class="row q-col-gutter-sm">
             <div
                 v-for="(buyList, id) in buyLists"
                 :key="id"
@@ -76,6 +76,7 @@
 
 <script setup lang="ts">
 import type { BuyList } from '~/models/inventory/BuyList'
+
 useHead({
     title: 'My buy lists',
 })

@@ -1,0 +1,35 @@
+{
+    "FolderCreate": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "folder": {
+                    "$ref": "refSchema#/definitions/FolderCreateFields"
+                }
+            },
+            "required": [
+                "folder"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "folder": {
+                        "$ref": "refSchema#/definitions/Folder"
+                    }
+                },
+                "required": [
+                    "folder"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "FolderCreateFields": {},
+    "UBigInt": {},
+    "Folder": {},
+    "Image": {},
+    "FolderKind": {}
+}

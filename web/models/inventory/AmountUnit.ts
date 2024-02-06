@@ -14,4 +14,6 @@ export interface AmountUnit {
     userId: string | null
 
     powerPrefixes: AmountUnitPowerPrefix[]
+
+    default: boolean
 }

@@ -1,4 +1,37 @@
 <template>
+    <q-select
+        v-model="input"
+        :options="searchResults"
+        :label="label"
+        :loading="loading"
+        :input-debounce="500"
+        use-input
+        dense
+        outlined
+        hide-dropdown-icon
+        :option-label="displaySearchResult"
+        hide-selected
+        @filter="search"
+    >
+        <template #no-option>
+            <q-item v-if="input?.length">
+                <q-item-section>
+                    <q-item-label caption>
+                        Nothing found
+                    </q-item-label>
+                </q-item-section>
+            </q-item>
+        </template>
+
+        <template #option="{opt, itemProps}">
+            <q-item v-bind="itemProps" @click="navigateTo(opt.url)">
+                <q-item-section>
+                    <q-item-label>{{ opt.item.name }}</q-item-label>
+                </q-item-section>
+            </q-item>
+        </template>
+    </q-select>
+    <!--
     <div class="row">
         <q-input
             ref="inputField"
@@ -11,12 +44,10 @@
             style="width: 250px"
             :loading="loading"
             debounce="500"
-            label="Search"
-            @focus="focused = true"
-            @blur="focused = false"
+            :label="label"
             @update:model-value="search"
         >
-            <!-- <template #prepend>
+            <template #prepend>
                 <q-icon name="search" />
             </template>
 
@@ -26,11 +57,10 @@
                         <kbd class="kbd self-center text-body2 rounded-borders">Ctrl+K</kbd>
                     </div>
                 </div>
-            </template> -->
+            </template>
         </q-input>
 
         <q-list
-            v-show="focused"
             bordered
             separator
             padding
@@ -59,29 +89,37 @@
             </q-item>
         </q-list>
     </div>
+-->
 </template>
 
 <script lang="ts" setup>
-import type { QInput } from 'quasar'
+import type { QSelect } from 'quasar'
 import type { Inventory } from '~/models/inventory/Inventory'
 import type { Item } from '~/models/inventory/Item'
+import { TreePath, type TreePathSegment } from '~/models/inventory/Tree'
+
+const props = defineProps<{
+    path: TreePathSegment[]
+}>()
+
+const path = new TreePath(props.path)
 
 type SearchResult = {
     kind: 'item'
     item: Item
-    url?: string
+    url: string
 }
 
-const input = ref()
-const inputField = ref()
-const focused = ref()
+const label = computed(() => `Search in ${path.toUserPath()}`)
+
+const input = ref<string>()
 const searchResults = ref<SearchResult[]>([])
 const loading = ref(false)
 
 const { $apiFetch } = useNuxtApp()
 
-const search: QInput['onUpdate:modelValue'] = async (value) => {
-    const inventoryUri = useInventoryLocation().inventoryUri()
+const search: QSelect['onFilter'] = (value, update) => update(async () => {
+    const inventoryUri = path.inventoryUri()
 
     if (!value) {
         searchResults.value = []
@@ -109,14 +147,9 @@ const search: QInput['onUpdate:modelValue'] = async (value) => {
     })
 
     loading.value = false
-}
-
-defineExpose({
-    focus () {
-        inputField.value.focus()
-    },
-    focused,
 })
+
+const displaySearchResult = (result: SearchResult): string => result.item.name
 </script>
 
 <style lang="scss">

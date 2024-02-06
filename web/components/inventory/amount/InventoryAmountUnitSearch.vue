@@ -4,7 +4,7 @@
         label="Amount unit"
         :options="options"
         :option-value="(amountUnit: AmountUnit) => amountUnit"
-        :option-label="(amountUnit: AmountUnit) => `${amountUnit.name} (${amountUnit.symbol})`"
+        :option-label="(amountUnit: AmountUnit) => `${amountUnit.symbol} (${amountUnit.name})`"
         outlined
         use-input
         @filter="filter"
@@ -31,6 +31,14 @@ const emit = defineEmits<{
     'update:modelValue': [unit: AmountUnit | null],
 }>()
 
+const { $apiUseFetch } = useNuxtApp()
+
+const { data: amountUnits } = await $apiUseFetch<{
+    amountUnits: AmountUnit[]
+}>('inventory/amount')
+
+const defaultAmountUnit = computed(() => amountUnits.value?.amountUnits.find(unit => !!unit.default) ?? null)
+
 const model = computed({
     get () {
         return props.modelValue
@@ -40,21 +48,20 @@ const model = computed({
     },
 })
 
-const { $apiFetch } = useNuxtApp()
+watchEffect(() => {
+    if (defaultAmountUnit.value && !props.modelValue) {
+        model.value = defaultAmountUnit.value
+    }
+})
 
 const options = ref<AmountUnit[]>()
-const filter: QSelect['onFilter'] = async (_val, update) => {
-    if (options.value) {
-        update(() => {})
-        return
-    }
-
-    const { amountUnits } = await $apiFetch<{
-        amountUnits: AmountUnit[]
-    }>('inventory/amount')
+const filter: QSelect['onFilter'] = (input_, update) => {
+    const input = input_.toLocaleLowerCase()
 
     update(() => {
-        options.value = amountUnits
+        options.value = amountUnits.value?.amountUnits.filter(unit =>
+            unit.name.toLocaleLowerCase().includes(input) ||
+            unit.symbol.toLocaleLowerCase().includes(input))
     })
 }
 

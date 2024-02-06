@@ -61,7 +61,7 @@ const show = computed({
 
 const { $apiFetch } = useNuxtApp()
 
-const path = computed(() => useInventoryLocation().toUserPath())
+const path = computed(() => useInventoryStore().path?.toUserPath())
 const loading = ref<boolean>(false)
 
 const name = ref<string>()

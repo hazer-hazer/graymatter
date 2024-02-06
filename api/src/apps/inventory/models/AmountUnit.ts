@@ -25,6 +25,8 @@ export interface AmountUnit {
     userId: UBigInt | null
 
     powerPrefixes?: AmountUnitPowerPrefix[]
+
+    default?: boolean
 }
 
 export type AmountUnitCreateFields =

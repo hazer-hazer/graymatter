@@ -1,33 +1,20 @@
 import { FastifyPluginAsync } from 'fastify'
 import { default as baseDb, DB } from '@/modules/prisma'
-import { ItemCreate, ItemGetById, ItemMoveToTrash, ItemSearch, ItemUpdate, schemas  } from './schemas'
+import { ExtendedItemClientRes, ItemCreate, ItemGetById, ItemMoveToTrash, ItemSearch, ItemUpdate, schemas  } from './schemas'
 import { nameToUri } from '@/utils/names-format'
 import { getAvatar, Item } from '@/apps/inventory/models/Item'
 import image from './image'
 import { Api } from '@/App'
-import variant from './variant'
-import { Currency, extendWithRealPrice, fromRealValue, RealPrice, WithPrice, WithRealPrice } from '@/models/Currency'
+import variant, { itemVariantClientResInclude } from './variant'
+import { Currency, extendWithRealPrice, fromRealValue, RealPrice, toRealValue, WithPrice } from '@/models/Currency'
 import attr from './attr'
 import { Inventory } from '../../models/Inventory'
 import { ItemVariant } from '../../models/ItemVariant'
 import { Prisma } from '@prisma/client'
+import { buyListClientResInclude } from '../buy-list'
 
-const itemSelectSingleFields = {
-    id: true,
-    uri: true,
-    name: true,
-    description: true,
-    inventoryId: true,
-    inventory: true,
-    folderId: true,
-    createdAt: true,
-    updatedAt: true,
-    buyLink: true,
-    price: true,
-    currencyId: true,
+export const itemClientResInclude = {
     currency: true,
-    amountValue: true,
-    amountUnitId: true,
     amountUnit: {
         include: {
             powerPrefixes: true,
@@ -38,22 +25,11 @@ const itemSelectSingleFields = {
             image: true,
         },
         orderBy: {
-            createdAt: 'desc' as DB.SortOrder,
+            createdAt: 'desc',
         },
     },
     variants: {
-        include: {
-            avatar: true,
-            attributes: {
-                include: {
-                    itemAttr: {
-                        include: {
-                            attr: true,
-                        },
-                    },
-                },
-            },
-        },
+        include: itemVariantClientResInclude,
         orderBy: [{
             updatedAt: 'desc',
         }, {
@@ -62,7 +38,9 @@ const itemSelectSingleFields = {
     },
     buyLists: {
         include: {
-            buyList: true,
+            buyList: {
+                include: buyListClientResInclude,
+            },
         },
     },
     attributes: {
@@ -70,7 +48,7 @@ const itemSelectSingleFields = {
             attr: true,
         },
     },
-} satisfies DB.ItemSelect
+} satisfies DB.ItemInclude
 
 // type CalculateTotalPriceInput =
 //     Required<Pick<Item, 'realPrice' | 'amountValue'>>
@@ -129,7 +107,7 @@ const db = baseDb.$extends({
 
                 return db.item.update({
                     where,
-                    select: itemSelectSingleFields,
+                    include: itemClientResInclude,
                     data: {
                         folderId: trashFolderId,
                     },
@@ -167,10 +145,50 @@ async function priceDetermined<T extends {
     }
 }
 
+async function extendItem(
+    item: Item & Required<Pick<Item,
+        | 'amountUnit'
+        | 'images' 
+        | 'variants' 
+        | 'attributes' 
+        | 'buyLists'
+    >>,
+): Promise<ExtendedItemClientRes> {
+    const where = { id: item.id }
+    const currency = item.currency ?? await db.item.fallbackCurrency(where)
+    const realPrice = item.price ? toRealValue(item.price, currency) : null
+    const totalPrice = await db.item.totalPrice(where)
+    const path = await db.item.path(where)
+    const avatar = getAvatar(item)
+
+    const { _sum: { amountValue: variantsAmountSum } } = await db.itemVariant.aggregate({
+        _sum: { 
+            amountValue: true,
+        },
+        where: { itemId: item.id },
+    })
+
+    const variants = item.variants?.map(variant => extendWithRealPrice({
+        ...variant,
+        currency,
+    }))
+
+    return {
+        ...item,
+        currency,
+        realPrice,
+        totalPrice,
+        path,
+        avatar,
+        variantsAmountSum,
+        variants,
+    }
+}
+
 const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
     fastify.get<ItemGetById>('/:itemId', { schema: schemas.ItemGetById }, async (req, res) => {
         const data = await db.item.findUniqueOrThrow({
-            select: itemSelectSingleFields,
+            include: itemClientResInclude,
             // include: {
             //     variants: true,
             //     inventory: true,
@@ -188,24 +206,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             where: { id: req.params.itemId, userId: req.user.userId },
         })
 
-        const item: WithRealPrice<Item> = extendWithRealPrice(data)
-        item.variants = item.variants?.map(variant => extendWithRealPrice({
-            ...variant,
-            currency: data.currency,
-        }))
-
-        const { _sum: { amountValue: variantsAmountSum } } = await db.itemVariant.aggregate({
-            _sum: { 
-                amountValue: true,
-            },
-            where: { itemId: item.id },
-        })
-
-        item.currency ??= await db.item.fallbackCurrency({ id: item.id })
-        item.path = await db.item.path({ id: item.id })
-        item.variantsAmountSum = variantsAmountSum
-        item.totalPrice = await db.item.totalPrice({ id: item.id })
-        item.avatar = getAvatar(item)
+        const item = await extendItem(data)
 
         return res.code(200).send({
             item,
@@ -223,7 +224,7 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
             amountUnitId,
             amountValue,
             price,
-        } = await priceDetermined(req.body, { inventoryId: req.body.inventoryId })
+        } = await priceDetermined(req.body.item, { inventoryId: req.body.item.inventoryId })
 
         const item = await db.item.create({
             data: {
@@ -247,28 +248,31 @@ const fastifyPlugin: FastifyPluginAsync = async function (fastify) {
                     },
                 },
             },
+            include: itemClientResInclude,
         })
 
-        return res.code(200).send({ item })
+        return res.code(200).send({
+            item: await extendItem(item),
+        })
     })
 
     fastify.put<ItemUpdate>('/:itemId', { schema: schemas.ItemUpdate }, async (req, res) => {
         const { itemId } = req.params
         const updateParams = await priceDetermined(req.body.item, { id: itemId })
 
-        const item: Item = await db.item.update({
+        const item = await db.item.update({
             where: { id: itemId, userId: req.user.userId },
-            select: itemSelectSingleFields,
+            include: itemClientResInclude,
             data: updateParams,
         })
-
-        item.totalPrice = await db.item.totalPrice({ id: item.id })
 
         if (typeof updateParams.amountValue === 'number') {
             await watchBuyLists(itemId, updateParams.amountValue)
         }
 
-        return res.code(200).send({ item })
+        return res.code(200).send({
+            item: await extendItem(item),
+        })
     })
 
     fastify.delete<ItemMoveToTrash>('/:itemId', { schema: schemas.ItemMoveToTrash }, async (req, res) => {

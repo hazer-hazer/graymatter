@@ -5,7 +5,7 @@ import db, { DB } from '@/modules/prisma'
 import item, { buyListItemClientResInclude } from './item'
 import { nameToUri } from '@/utils/names-format'
 
-const buyListClientResInclude = {
+export const buyListClientResInclude = {
     items: {
         include: buyListItemClientResInclude,
     },

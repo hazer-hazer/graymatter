@@ -1,7 +1,6 @@
 <template>
     <q-table
         v-model:selected="variantsSelected"
-        title="Variants"
         :columns="variantsTableColumns"
         :rows="Object.values(variants)"
         row-key="id"
@@ -17,6 +16,13 @@
         hide-pagination
         wrap-cells
     >
+        <template #top-left>
+            <div class="row items-center">
+                <span class="text-h6">Variants</span>
+                <span class="q-ml-sm text-caption">({{ Object.values(variants).length }})</span>
+            </div>
+        </template>
+
         <template #top-right>
             <div v-if="variantsSelected.length > 0" class="row q-gutter-sm">
                 <q-btn
@@ -93,7 +99,8 @@
                     v-ripple
                     :props="body"
                     auto-width
-                    class="editable-cell"
+                    dense
+                    class="editable-cell thumbnail"
                     @click="body.row.showImageUploader = true"
                 >
                     <BadgeTooltip />
@@ -103,11 +110,12 @@
                             spinner-color="primary"
                             spinner-size="20px"
                             height="90%"
+                            ratio="16/9"
                             class="rounded-borders"
                         />
                     </q-avatar>
                     <q-avatar v-else icon="image" text-color="grey" />
-                    <ImageUploader v-model="body.row.showImageUploader" :multiple="false" @uploaded="res => variantImageChanged(body.row.id, res)" />
+                    <ImageUploader v-model="body.row.showImageUploader" :label="`Update image for variant ${body.row.name}`" :multiple="false" @uploaded="res => variantImageChanged(body.row.id, res)" />
                 </q-td>
 
                 <q-td
@@ -470,7 +478,7 @@ const variantImageChanged = async (variantId: ItemVariantDynamic['id'], res: Upl
     }>(`/inventory/item/variant/${variantId}`, {
         method: 'PUT',
         body: {
-            itemVariantId: {
+            itemVariant: {
                 avatarImageId: res.res.images[0].id,
             },
         },
@@ -487,6 +495,10 @@ const variantImageChanged = async (variantId: ItemVariantDynamic['id'], res: Upl
 
 .editable-cell {
     transition: all .2s;
+
+    &.thumbnail {
+        padding: 0 7px;
+    }
 }
 
 .editable-cell:hover {

@@ -256,5 +256,33 @@
                 "additionalProperties": false
             }
         }
+    },
+    "InventoryGetCurrency": {
+        "params": {
+            "type": "object",
+            "properties": {
+                "inventoryId": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "inventoryId"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "$ref": "refSchema#/definitions/Currency"
+                    }
+                },
+                "required": [
+                    "currency"
+                ],
+                "additionalProperties": false
+            }
+        }
     }
 }

@@ -3,7 +3,8 @@
         v-model="price"
         type="number"
         label="Price"
-        :prefix="currency.symbol"
+        :readonly="!currency"
+        :prefix="currency?.symbol"
         outlined
         hide-bottom-space
         :rules="[
@@ -17,7 +18,7 @@ import type { Currency } from '~/models/Currency'
 
 const props = defineProps<{
     modelValue?: number | null
-    currency: Currency
+    currency: Currency | null
 }>()
 
 const emit = defineEmits<{
@@ -34,7 +35,7 @@ const price = computed<string>({
             return
         }
         const [int, frac] = val.split('.')
-        const fracStr = frac ? `.${frac.slice(0, props.currency.decimals)}` : ''
+        const fracStr = frac ? `.${frac.slice(0, props.currency?.decimals)}` : ''
         emit('update:modelValue', Number(`${int}${fracStr}`))
     },
 })

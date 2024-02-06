@@ -11,6 +11,13 @@
 
         <q-separator spaced inset />
 
+        <q-item v-ripple clickable to="/inventory/search">
+            <q-item-section avatar>
+                <q-icon color="primary" name="manage_search" size="sm" />
+            </q-item-section>
+            <q-item-section>Search</q-item-section>
+        </q-item>
+
         <q-item v-ripple clickable to="/inventory/buy-list">
             <q-item-section avatar>
                 <q-icon color="primary" name="shopping_cart" size="sm" />

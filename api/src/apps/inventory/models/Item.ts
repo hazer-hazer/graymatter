@@ -21,7 +21,7 @@ export interface Item {
     uri: string
 
     name: string
-    description?: string | null
+    description: string | null
 
     inventoryId: number
     inventory?: Inventory
@@ -90,6 +90,7 @@ export type ItemCreateFields =
         | 'amountValue'
         | 'realPrice'
         | 'currencyId'
+        | 'buyLink'
     >>
     & {
         variants?: ItemVariantCreateFields[]

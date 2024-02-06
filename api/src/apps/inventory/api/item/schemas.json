@@ -1,28 +1,7 @@
 {
-    "ItemCreate": {
-        "body": {
-            "$ref": "refSchema#/definitions/ItemCreateFields"
-        },
-        "response": {
-            "200": {
-                "type": "object",
-                "properties": {
-                    "item": {
-                        "$ref": "refSchema#/definitions/Item"
-                    }
-                },
-                "required": [
-                    "item"
-                ],
-                "additionalProperties": false
-            }
-        }
-    },
-    "ItemCreateFields": {},
-    "UBigInt": {},
-    "RealPrice": {},
-    "ItemVariantCreateFields": {},
+    "ExtendedItemClientRes": {},
     "Item": {},
+    "UBigInt": {},
     "Inventory": {},
     "Image": {},
     "Currency": {},
@@ -33,6 +12,9 @@
     "InventoryStats": {},
     "TreePath": {},
     "TreePathSegment": {},
+    "FolderTree": {},
+    "Tree": {},
+    "TreeNodeKind": {},
     "Folder": {},
     "FolderKind": {},
     "AmountUnit": {},
@@ -43,11 +25,39 @@
     "Attribute": {},
     "AttrType": {},
     "AttrValue": {},
+    "RealPrice": {},
     "BuyList": {},
     "BuyListItem": {},
-    "FolderTree": {},
-    "Tree": {},
-    "TreeNodeKind": {},
+    "ItemCreate": {
+        "body": {
+            "type": "object",
+            "properties": {
+                "item": {
+                    "$ref": "refSchema#/definitions/ItemCreateFields"
+                }
+            },
+            "required": [
+                "item"
+            ],
+            "additionalProperties": false
+        },
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "item": {
+                        "$ref": "refSchema#/definitions/ExtendedItemClientRes"
+                    }
+                },
+                "required": [
+                    "item"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "ItemCreateFields": {},
+    "ItemVariantCreateFields": {},
     "ItemUpdate": {
         "params": {
             "type": "object",
@@ -78,7 +88,7 @@
                 "type": "object",
                 "properties": {
                     "item": {
-                        "$ref": "refSchema#/definitions/Item"
+                        "$ref": "refSchema#/definitions/ExtendedItemClientRes"
                     }
                 },
                 "required": [
@@ -107,7 +117,7 @@
                 "type": "object",
                 "properties": {
                     "item": {
-                        "$ref": "refSchema#/definitions/Item"
+                        "$ref": "refSchema#/definitions/ExtendedItemClientRes"
                     }
                 },
                 "required": [

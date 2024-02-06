@@ -1,6 +1,7 @@
 import { Inventory, InventoryCreateFields } from '@/apps/inventory/models/Inventory'
 import { Folder } from '../../models/Folder'
 import { Item } from '../../models/Item'
+import { Currency } from '@/models/Currency'
 
 export { default as schemas } from './schemas.json'
 
@@ -97,6 +98,17 @@ export interface InventoryGetStarred {
     Reply: {
         200: {
             inventories: Inventory[]
+        }
+    }
+}
+
+export interface InventoryGetCurrency {
+    Params: {
+        inventoryId: Inventory['id']
+    }
+    Reply: {
+        200: {
+            currency: Currency
         }
     }
 }

@@ -1,5 +1,5 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify'
-import { InventoryCreate, InventoryGetByUri, InventoryGetMy, InventoryGetStarred, InventoryGetTrash, InventorySearch, InventoryStarUpdate, schemas } from './schemas'
+import { InventoryCreate, InventoryGetByUri, InventoryGetCurrency, InventoryGetMy, InventoryGetStarred, InventoryGetTrash, InventorySearch, InventoryStarUpdate, schemas } from './schemas'
 import { default as baseDb } from '@/modules/prisma'
 import { Api } from '@/App'
 import { nameToUri } from '@/utils/names-format'
@@ -101,6 +101,15 @@ const dashboard: FastifyPluginAsync = async function (fastify) {
         }
 
         return res.code(200).send({ inventory: resultInventory })
+    })
+
+    fastify.get<InventoryGetCurrency>('/:inventoryId/currency', { schema: schemas.InventoryGetCurrency }, async (req, res) => {
+        const { inventoryId } = req.params
+        const currency = await db.inventory.fallbackCurrency({ id: inventoryId })
+
+        return res.code(200).send({
+            currency,
+        })
     })
 
     // Only item search

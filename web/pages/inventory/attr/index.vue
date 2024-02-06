@@ -9,6 +9,8 @@
                     color="primary"
                     icon="new_label"
                     outline
+                    dense
+                    class="q-px-md"
                     label="Create attribute"
                     @click="showCreateModal = true"
                 />

@@ -1,0 +1,22 @@
+{
+    "CurrencyGet": {
+        "response": {
+            "200": {
+                "type": "object",
+                "properties": {
+                    "currencies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "refSchema#/definitions/Currency"
+                        }
+                    }
+                },
+                "required": [
+                    "currencies"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "Currency": {}
+}

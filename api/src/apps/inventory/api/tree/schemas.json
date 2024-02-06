@@ -231,6 +231,16 @@
                                         ]
                                     }
                                 },
+                                "avatar": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "refSchema#/definitions/Image"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                },
                                 "path": {
                                     "$ref": "refSchema#/definitions/TreePath"
                                 },
@@ -269,6 +279,7 @@
                                 "buyLink",
                                 "createdAt",
                                 "currencyId",
+                                "description",
                                 "folderId",
                                 "id",
                                 "inventory",

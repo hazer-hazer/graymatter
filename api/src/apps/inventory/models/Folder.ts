@@ -14,3 +14,14 @@ export interface Folder {
 
     kind?: FolderKind | null
 }
+
+export type FolderCreateFields =
+    Required<Pick<Folder, 
+        | 'name'
+        | 'parentId'
+        | 'inventoryId'
+    >>
+    & Partial<Pick<Folder,
+        | 'description'
+        | 'uri'
+    >>

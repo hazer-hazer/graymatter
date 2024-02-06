@@ -11,6 +11,7 @@
                 :max-file-size="2 ** 21"
                 :multiple="props.multiple"
                 :headers="headers"
+                :label="label"
                 @uploaded="uploaded"
             />
         </q-card>
@@ -24,8 +25,10 @@ import type { Image } from '~/models/Image'
 const props = withDefaults(defineProps<{
     multiple?: boolean
     modelValue: boolean,
+    label?: string
 }>(), {
     multiple: true,
+    label: undefined,
 })
 
 const emit = defineEmits<{

@@ -7,7 +7,7 @@
                     class="col-auto"
                     label="Create new inventory"
                     no-caps
-                    @click="showInventoryCreateModal().value = true"
+                    @click="showInventoryCreateModal = true"
                 />
             </div>
             <q-separator spaced />
@@ -31,6 +31,8 @@
                 <span class="text-h6">You have no inventories</span>
             </div>
         </div>
+
+        <InventoryCreateModal v-model="showInventoryCreateModal" />
     </DefaultPage>
 </template>
 
@@ -46,6 +48,8 @@ definePageMeta({
 })
 
 const { $apiUseFetch } = useNuxtApp()
+
+const showInventoryCreateModal = ref<boolean>(false)
 
 const inventories = await $apiUseFetch<{
     inventories: Inventory[]

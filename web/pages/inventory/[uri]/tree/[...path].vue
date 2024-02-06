@@ -1,8 +1,5 @@
 <template>
     <DefaultPage>
-        <div class="row q-pb-md">
-            <InventoryCreateEntry />
-        </div>
         <div v-if="data" class="row q-gutter-sm">
             <InventoryFolderCard v-for="folder in data.folders" :key="folder.id" class="card col" :folder="folder" />
             <InventoryItemCard
@@ -13,6 +10,9 @@
                 bordered
                 :item="item"
             />
+            <div class="row q-pb-md">
+                <InventoryCreateEntry :path="data?.path" />
+            </div>
         </div>
         <div v-else-if="pending">
             <q-spinner-gears
@@ -31,7 +31,7 @@
 import type { Folder } from '~/models/inventory/Folder'
 import type { Inventory } from '~/models/inventory/Inventory'
 import type { Item } from '~/models/inventory/Item'
-import { TreePath } from '~/models/inventory/Tree'
+import { TreePath, type TreePathSegment } from '~/models/inventory/Tree'
 
 definePageMeta({
     validate: (route) => {
@@ -53,12 +53,13 @@ const { data, pending, error } = await $apiUseFetch<{
     inventory: Inventory
     targetFolderId: Folder['id']
     targetFolderPath: TreePath
-    folders: any[],
+    folders: any[]
     items: Item[]
+    path: TreePathSegment[]
 }>(() => `inventory/${route.params.uri}/tree/${path.value}`)
 
 if (data.value?.targetFolderPath) {
-    inventoryLocation().value = data.value?.targetFolderPath.segments
+    useInventoryStore().relocate(data.value.targetFolderPath.segments)
 }
 
 const title = computed(() => {

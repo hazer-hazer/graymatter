@@ -108,6 +108,10 @@
                     size="sm"
                     @click.stop="() => leftDrawerMini = !leftDrawerMini"
                 />
+
+                <q-tooltip anchor="center end" self="center start">
+                    Toggle mini mode <kbd>[</kbd>
+                </q-tooltip>
             </div>
         </q-drawer>
 
@@ -116,9 +120,6 @@
             <NuxtPage />
         </q-page-container>
 
-        <InventoryItemCreateModal />
-        <InventoryFolderCreateModal />
-        <InventoryCreateModal />
         <AuthModal />
     </q-layout>
 </template>

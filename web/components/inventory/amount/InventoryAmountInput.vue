@@ -16,7 +16,7 @@
 import type { AmountUnit } from '~/models/inventory/AmountUnit'
 
 const props = defineProps<{
-    amountUnit?: AmountUnit,
+    amountUnit?: AmountUnit | null,
     modelValue?: number | null,
 }>()
 

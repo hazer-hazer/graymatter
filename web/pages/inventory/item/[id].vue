@@ -78,9 +78,10 @@
                 <q-separator spaced inset vertical />
                 <q-card-section class="col q-pl-none">
                     <q-btn
-                        icon="more_vert"
+                        icon="more_horiz"
                         flat
-                        class="absolute-top-right q-ma-md q-pa-sm"
+                        dense
+                        class="absolute-top-right q-ma-md"
                     >
                         <q-menu>
                             <q-list dense>
@@ -99,35 +100,52 @@
                         </q-menu>
                     </q-btn>
 
-                    <div class="row">
+                    <div class="row cursor-pointer">
+                        <BadgeTooltip position="before" />
                         <span class="text-h5 ellipsis">{{ item.name }}</span>
-                        <q-tooltip anchor="bottom start" :offset="[-45, 0]">
-                            <span>Edit name</span><q-icon name="edit" class="q-pl-sm" />
-                        </q-tooltip>
-                        <q-popup-edit v-slot="scope" v-model="item.name" title="Edit item name" auto-save>
-                            <q-input v-model="scope.value" dense autofocus @keyup.enter="scope.set" />
+                        <q-popup-edit
+                            v-slot="scope"
+                            v-model="item.name"
+                            class="q-pa-none"
+                            @save="name => updateAndSaveItem('name', name)"
+                        >
+                            <q-input
+                                v-model="scope.value"
+                                label="Name"
+                                dense
+                                outlined
+                                autofocus
+                                @keyup.enter="scope.set"
+                            />
                         </q-popup-edit>
                     </div>
                     <q-separator spaced />
-                    <div class="row">
+                    <div class="row cursor-pointer">
+                        <BadgeTooltip position="before" />
                         <p v-if="item.description?.trim().length" class="text-body2 col" style="white-space: normal; overflow-wrap: break-word;">
                             {{ item.description }}
                         </p>
                         <span v-else class="text-italic col">No description</span>
-                        <q-tooltip anchor="bottom start" :offset="[-60, 0]">
-                            <span>Edit description</span><q-icon name="edit" class="q-pl-sm" />
-                        </q-tooltip>
-                        <q-popup-edit v-slot="scope" v-model="item.description" title="Edit item description" auto-save>
+                        <q-popup-edit
+                            v-slot="scope"
+                            v-model="item.description"
+                            class="q-pa-none"
+                            buttons
+                            @save="description => updateAndSaveItem('description', description)"
+                        >
                             <q-input
                                 v-model="scope.value"
                                 type="textarea"
+                                label="Description"
+                                outlined
+                                autogrow
                                 dense
                                 autofocus
                             />
                         </q-popup-edit>
                     </div>
 
-                    <div v-if="itemFieldsChanged.name || itemFieldsChanged.description" class="row q-gutter-xs justify-end absolute-bottom q-mr-md q-mb-sm">
+                    <!-- <div v-if="itemFieldsChanged.name || itemFieldsChanged.description" class="row q-gutter-xs justify-end absolute-bottom q-mr-md q-mb-sm">
                         <q-btn
                             color="grey"
                             icon="close"
@@ -143,7 +161,7 @@
                             :loading="itemFieldsLoading.name || itemFieldsLoading.description"
                             @click="saveUpdatedItem('name', 'description')"
                         />
-                    </div>
+                    </div> -->
                 </q-card-section>
             </q-card-section>
 
@@ -168,15 +186,17 @@
                             v-model="amount"
                             max-width="300px"
                             buttons
+                            class="q-pa-xs"
                         >
                             <div class="column">
-                                <InventoryAmountUnitSearch v-model="scope.value.unit" class="col" />
+                                <InventoryAmountUnitSearch v-model="scope.value.unit" dense class="col" />
                                 <q-separator spaced inset />
                                 <InventoryAmountInput
                                     v-model="scope.value.value"
                                     :disable="useVariantsAmount"
                                     :hint="cannotChangeItemAmountHint"
                                     class="col"
+                                    dense
                                     :amount-unit="scope.value.unit"
                                 />
                             </div>
@@ -195,7 +215,7 @@
                 <q-card bordered flat class="row item-prop-card justify-center items-center">
                     <BadgeTooltip />
 
-                    <q-card-section class="col column" style="padding: 0 20px;">
+                    <q-card-section class="col column items-center" style="padding: 0 20px;">
                         <div v-if="!price.total && !price.perUnit" class="col text-h6 text-grey-6 text-center">
                             set price
                         </div>
@@ -204,9 +224,14 @@
                             <span>{{ price.total }} in total</span>
                         </div>
 
-                        <div v-if="price.perUnit" class="col text-caption text-center">
-                            <span>{{ price.perUnit }}</span>
-                            <span> each</span>
+                        <div class="row col text-caption q-gutter-xs">
+                            <div v-if="price.perUnit !== null" class="col-auto">
+                                <span>{{ price.perUnit }}</span>
+                                <span> each</span>
+                            </div>
+                            <!-- <div v-if="price.itemDisplayPrice !== null" class="col-auto">
+                                <span>({{ price.itemDisplayPrice }} by default)</span>
+                            </div> -->
                         </div>
                     </q-card-section>
 
@@ -214,12 +239,14 @@
                         v-slot="scope"
                         v-model="item.realPrice"
                         class="q-pa-xs"
+                        max-width="200px"
                         @save="val => updateAndSaveItem('realPrice', val)"
                     >
                         <InventoryPriceInput
                             v-model="scope.value"
                             :currency="item.currency"
                             autofocus
+                            :hint="itemPriceHint"
                             @keyup.enter="scope.set"
                         />
                     </q-popup-edit>
@@ -490,7 +517,7 @@ const originalItem: ItemDynamic = itemToDynamic({ ...data.value.item })
 const item = reactive<ItemDynamic>(itemToDynamic(data.value.item))
 
 if (item.path) {
-    inventoryLocation().value = item?.path.segments
+    useInventoryStore().relocate(item.path.segments)
 }
 
 useHead({
@@ -527,7 +554,15 @@ const photoUploaded = async (res: UploadResult) => {
 }
 
 const itemFieldsLoading = reactive(mapValuesToDefault(item, false))
-const itemFieldsChanged = computed(() => shallowDiff(pick(item, 'name', 'description', 'realPrice', 'amountUnitId'), pick(originalItem, 'name', 'description', 'realPrice', 'amountUnitId')))
+// const itemFieldsChanged = computed(() => shallowDiff(pick(item, 'name', 'description', 'realPrice', 'amountUnitId'), pick(originalItem, 'name', 'description', 'realPrice', 'amountUnitId')))
+
+const applyItemChanges = (updated: Item) => {
+    Object.assign(item, {
+        ...item,
+        ...itemToDynamic(updated),
+    })
+    Object.assign(originalItem, updated)
+}
 
 const saveUpdatedItem = async (...fields: (keyof ItemDynamic)[]) => {
     const pickedFields = pick(item, ...fields)
@@ -542,25 +577,17 @@ const saveUpdatedItem = async (...fields: (keyof ItemDynamic)[]) => {
             },
         })
 
-        Object.assign(item, {
-            ...item,
-            ...itemToDynamic(updated),
-        })
-        Object.assign(originalItem, {
-            ...item,
-        })
+        applyItemChanges(updated)
         success = true
     } catch (err) {
         if (!success) {
             discardItemChanges(...fields)
         }
 
-        if (err instanceof Error) {
-            $q.notify({
-                type: 'negative',
-                message: err.message,
-            })
-        }
+        $q.notify({
+            type: 'negative',
+            message: err instanceof Error ? err.message : 'Unknown error',
+        })
     } finally {
         assignPicked(itemFieldsLoading, fields, false)
     }
@@ -653,7 +680,7 @@ const price = computed<DisplayPrice>(() => {
         const variantsPrices = new Set(item.variants.filter(({ realPrice }) => typeof realPrice === 'number').map(({ realPrice }) => realPrice!))
         if (variantsPrices.size > 1) {
             const min = Math.min(...variantsPrices)
-            const max = Math.min(...variantsPrices)
+            const max = Math.max(...variantsPrices)
 
             perUnit = formatter.formatRange(min, max)
         } else if (variantsPrices.size === 1) {
@@ -669,6 +696,12 @@ const price = computed<DisplayPrice>(() => {
         total,
         itemDisplayPrice,
         perUnit,
+    }
+})
+
+const itemPriceHint = computed(() => {
+    if (item.variants?.some(v => v.realPrice !== null)) {
+        return 'This price will be used for variants by default'
     }
 })
 
@@ -798,6 +831,9 @@ const scrollToVariants = () => {
     max-width: 200px;
     max-height: 70px;
     transition: box-shadow .2s;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
 }
 
 .item-prop-card:hover {

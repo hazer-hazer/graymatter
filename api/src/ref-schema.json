@@ -273,6 +273,39 @@
             ],
             "additionalProperties": false
         },
+        "CurrencyGet": {
+            "type": "object",
+            "properties": {
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "currencies": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Currency"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "currencies"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
         "ImageUpload": {
             "type": "object",
             "properties": {
@@ -495,6 +528,9 @@
                     "items": {
                         "$ref": "#/definitions/AmountUnitPowerPrefix"
                     }
+                },
+                "default": {
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -1230,6 +1266,16 @@
                         }
                     }
                 },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
                 "path": {
                     "$ref": "#/definitions/TreePath"
                 },
@@ -1266,6 +1312,7 @@
                 "id",
                 "uri",
                 "name",
+                "description",
                 "inventoryId",
                 "folderId",
                 "buyLink",
@@ -1811,6 +1858,16 @@
                 "path": {
                     "$ref": "#/definitions/TreePath"
                 },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
                 "children": {
                     "type": "array",
                     "items": {
@@ -1819,6 +1876,7 @@
                 }
             },
             "required": [
+                "avatar",
                 "children",
                 "id",
                 "kind",
@@ -1855,6 +1913,16 @@
                 },
                 "path": {
                     "$ref": "#/definitions/TreePath"
+                },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -1862,7 +1930,8 @@
                 "uri",
                 "kind",
                 "name",
-                "path"
+                "path",
+                "avatar"
             ],
             "additionalProperties": false
         },
@@ -2515,6 +2584,80 @@
             ],
             "additionalProperties": false
         },
+        "FolderCreate": {
+            "type": "object",
+            "properties": {
+                "Body": {
+                    "type": "object",
+                    "properties": {
+                        "folder": {
+                            "$ref": "#/definitions/FolderCreateFields"
+                        }
+                    },
+                    "required": [
+                        "folder"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "folder": {
+                                    "$ref": "#/definitions/Folder"
+                                }
+                            },
+                            "required": [
+                                "folder"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Body",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
+        "FolderCreateFields": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "inventoryId": {
+                    "type": "number"
+                }
+            }
+        },
         "InventoryGetByUri": {
             "type": "object",
             "properties": {
@@ -2906,6 +3049,49 @@
             ],
             "additionalProperties": false
         },
+        "InventoryGetCurrency": {
+            "type": "object",
+            "properties": {
+                "Params": {
+                    "type": "object",
+                    "properties": {
+                        "inventoryId": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "inventoryId"
+                    ],
+                    "additionalProperties": false
+                },
+                "Reply": {
+                    "type": "object",
+                    "properties": {
+                        "200": {
+                            "type": "object",
+                            "properties": {
+                                "currency": {
+                                    "$ref": "#/definitions/Currency"
+                                }
+                            },
+                            "required": [
+                                "currency"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "200"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "Params",
+                "Reply"
+            ],
+            "additionalProperties": false
+        },
         "ItemAttrCreate": {
             "type": "object",
             "properties": {
@@ -3115,11 +3301,274 @@
             ],
             "additionalProperties": false
         },
+        "ExtendedItemClientRes": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "amountUnit": {
+                    "$ref": "#/definitions/AmountUnit"
+                },
+                "currency": {
+                    "$ref": "#/definitions/Currency"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "image": {
+                                "$ref": "#/definitions/Image"
+                            }
+                        },
+                        "required": [
+                            "image"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ItemAttr"
+                    }
+                },
+                "variants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ItemVariant"
+                    }
+                },
+                "buyLists": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "buyList": {
+                                "$ref": "#/definitions/BuyList"
+                            },
+                            "id": {
+                                "$ref": "#/definitions/UBigInt"
+                            },
+                            "name": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "description": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "itemId": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/UBigInt"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "item": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/Item"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "itemVariantId": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/UBigInt"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "itemVariant": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/ItemVariant"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "amountValue": {
+                                "type": "number"
+                            },
+                            "checked": {
+                                "type": "boolean"
+                            },
+                            "buyListId": {
+                                "$ref": "#/definitions/UBigInt"
+                            }
+                        },
+                        "required": [
+                            "amountValue",
+                            "buyListId",
+                            "checked",
+                            "description",
+                            "id",
+                            "itemId",
+                            "itemVariantId",
+                            "name"
+                        ]
+                    }
+                },
+                "avatar": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Image"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "path": {
+                    "$ref": "#/definitions/TreePath"
+                },
+                "variantsAmountSum": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "totalPrice": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "realPrice": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RealPrice"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "id": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "inventoryId": {
+                    "type": "number"
+                },
+                "inventory": {
+                    "$ref": "#/definitions/Inventory"
+                },
+                "folder": {
+                    "$ref": "#/definitions/Folder"
+                },
+                "folderId": {
+                    "$ref": "#/definitions/UBigInt"
+                },
+                "itemLocationId": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "itemLocationNotes": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "buyLink": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "url"
+                },
+                "price": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UBigInt"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "currencyId": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "amountUnitId": {
+                    "type": "number"
+                },
+                "amountValue": {
+                    "type": "number"
+                },
+                "displayPrice": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "amountUnitId",
+                "amountValue",
+                "buyLink",
+                "createdAt",
+                "currencyId",
+                "description",
+                "folderId",
+                "id",
+                "inventoryId",
+                "name",
+                "price",
+                "updatedAt",
+                "uri"
+            ]
+        },
         "ItemCreate": {
             "type": "object",
             "properties": {
                 "Body": {
-                    "$ref": "#/definitions/ItemCreateFields"
+                    "type": "object",
+                    "properties": {
+                        "item": {
+                            "$ref": "#/definitions/ItemCreateFields"
+                        }
+                    },
+                    "required": [
+                        "item"
+                    ],
+                    "additionalProperties": false
                 },
                 "Reply": {
                     "type": "object",
@@ -3128,7 +3577,7 @@
                             "type": "object",
                             "properties": {
                                 "item": {
-                                    "$ref": "#/definitions/Item"
+                                    "$ref": "#/definitions/ExtendedItemClientRes"
                                 }
                             },
                             "required": [
@@ -3183,6 +3632,13 @@
                 },
                 "currencyId": {
                     "type": "number"
+                },
+                "buyLink": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "url"
                 },
                 "name": {
                     "type": "string"
@@ -3263,7 +3719,7 @@
                             "type": "object",
                             "properties": {
                                 "item": {
-                                    "$ref": "#/definitions/Item"
+                                    "$ref": "#/definitions/ExtendedItemClientRes"
                                 }
                             },
                             "required": [
@@ -3351,7 +3807,7 @@
                             "type": "object",
                             "properties": {
                                 "item": {
-                                    "$ref": "#/definitions/Item"
+                                    "$ref": "#/definitions/ExtendedItemClientRes"
                                 }
                             },
                             "required": [
@@ -4232,6 +4688,16 @@
                                                     ]
                                                 }
                                             },
+                                            "avatar": {
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "#/definitions/Image"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            },
                                             "path": {
                                                 "$ref": "#/definitions/TreePath"
                                             },
@@ -4270,6 +4736,7 @@
                                             "buyLink",
                                             "createdAt",
                                             "currencyId",
+                                            "description",
                                             "folderId",
                                             "id",
                                             "inventory",

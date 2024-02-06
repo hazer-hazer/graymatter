@@ -48,9 +48,11 @@ async function main(tx: Prisma.TransactionClient) {
         where: {
             default: true,
         },
-        update: {},
+        update: {
+            name: 'Pieces',
+        },
         create: {
-            name: 'pcs',
+            name: 'Pieces',
             symbol: 'pcs',
             default: true,
             powerPrefixes: {

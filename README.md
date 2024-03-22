@@ -11,19 +11,19 @@ Tried different options but the best one was Sortly as it is friendly for person
 Thus, because I love reinventing the wheel, I started this project.
 
 ### Screenshots:
-![image](https://github.com/hazer-hazer/graymatter/assets/29581311/bdeaca77-7b86-4717-b4d6-e5a40f75366c)
+![image](https://github.com/hazer-hazer/graymatter/assets/29581311/bdeaca77-7b86-4717-b4d6-e5a40f75366c | height=400px)
 
 ### Stack
 
 Both front-end and back-end use Typescript, modern ESLint with stylistic
 
-Front-end:
+**Front-end**:
 - Vue.js v3 with Nuxt.js
 - Pinia
 - Quasar.js
 - Material UI (via Quasar)
 
-Back-end and storages:
+**Back-end and storages**:
 - Node.js 21
 - Fastify
 - PostgreSQL with Prisma.js

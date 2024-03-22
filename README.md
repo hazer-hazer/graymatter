@@ -10,6 +10,9 @@ When my carts from AliExpress began to be large and amount of distinct electroni
 Tried different options but the best one was Sortly as it is friendly for personal use and has a bunch of convenient features. Anyway, it is pricey, I quicly went over the limit of 100 distinct items.
 Thus, because I love reinventing the wheel, I started this project.
 
+### Screenshots:
+![image](https://github.com/hazer-hazer/graymatter/assets/29581311/bdeaca77-7b86-4717-b4d6-e5a40f75366c)
+
 ### Stack
 
 Both front-end and back-end use Typescript, modern ESLint with stylistic

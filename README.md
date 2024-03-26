@@ -11,7 +11,7 @@ Tried different options but the best one was Sortly as it is friendly for person
 Thus, because I love reinventing the wheel, I started this project.
 
 ### Screenshots:
-<img src="https://github.com/hazer-hazer/graymatter/assets/29581311/bdeaca77-7b86-4717-b4d6-e5a40f75366c" height="500px">
+<img src="https://github.com/hazer-hazer/graymatter/assets/29581311/bdeaca77-7b86-4717-b4d6-e5a40f75366c" width="500px">
 
 ### Stack
 

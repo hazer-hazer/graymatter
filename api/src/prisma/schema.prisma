@@ -1,6 +1,7 @@
 datasource db {
     provider   = "postgresql"
     url        = env("DATABASE_URL")
+    directUrl  = env("DIRECT_URL")
     extensions = [pg_trgm]
 }
 
@@ -188,7 +189,7 @@ model Image {
     folders            FolderImages[]
     inventoriesAvatars Inventory[]
     usersAvatars       User[]
-    itemVariants        ItemVariant[]
+    itemVariants       ItemVariant[]
 
     @@map("images")
 }

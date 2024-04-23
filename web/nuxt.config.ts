@@ -7,7 +7,6 @@ export default defineNuxtConfig({
     sourcemap: true,
     devtools: {
         enabled: true,
-
         timeline: {
             enabled: true,
         },
@@ -42,6 +41,6 @@ export default defineNuxtConfig({
         },
     },
     appConfig: {
-        apiUrl: 'http://localhost:5000',
+        apiUrl: process.env.API_URL ?? 'http://localhost:5000',
     },
 })

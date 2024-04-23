@@ -5,7 +5,7 @@
     "build": "npm run build:models && tsc && tsc-alias",
     "dev": "nodemon",
     "dev:docker": "nodemon --config ./nodemon.json -L -V",
-    "start": "node ./dist/index.js",
+    "start": "node ./dist/src/index.js",
     "start:dev": "node --trace-warnings ./dist/src/index.js",
     "watch:models": "nodemon -w src/**/schemas.ts *.prisma -e js,prisma -x \"npm run build:models\"",
     "schemas-generate": "ts-node ./scripts/gen-schemas",

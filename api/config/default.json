@@ -1,6 +1,6 @@
 {
     "http": {
-        "port": 5000
+        "port": 3000
     },
     "cookie": {
         "secret": "superKEK"

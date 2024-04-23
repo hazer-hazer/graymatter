@@ -111,7 +111,7 @@ void (async () => {
     })
 
     try {
-        await fastify.listen({ port: config.get('http.port'), host: 'localhost' })
+        await fastify.listen({ port: config.get('http.port'), host: '0.0.0.0' })
     } catch (error) {
         fastify.log.error(error)
         process.exit(1)
